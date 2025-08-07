@@ -1,0 +1,36 @@
+{
+  "name": "@hive/eslint-config",
+  "version": "0.0.1",
+  "description": "Shared ESLint configurations for Hive monorepo",
+  "author": "Hive Team",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "main": "./base.js",
+  "exports": {
+    ".": "./base.js",
+    "./base": "./base.js",
+    "./library": "./library.js",
+    "./nest": "./nest.js",
+    "./next": "./next.js",
+    "./prettier-base": "./prettier-base.js",
+    "./react-internal": "./react-internal.js"
+  },
+  "files": [
+    "*.js"
+  ],
+  "dependencies": {
+    "@eslint/js": "^9.18.0",
+    "@next/eslint-plugin-next": "^15.1.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.2",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "globals": "^16.0.0",
+    "typescript-eslint": "^8.20.0"
+  },
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "typescript": "^5.0.0"
+  }
+}
