@@ -1,5 +1,5 @@
 {
-  "name": "@hive/template",
+  "name": "@hive/registry",
   "version": "0.0.1",
   "description": "NestJS library template for Hive monorepo",
   "author": "Hive Team",
@@ -16,10 +16,25 @@
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./*": {
-      "import": "./dist/*.js",
-      "require": "./dist/*.js",
-      "types": "./dist/*.d.ts"
+    "./client": {
+      "import": "./dist/client/index.js",
+      "require": "./dist/client/index.js",
+      "types": "./dist/client/index.d.ts"
+    },
+    "./constants": {
+      "import": "./dist/constants/index.js",
+      "require": "./dist/constants/index.js",
+      "types": "./dist/constants/index.d.ts"
+    },
+    "./dto": {
+      "import": "./dist/dto/index.js",
+      "require": "./dist/dto/index.js",
+      "types": "./dist/dto/index.d.ts"
+    },
+    "./interfaces": {
+      "import": "./dist/interfaces/index.js",
+      "require": "./dist/interfaces/index.js",
+      "types": "./dist/interfaces/index.d.ts"
     }
   },
   "scripts": {
@@ -33,7 +48,15 @@
     "test:cov": "jest --coverage"
   },
   "dependencies": {
-    "@nestjs/mapped-types": "*"
+    "@anatine/zod-nestjs": "^2.0.12",
+    "@anatine/zod-openapi": "^2.2.8",
+    "@nestjs/mapped-types": "*",
+    "openapi3-ts": "^4.5.0",
+    "semver": "^7.7.2"
+  },
+  "peerDependencies": {
+    "zod": "^4.0.15",
+    "@nestjs/swagger": "^11.2.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
