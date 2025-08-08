@@ -1,29 +1,21 @@
-import { extendApi } from '@anatine/zod-openapi';
+import { createZodDto } from 'nestjs-zod';
 import { SERVICE_NAME_REGEX } from '../constants';
 import z from 'zod';
-import { createZodDto } from '@anatine/zod-nestjs';
+//   { title: 'Service Info query ' },
 
-export const ServiceInfoQuerySchema = extendApi(
-  z.object({
-    name: extendApi(z.string().regex(SERVICE_NAME_REGEX).optional(), {
-      example: '@hive/sample-service',
-      description: `Must follow pattern \`${SERVICE_NAME_REGEX}\``,
-    }),
-    instanceId: extendApi(z.string().optional(), {
-      example: 'service-instance-uuid-123',
-    }),
-  }),
-  { title: 'Service Info query ' },
-);
+export const ServiceQuerySchema = z.object({
+  // example: '@hive/sample-service',
+  // description: `Must follow pattern \`${SERVICE_NAME_REGEX}\``,
+  name: z.string().regex(SERVICE_NAME_REGEX).optional(),
+  //       example: 'service-instance-uuid-123',
 
-export const HeartbeatQuerySchema = extendApi(
-  z.object({
-    instanceId: extendApi(z.string().optional(), {
-      example: 'service-instance-uuid-123',
-    }),
-  }),
-  { title: 'Heartbit Query', description: 'Heart bit payload' },
-);
+  instanceId: z.string().optional(),
+});
+//   { title: 'Heartbit Query', description: 'Heart bit payload' },
+export const HeartbeatSchema = z.object({
+  // example: 'service-instance-uuid-123',
+  instanceId: z.string().optional(),
+});
 
-export class ServiceInfoQueryDto extends createZodDto(ServiceInfoQuerySchema) {}
-export class HeartbeatQueryDto extends createZodDto(HeartbeatQuerySchema) {}
+export type ServiceQueryDto = z.infer<typeof ServiceQuerySchema>;
+export class HeartbeatDto extends createZodDto(HeartbeatSchema) {}
