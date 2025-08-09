@@ -1,13 +1,12 @@
+import { ConfigifyModule } from '@itgorillaz/configify';
 import { Module } from '@nestjs/common';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ZodValidationPipe } from 'nestjs-zod';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigifyModule } from '@itgorillaz/configify';
-import { ServiceRegistryModule } from './service-registry/service-registry.module';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
-import { ZodValidationPipe } from 'nestjs-zod';
 import { ZodValidationExceptionFilter } from './app.utils';
-import { ScheduleModule } from '@nestjs/schedule';
-import { StorageModule } from './storage/storage.module';
+import { ServiceRegistryModule } from './service-registry/service-registry.module';
 
 const ZodePipe = {
   provide: APP_PIPE,
@@ -21,7 +20,7 @@ const ZodExceptionFilter = {
 
 @Module({
   imports: [
-    ConfigifyModule.forRootAsync(),
+    ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
     ScheduleModule.forRoot(),
     ServiceRegistryModule,
   ],
