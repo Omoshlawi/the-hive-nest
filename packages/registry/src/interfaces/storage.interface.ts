@@ -1,5 +1,6 @@
 import { ServiceInfo, ServiceRegistryEntry } from './service-info.interface';
 
+
 export interface StorageAdapter {
   /**
    * Register a service instance
@@ -20,6 +21,24 @@ export interface StorageAdapter {
    * Find a specific service instance
    */
   findByInstanceId(instanceId: string): Promise<ServiceRegistryEntry | null>;
+
+  /**
+   * Find and load balance a service by name and version
+   * Returns a single randomly selected instance that matches the criteria
+   */
+  findByNameAndVersion(
+    serviceName: string, 
+    version: string
+  ): Promise<ServiceRegistryEntry | null>;
+
+  /**
+   * Find all services by name and version
+   * Returns all instances that match the name and version criteria
+   */
+  findAllByNameAndVersion(
+    serviceName: string, 
+    version: string
+  ): Promise<ServiceRegistryEntry[]>;
 
   /**
    * Get all registered services
@@ -50,9 +69,4 @@ export interface StorageAdapter {
    * Close storage connections
    */
   close(): Promise<void>;
-}
-
-export interface StorageConfig {
-  type: 'memory' | 'redis';
-  options?: Record<string, any>;
 }

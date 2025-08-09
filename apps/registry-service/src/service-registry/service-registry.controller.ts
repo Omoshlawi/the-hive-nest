@@ -2,8 +2,9 @@ import {
   HealthResponseDto,
   HeartbeatDto,
   RegisterServiceDto,
+  ServiceByNameandVersionDto,
   ServiceQueryDto,
-  ServiceResponseDto,
+  ServicesResponseDto,
 } from '@hive/registry';
 import {
   Body,
@@ -12,6 +13,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Query,
@@ -25,15 +27,9 @@ export class ServiceRegistryController {
   @Post('register')
   @ApiOperation({ summary: 'Register a service instance' })
   @ApiResponse({ status: 201, description: 'Service registered successfully' })
-  async register(
-    @Body() registerDto: RegisterServiceDto,
-  ): Promise<ServiceResponseDto> {
+  async register(@Body() registerDto: RegisterServiceDto) {
     const data = await this.registryService.register(registerDto);
-    return {
-      success: true,
-      message: 'Service registered successfully',
-      data,
-    };
+    return data;
   }
 
   @Delete('deregister/:instanceId')
@@ -42,9 +38,7 @@ export class ServiceRegistryController {
     status: 200,
     description: 'Service deregistered successfully',
   })
-  async deregister(
-    @Param('instanceId') instanceId: string,
-  ): Promise<ServiceResponseDto> {
+  async deregister(@Param('instanceId') instanceId: string) {
     try {
       const success = await this.registryService.deregister(instanceId);
       if (!success) {
@@ -55,7 +49,6 @@ export class ServiceRegistryController {
       }
 
       return {
-        success: true,
         message: 'Service deregistered successfully',
       };
     } catch (error) {
@@ -73,13 +66,12 @@ export class ServiceRegistryController {
   @ApiResponse({ status: 200, description: 'Services retrieved successfully' })
   async findServices(
     @Query() query: ServiceQueryDto,
-  ): Promise<ServiceResponseDto> {
+  ): Promise<ServicesResponseDto> {
     try {
-      const data = await this.registryService.findServices(query);
+      const results = await this.registryService.findServices(query);
       return {
-        success: true,
         message: 'Services retrieved successfully',
-        data,
+        results,
       };
     } catch (error) {
       throw new HttpException(
@@ -89,12 +81,34 @@ export class ServiceRegistryController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Find and load balance a service by name and version',
+  })
+  @Get('services/find-by-version/load-balance')
+  async findByNameAndVersion(@Query() query: ServiceByNameandVersionDto) {
+    const service = await this.registryService.findByNameAndVersion(query);
+    if (!service)
+      throw new NotFoundException({ detail: 'No matching service found' });
+    return service;
+  }
+  @ApiOperation({
+    summary: 'Find all services by name and version',
+  })
+  @Get('services/find-by-version')
+  async findAllByNameAndVersion(
+    @Query() query: ServiceByNameandVersionDto,
+  ): Promise<ServicesResponseDto> {
+    const results = await this.registryService.findAllByNameAndVersion(query);
+    return {
+      message: 'Matching Sercices retrieved successfully',
+      results,
+    };
+  }
+
   @Post('heartbeat')
   @ApiOperation({ summary: 'Send service heartbeat' })
   @ApiResponse({ status: 200, description: 'Heartbeat received successfully' })
-  async heartbeat(
-    @Body() heartbeatDto: HeartbeatDto,
-  ): Promise<ServiceResponseDto> {
+  async heartbeat(@Body() heartbeatDto: HeartbeatDto) {
     try {
       const success = await this.registryService.heartbeat(
         heartbeatDto.instanceId!,
@@ -107,7 +121,6 @@ export class ServiceRegistryController {
       }
 
       return {
-        success: true,
         message: 'Heartbeat received successfully',
       };
     } catch (error) {

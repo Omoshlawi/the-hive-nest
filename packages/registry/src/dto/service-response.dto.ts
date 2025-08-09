@@ -1,15 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ServiceRegistryEntry } from '../interfaces/service-info.interface';
 
-export class ServiceResponseDto {
-  @ApiProperty()
-  success: boolean;
-
+export class ServicesResponseDto {
   @ApiProperty()
   message: string;
 
   @ApiProperty({ required: false })
-  data?: ServiceRegistryEntry | ServiceRegistryEntry[];
+  results: ServiceRegistryEntry[];
 }
 
 export class HealthResponseDto {

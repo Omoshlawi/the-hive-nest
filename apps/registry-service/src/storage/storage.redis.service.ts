@@ -223,7 +223,7 @@ export class RedisStorage extends BaseStorage {
   async cleanup(): Promise<number> {
     // With Redis TTL, cleanup is automatic!
     // This method can be a no-op or just return 0
-    this.logger.log('Redis TTL handles cleanup automatically');
+    this.logger.debug('Redis TTL handles cleanup automatically');
     return 0;
   }
 

@@ -1,6 +1,7 @@
 import {
   BaseStorage,
   RegisterServiceDto,
+  ServiceByNameandVersionDto,
   ServiceInfo,
   ServiceQueryDto,
   ServiceRegistryEntry,
@@ -71,7 +72,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     return `${servicePart}-${hostPart}-${portPart}-${timestamp}-${uuid}`;
   }
 
-  async deregister(instanceId: string): Promise<boolean> {
+  deregister(instanceId: string): Promise<boolean> {
     return this.storage.deregister(instanceId);
   }
 
@@ -103,6 +104,13 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
         healthy: isHealthy,
       },
     };
+  }
+
+  findByNameAndVersion({ name, version }: ServiceByNameandVersionDto) {
+    return this.storage.findByNameAndVersion(name, version);
+  }
+  findAllByNameAndVersion({ name, version }: ServiceByNameandVersionDto) {
+    return this.storage.findAllByNameAndVersion(name, version);
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
