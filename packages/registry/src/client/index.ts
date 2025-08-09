@@ -1,1 +1,1 @@
-export const client = 1;
+export * from './registry-client';

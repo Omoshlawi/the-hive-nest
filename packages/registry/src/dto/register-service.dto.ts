@@ -2,10 +2,10 @@ import { createZodDto } from 'nestjs-zod';
 import { SERVICE_NAME_REGEX } from '../constants';
 import z from 'zod';
 // { title: 'Service', description: 'Service Information' }
-const ServiceInfoSchema = z.object({
+const RegisterServiceSchema = z.object({
   //  example: '@hive/sample-service',
   // description: `Must follow pattern \`${SERVICE_NAME_REGEX}\``,
-  name: z.string().regex(SERVICE_NAME_REGEX),
+  name: z.string().regex(SERVICE_NAME_REGEX).max(20),
   //{ example: 'localhost' }
   host: z.ipv4(),
   //      example: 3001,
@@ -13,11 +13,11 @@ const ServiceInfoSchema = z.object({
   //  { example: '1.0.0' }
   version: z.string(),
   // { example: 'service-instance-uuid-123' }
-  instanceId: z.string(),
+  instanceId: z.string().optional(),
   //       example: 300,
 
   ttl: z.coerce.number().min(30).optional(),
   metadata: z.object().optional(),
 });
 
-export class ServiceInfoDto extends createZodDto(ServiceInfoSchema) {}
+export class RegisterServiceDto extends createZodDto(RegisterServiceSchema) {}

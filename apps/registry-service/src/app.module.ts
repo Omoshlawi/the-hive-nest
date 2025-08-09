@@ -6,6 +6,7 @@ import { ServiceRegistryModule } from './service-registry/service-registry.modul
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { ZodValidationExceptionFilter } from './app.utils';
+import { ScheduleModule } from '@nestjs/schedule';
 
 const ZodePipe = {
   provide: APP_PIPE,
@@ -18,7 +19,11 @@ const ZodExceptionFilter = {
 };
 
 @Module({
-  imports: [ConfigifyModule.forRootAsync(), ServiceRegistryModule],
+  imports: [
+    ConfigifyModule.forRootAsync(),
+    ScheduleModule.forRoot(),
+    ServiceRegistryModule,
+  ],
   controllers: [AppController],
   providers: [AppService, ZodePipe, ZodExceptionFilter],
 })
