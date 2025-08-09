@@ -1,20 +1,24 @@
 import {
+  BaseStorage,
+  RegisterServiceDto,
+  ServiceInfo,
+  ServiceQueryDto,
+  ServiceRegistryEntry,
+} from '@hive/registry';
+import {
   Injectable,
   Logger,
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { MemoryStorage, ServiceInfo, StorageAdapter } from '@hive/registry';
-import { RegisterServiceDto, ServiceRegistryEntry } from '@hive/registry';
-import { HeartbeatDto, ServiceQueryDto } from '@hive/registry';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ServiceRegistryService.name);
 
-  constructor(private readonly storage: MemoryStorage) {}
+  constructor(private readonly storage: BaseStorage) {}
 
   async onModuleInit() {
     await this.storage.initialize();
@@ -103,6 +107,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async cleanupExpiredServices() {
+    this.logger.debug('Cleaning up expired services');
     try {
       const cleaned = await this.storage.cleanup();
       if (cleaned > 0) {

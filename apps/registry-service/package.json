@@ -29,6 +29,7 @@
     "@nestjs/schedule": "^6.0.0",
     "@nestjs/swagger": "^11.2.0",
     "axios": "^1.11.0",
+    "ioredis": "^5.7.0",
     "nestjs-zod": "5.0.0-beta.20250806T023752",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

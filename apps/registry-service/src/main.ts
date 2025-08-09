@@ -3,9 +3,12 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { NextFunction, Request, Response } from 'express';
+import { AppConfig } from './config/app.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const appConfig = app.get(AppConfig);
+
   const config = new DocumentBuilder()
     .setTitle('The Hive Service registry Service')
     .setDescription('Hive Service Registry API for dynamic service descovery')
@@ -48,6 +51,6 @@ async function bootstrap() {
           </html>`);
     res.end();
   });
-  await app.listen(process.env.PORT ?? 4001);
+  await app.listen(appConfig.port);
 }
 bootstrap();

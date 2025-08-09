@@ -7,6 +7,7 @@ import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { ZodValidationExceptionFilter } from './app.utils';
 import { ScheduleModule } from '@nestjs/schedule';
+import { StorageModule } from './storage/storage.module';
 
 const ZodePipe = {
   provide: APP_PIPE,
