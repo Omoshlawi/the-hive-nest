@@ -17,5 +17,5 @@ export const HeartbeatSchema = z.object({
   instanceId: z.string().optional(),
 });
 
-export type ServiceQueryDto = z.infer<typeof ServiceQuerySchema>;
+export class ServiceQueryDto extends createZodDto(ServiceQuerySchema) {}
 export class HeartbeatDto extends createZodDto(HeartbeatSchema) {}

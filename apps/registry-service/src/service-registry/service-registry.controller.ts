@@ -15,7 +15,6 @@ import {
   Param,
   Post,
   Query,
-  UsePipes
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ServiceRegistryService } from './service-registry.service';
