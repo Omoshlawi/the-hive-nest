@@ -1,144 +1,95 @@
+import { Metadata, ServerUnaryCall } from '@grpc/grpc-js';
 import {
   HealthResponseDto,
   HeartbeatDto,
+  ListServicesResponse,
   RegisterServiceDto,
   ServiceByNameandVersionDto,
   ServiceQueryDto,
   ServicesResponseDto,
 } from '@hive/registry';
 import {
-  Body,
   Controller,
-  Delete,
-  Get,
   HttpException,
   HttpStatus,
   NotFoundException,
-  Param,
-  Post,
   Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { ServiceRegistryService } from './service-registry.service';
-@Controller('registry')
+@Controller()
 export class ServiceRegistryController {
   constructor(private registryService: ServiceRegistryService) {}
 
-  @Post('register')
-  @ApiOperation({ summary: 'Register a service instance' })
-  @ApiResponse({ status: 201, description: 'Service registered successfully' })
-  async register(@Body() registerDto: RegisterServiceDto) {
+  @GrpcMethod('Registry', 'RegisterService')
+  async register(
+    registerDto: RegisterServiceDto,
+    metadata: Metadata,
+    call: ServerUnaryCall<any, any>,
+  ) {
     const data = await this.registryService.register(registerDto);
     return data;
   }
 
-  @Delete('deregister/:instanceId')
-  @ApiOperation({ summary: 'Deregister a service instance' })
-  @ApiResponse({
-    status: 200,
-    description: 'Service deregistered successfully',
-  })
-  async deregister(@Param('instanceId') instanceId: string) {
-    try {
-      const success = await this.registryService.deregister(instanceId);
-      if (!success) {
-        throw new HttpException(
-          'Service instance not found',
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      return {
-        message: 'Service deregistered successfully',
-      };
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-
-      throw new HttpException(
-        `Failed to deregister service: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+  @GrpcMethod('Registry', 'UnregisterService')
+  deregister(@Payload() instanceId: string) {
+    return this.registryService.deregister(instanceId);
   }
 
-  @Get('services')
-  @ApiOperation({ summary: 'Discover services' })
-  @ApiResponse({ status: 200, description: 'Services retrieved successfully' })
+  @GrpcMethod('Registry', 'ListServices')
   async findServices(
-    @Query() query: ServiceQueryDto,
-  ): Promise<ServicesResponseDto> {
-    try {
-      const results = await this.registryService.findServices(query);
-      return {
-        message: 'Services retrieved successfully',
-        results,
-      };
-    } catch (error) {
-      throw new HttpException(
-        `Failed to retrieve services: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    payload: ServiceQueryDto,
+    metadata: Metadata,
+    call: ServerUnaryCall<any, any>,
+  ): Promise<ListServicesResponse> {
+    const services = await this.registryService.findServices(payload);
+    return {
+      services: services.map((service) => ({
+        host: service.host,
+        instanceId: service.instanceId,
+        metadata: service.metadata ?? {},
+        name: service.name,
+        port: service.port,
+        timestamp: service.timestamp,
+        ttl: service.ttl ?? 1234,
+        version: service.version,
+      })),
+    };
   }
 
-  @ApiOperation({
-    summary: 'Find and load balance a service by name and version',
-  })
-  @Get('services/find-by-version/load-balance')
+  @GrpcMethod('Registry', 'GetServiceByNameAndVersion')
   async findByNameAndVersion(@Query() query: ServiceByNameandVersionDto) {
     const service = await this.registryService.findByNameAndVersion(query);
     if (!service)
       throw new NotFoundException({ detail: 'No matching service found' });
     return service;
   }
-  @ApiOperation({
-    summary: 'Find all services by name and version',
-  })
-  @Get('services/find-by-version')
-  async findAllByNameAndVersion(
+
+  @GrpcMethod('Registry', 'ListServicesByNameAndVersion')
+  findAllByNameAndVersion(
     @Query() query: ServiceByNameandVersionDto,
-  ): Promise<ServicesResponseDto> {
-    const results = await this.registryService.findAllByNameAndVersion(query);
+  ): Promise<ServicesResponseDto['results']> {
+    return this.registryService.findAllByNameAndVersion(query);
+  }
+
+  @GrpcMethod('Registry', 'SendHeartbeat')
+  async heartbeat(@Payload() heartbeatDto: HeartbeatDto) {
+    const success = await this.registryService.heartbeat(
+      heartbeatDto.instanceId!,
+    );
+    if (!success) {
+      throw new HttpException(
+        'Service instance not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     return {
-      message: 'Matching Sercices retrieved successfully',
-      results,
+      message: 'Heartbeat received successfully',
     };
   }
 
-  @Post('heartbeat')
-  @ApiOperation({ summary: 'Send service heartbeat' })
-  @ApiResponse({ status: 200, description: 'Heartbeat received successfully' })
-  async heartbeat(@Body() heartbeatDto: HeartbeatDto) {
-    try {
-      const success = await this.registryService.heartbeat(
-        heartbeatDto.instanceId!,
-      );
-      if (!success) {
-        throw new HttpException(
-          'Service instance not found',
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      return {
-        message: 'Heartbeat received successfully',
-      };
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-
-      throw new HttpException(
-        `Failed to process heartbeat: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Get('health')
-  @ApiOperation({ summary: 'Get registry health status' })
-  @ApiResponse({
-    status: 200,
-    description: 'Health status retrieved successfully',
-  })
+  @GrpcMethod('Registry', 'CheckHealth')
   async getHealth(): Promise<HealthResponseDto> {
     return this.registryService.getHealth();
   }
