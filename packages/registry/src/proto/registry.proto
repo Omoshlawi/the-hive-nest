@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package hive.registry.v1;
+
+
+message ServiceRegistration {
+  string id = 1;
+  string name = 2;
+  string host = 3;
+  int32 port = 4;
+  string version = 5;
+  int64 timestamp = 6; // time created
+  repeated string tags = 7;
+  map<string, string> metadata = 8; 
+}
+
+message RegisterServiceRequest {
+  string name = 1;
+  string host = 2;
+  int32 port = 3;
+  string version = 4;
+  repeated string tags = 6;
+  map<string, string> metadata = 7; 
+}
+
+message Empty {
+    string nam=1;
+}
+
+message GetServiceRequest {
+  string name = 1;
+  string version = 2;
+}
+
+message ListServicesRequest {
+  repeated string tags = 1;
+  string name = 2;
+  string version = 3;
+}
+
+message ListServicesResponse {
+  repeated ServiceRegistration services = 1;
+}
+
+message UnregisterServiceRequest {
+  string id = 1;
+}
+
+message UnregisterServiceResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message StorageStatus {
+  string type = 1;
+  bool healthy = 2;
+}
+
+enum ServiceStatus {
+  UNKNOWN = 0;
+  HEALTHY = 1;
+  UNHEALTHY = 2;
+}
+
+message ServiceHealthResponse {
+  ServiceStatus status = 1;
+  int64 timestamp = 2;
+  int64 uptime = 3;
+  StorageStatus storage = 4;
+}
+
+service Registry {
+  rpc RegisterService (RegisterServiceRequest) returns (ServiceRegistration);
+  rpc GetService (GetServiceRequest) returns (ServiceRegistration);
+  rpc ListServices (ListServicesRequest) returns (ListServicesResponse);
+  rpc UnregisterService (UnregisterServiceRequest) returns (UnregisterServiceResponse);
+  rpc HealthCheck (Empty) returns (ServiceHealthResponse);
+}

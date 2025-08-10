@@ -18,7 +18,9 @@ const ZodExceptionFilter = {
 };
 
 @Module({
-  imports: [ConfigifyModule.forRootAsync(), RegistryModule],
+  imports: [ConfigifyModule.forRootAsync(), 
+    RegistryModule
+  ],
   controllers: [AppController],
   providers: [AppService, ZodPipe, ZodExceptionFilter],
 })

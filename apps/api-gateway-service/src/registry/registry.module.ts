@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common';
 import { RegistryController } from './registry.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { SERVICE_REGISTRY_CLIENT } from '@hive/registry';
+import { REGISTRY_PACKAGE } from '@hive/registry';
 import { join } from 'path';
 @Module({
   imports: [
     ClientsModule.register({
       clients: [
         {
-          name: SERVICE_REGISTRY_CLIENT,
+          name: REGISTRY_PACKAGE.V1.TOKEN,
           transport: Transport.GRPC,
           options: {
             package: 'hive.registry.v1',
-            protoPath: join(__dirname, '../proto/registry.proto'),
+            protoPath: REGISTRY_PACKAGE.V1.PROTO_PATH,
             url: '0.0.0.0:4001',
           },
         },

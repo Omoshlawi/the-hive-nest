@@ -1,3 +1,4 @@
+import path from 'path';
 /**
  * Validates service names that follow the pattern: @hive/<name>-service
  *
@@ -12,13 +13,14 @@
  * - @hive/user-auth          // missing '-service' suffix
  */
 export const SERVICE_NAME_REGEX = /^@hive\/[a-z]+(-[a-z]+)*-service$/;
-export const SERVICE_REGISTRY_CLIENT = 'SERVICE_REGISTRY_CLIENT';
-export const SERVICE_REGISTRY_PATTERNS = Object.freeze({
-  SERVICES: 'registry.services',
-  SERVICE_BY_NAME_AND_VERSION: 'registry.findByNameAndVersion',
-  SERVICES_BY_NAME_AND_VERSION: 'registry.findAllByNameAndVersion',
-  SERVICE_DEREGISTER: 'registry.deregister',
-  SERVICE_HEARTBEAT: 'registry.heartbeat',
-  SERVICE_HEALTH: 'registry.health',
-  SERVICE_REGISTER: 'registry.register',
+
+// Export package information
+export const REGISTRY_PACKAGE = Object.freeze({
+  V1: {
+    NAME: 'hive.registry.v1',
+    PROTO_PATH: require.resolve(
+      path.join(__dirname, '../proto/registry.proto'),
+    ),
+    TOKEN: 'SERVICE_REGISTRY_PACKAGE_V1',
+  },
 });

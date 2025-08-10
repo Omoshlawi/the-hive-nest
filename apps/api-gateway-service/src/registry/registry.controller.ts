@@ -3,10 +3,10 @@ import {
   HeartbeatDto,
   RegisterServiceDto,
   RegistryService,
-  SERVICE_REGISTRY_CLIENT,
   ServiceByNameandVersionDto,
   ServiceQueryDto,
   ServicesResponseDto,
+  REGISTRY_PACKAGE,
 } from '@hive/registry';
 import {
   Body,
@@ -30,7 +30,7 @@ import { from } from 'rxjs';
 export class RegistryController implements OnModuleInit {
   private registryService: RegistryService;
   constructor(
-    @Inject(SERVICE_REGISTRY_CLIENT) private client: ClientGrpcProxy,
+    @Inject(REGISTRY_PACKAGE.V1.TOKEN) private client: ClientGrpcProxy,
   ) {}
   onModuleInit() {
     this.registryService = this.client.getService<RegistryService>('Registry');
@@ -68,9 +68,7 @@ export class RegistryController implements OnModuleInit {
   @Get('services')
   @ApiOperation({ summary: 'Discover services' })
   @ApiResponse({ status: 200, description: 'Services retrieved successfully' })
-  async findServices(
-    @Query() query: ServiceQueryDto,
-  ){
+  async findServices(@Query() query: ServiceQueryDto) {
     const results: any = await this.registryService.ListServices(query);
     return results;
   }
