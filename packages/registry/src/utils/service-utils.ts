@@ -1,5 +1,4 @@
-import { ServiceInfo } from '../interfaces/service-info.interface';
-
+import { ServiceRegistration } from '../types';
 export class ServiceUtils {
   /**
    * Generate a unique instance ID
@@ -41,7 +40,7 @@ export class ServiceUtils {
    * Create service URL
    */
   static createServiceUrl(
-    service: ServiceInfo,
+    service: ServiceRegistration,
     path = '',
     protocol = 'http',
   ): string {
@@ -51,13 +50,16 @@ export class ServiceUtils {
   /**
    * Check if service is healthy based on timestamp and TTL
    */
-  static isServiceHealthy(service: ServiceInfo, maxAge = 300000): boolean {
+  static isServiceHealthy(
+    service: ServiceRegistration,
+    maxAge = 300000,
+  ): boolean {
     const now = Date.now();
     const age = now - service.timestamp;
 
-    if (service.ttl) {
-      return age < service.ttl * 1000;
-    }
+    // if (service.ttl) {
+    //   return age < service.ttl * 1000;
+    // }
 
     return age < maxAge;
   }
@@ -65,7 +67,7 @@ export class ServiceUtils {
   /**
    * Sort services by priority (health, version, timestamp)
    */
-  static sortServices(services: ServiceInfo[]): ServiceInfo[] {
+  static sortServices(services: ServiceRegistration[]): ServiceRegistration[] {
     return [...services].sort((a, b) => {
       // First by health
       const aHealthy = ServiceUtils.isServiceHealthy(a);

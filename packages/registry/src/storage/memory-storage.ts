@@ -1,133 +1,66 @@
 import { Injectable } from '@nestjs/common';
+import { ServiceRegistration } from 'types';
 import { BaseStorage } from './base-storage';
-import {
-  ServiceInfo,
-  ServiceRegistryEntry,
-} from '../interfaces/service-info.interface';
 
 @Injectable()
 export class MemoryStorage extends BaseStorage {
-  private services = new Map<string, ServiceRegistryEntry>();
-  private instanceIndex = new Map<string, string>(); // instanceId -> id mapping
+  private services = new Map<string, ServiceRegistration>();
 
   async initialize(): Promise<void> {
-    this.logger.log('Initializing memory storage');
     this.services.clear();
-    this.instanceIndex.clear();
-    this.initialized = true;
+    super.initialize();
   }
 
-  async register(serviceInfo: ServiceInfo): Promise<ServiceRegistryEntry> {
-    const entry = this.createRegistryEntry(serviceInfo);
-
+  async save(service: ServiceRegistration): Promise<ServiceRegistration> {
     // Remove existing instance if it exists
-    await this.deregister(serviceInfo.instanceId);
-
-    this.services.set(entry.id, entry);
-    this.instanceIndex.set(serviceInfo.instanceId, entry.id);
-
+    await this.remove(service.id);
+    this.services.set(service.id, service);
     this.logger.log(
-      `Registered service: ${serviceInfo.name} (${serviceInfo.instanceId})`,
+      `Registered service: ${service.name}@${service.version} (${service.id})`,
     );
-    return entry;
+    return service;
   }
 
-  async deregister(instanceId: string): Promise<boolean> {
-    const id = this.instanceIndex.get(instanceId);
-    if (!id) return false;
-
+  async remove(id: string): Promise<ServiceRegistration | null> {
+    const service = this.services.get(id);
+    if (!service) {
+      this.logger.debug(`Service with ID ${id} not found for removal`);
+      return null;
+    }
     this.services.delete(id);
-    this.instanceIndex.delete(instanceId);
-
-    this.logger.log(`Deregistered service instance: ${instanceId}`);
-    return true;
+    this.logger.log(`Deregistered service instance: ${id}`);
+    return service;
   }
 
-  async findByName(serviceName: string): Promise<ServiceRegistryEntry[]> {
-    const results: ServiceRegistryEntry[] = [];
-
-    for (const entry of this.services.values()) {
-      if (
-        !this.isExpired(entry) &&
-        this.matchesPattern(entry.name, serviceName)
-      ) {
-        results.push(entry);
-      }
+  async get(id: string): Promise<ServiceRegistration | null> {
+    const service = this.services.get(id);
+    if (!service) {
+      this.logger.debug(`Service with ID ${id} not found in memory storage`);
+      return null;
     }
-
-    return results;
+    return service;
   }
 
-  async findByInstanceId(
-    instanceId: string,
-  ): Promise<ServiceRegistryEntry | null> {
-    const id = this.instanceIndex.get(instanceId);
-    if (!id) return null;
-
-    const entry = this.services.get(id);
-    if (!entry || this.isExpired(entry)) return null;
-
-    return entry;
+  async getAll(): Promise<Array<ServiceRegistration>> {
+    return Array.from(this.services.values());
   }
 
-  async findAll(): Promise<ServiceRegistryEntry[]> {
-    const results: ServiceRegistryEntry[] = [];
-
-    for (const entry of this.services.values()) {
-      if (!this.isExpired(entry)) {
-        results.push(entry);
-      }
-    }
-
-    return results;
-  }
-
-  async heartbeat(instanceId: string): Promise<boolean> {
-    const id = this.instanceIndex.get(instanceId);
-    if (!id) return false;
-
-    const entry = this.services.get(id);
-    if (!entry) return false;
-
-    const now = Date.now();
-    entry.timestamp = now;
-    if (entry.ttl) {
-      entry.expiresAt = now + entry.ttl * 1000;
-    }
-
-    this.services.set(id, entry);
-    return true;
-  }
-
-  async cleanup(): Promise<number> {
-    let cleaned = 0;
-    const toRemove: string[] = [];
-
-    for (const [id, entry] of this.services.entries()) {
-      if (this.isExpired(entry)) {
-        toRemove.push(id);
-        this.instanceIndex.delete(entry.instanceId);
-        cleaned++;
-      }
-    }
-
-    toRemove.forEach((id) => this.services.delete(id));
+  async clear(): Promise<number> {
+    let cleaned = Array.from(this.services.keys()).length;
 
     if (cleaned > 0) {
-      this.logger.log(`Cleaned up ${cleaned} expired services`);
+      this.logger.log(`Cleared ${cleaned} records from memory storage`);
+    } else {
+      this.logger.debug('No services to clear from Memory storage');
     }
-
     return cleaned;
   }
 
   async healthCheck(): Promise<boolean> {
     return this.initialized;
   }
-
   async close(): Promise<void> {
     this.services.clear();
-    this.instanceIndex.clear();
-    this.initialized = false;
-    this.logger.log('Memory storage closed');
+    super.close();
   }
 }

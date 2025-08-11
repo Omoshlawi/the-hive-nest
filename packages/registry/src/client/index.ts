@@ -1,1 +1,1 @@
-export * from './registry-client';
+export * from "./registry.grpc.client"

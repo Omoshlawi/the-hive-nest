@@ -49,7 +49,6 @@ export interface RegisterServiceRequest_MetadataEntry {
 }
 
 export interface Empty {
-  nam: string;
 }
 
 export interface GetServiceRequest {
@@ -88,6 +87,16 @@ export interface ServiceHealthResponse {
   storage: StorageStatus | undefined;
 }
 
+/** Heartbeat Messages */
+export interface HeartbeatRequest {
+  serviceId: string;
+}
+
+export interface HeartbeatResponse {
+  acknowledged: boolean;
+  message: string;
+}
+
 export const HIVE_REGISTRY_V1_PACKAGE_NAME = "hive.registry.v1";
 
 export interface RegistryClient {
@@ -100,6 +109,8 @@ export interface RegistryClient {
   unregisterService(request: UnregisterServiceRequest): Observable<UnregisterServiceResponse>;
 
   healthCheck(request: Empty): Observable<ServiceHealthResponse>;
+
+  sendHeartbeat(request: HeartbeatRequest): Observable<HeartbeatResponse>;
 }
 
 export interface RegistryController {
@@ -122,11 +133,22 @@ export interface RegistryController {
   healthCheck(
     request: Empty,
   ): Promise<ServiceHealthResponse> | Observable<ServiceHealthResponse> | ServiceHealthResponse;
+
+  sendHeartbeat(
+    request: HeartbeatRequest,
+  ): Promise<HeartbeatResponse> | Observable<HeartbeatResponse> | HeartbeatResponse;
 }
 
 export function RegistryControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["registerService", "getService", "listServices", "unregisterService", "healthCheck"];
+    const grpcMethods: string[] = [
+      "registerService",
+      "getService",
+      "listServices",
+      "unregisterService",
+      "healthCheck",
+      "sendHeartbeat",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("Registry", method)(constructor.prototype[method], method, descriptor);

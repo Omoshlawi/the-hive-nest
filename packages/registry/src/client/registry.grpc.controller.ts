@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs';
 import {
   Empty,
   GetServiceRequest,
@@ -6,73 +7,70 @@ import {
   ListServicesRequest,
   ListServicesResponse,
   RegisterServiceRequest,
-  REGISTRY_SERVICE_NAME,
   RegistryController,
   ServiceHealthResponse,
   ServiceRegistration,
   UnregisterServiceRequest,
   UnregisterServiceResponse,
-} from '@hive/registry';
+} from '../types';
 import { Controller } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { ServiceRegistryService } from './service-registry.service';
 import { GrpcMethod } from '@nestjs/microservices';
+
 @Controller()
-export class ServiceRegistryController implements RegistryController {
-  constructor(private registryService: ServiceRegistryService) {}
-  @GrpcMethod(REGISTRY_SERVICE_NAME)
+export class RegistryGRPCController implements RegistryController {
+    
+  @GrpcMethod('Registry', 'RegisterService')
   registerService(
     request: RegisterServiceRequest,
   ):
     | Promise<ServiceRegistration>
     | Observable<ServiceRegistration>
     | ServiceRegistration {
-    return this.registryService.registerService(request);
+    throw new Error('Method not implemented.');
   }
-  @GrpcMethod(REGISTRY_SERVICE_NAME)
+  @GrpcMethod('Registry', 'GetService')
   getService(
     request: GetServiceRequest,
   ):
     | Promise<ServiceRegistration>
     | Observable<ServiceRegistration>
     | ServiceRegistration {
-    // TODO Hand null over grpc
-    return this.registryService.getService(request) as any;
+    throw new Error('Method not implemented.');
   }
-  @GrpcMethod(REGISTRY_SERVICE_NAME)
-  async listServices(
+  @GrpcMethod('Registry', 'ListServices')
+  listServices(
     request: ListServicesRequest,
-  ): Promise<ListServicesResponse> {
-    const services = await this.registryService.listServices(request);
-    return { services };
+  ):
+    | Promise<ListServicesResponse>
+    | Observable<ListServicesResponse>
+    | ListServicesResponse {
+    throw new Error('Method not implemented.');
   }
-  @GrpcMethod(REGISTRY_SERVICE_NAME)
+  @GrpcMethod('Registry', 'UnregisterService')
   unregisterService(
     request: UnregisterServiceRequest,
   ):
     | Promise<UnregisterServiceResponse>
     | Observable<UnregisterServiceResponse>
     | UnregisterServiceResponse {
-    // TODO Hand null over grpc
-
-    return this.registryService.unregisterService(request.id) as any;
+    throw new Error('Method not implemented.');
   }
-  @GrpcMethod(REGISTRY_SERVICE_NAME)
+  @GrpcMethod('Registry', 'HealthCheck')
   healthCheck(
     request: Empty,
   ):
     | Promise<ServiceHealthResponse>
     | Observable<ServiceHealthResponse>
     | ServiceHealthResponse {
-    return this.registryService.healthCheck();
+    throw new Error('Method not implemented.');
   }
-  @GrpcMethod(REGISTRY_SERVICE_NAME)
+  @GrpcMethod('Registry', 'SendHeartbeat')
   sendHeartbeat(
     request: HeartbeatRequest,
   ):
     | Promise<HeartbeatResponse>
     | Observable<HeartbeatResponse>
     | HeartbeatResponse {
-    return this.registryService.sendHeartbeat(request);
+    throw new Error('Method not implemented.');
   }
 }

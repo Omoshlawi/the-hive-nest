@@ -9,7 +9,7 @@ message ServiceRegistration {
   string host = 3;
   int32 port = 4;
   string version = 5;
-  int64 timestamp = 6; // time created
+  int32 timestamp = 6; // time created
   repeated string tags = 7;
   map<string, string> metadata = 8; 
 }
@@ -24,7 +24,6 @@ message RegisterServiceRequest {
 }
 
 message Empty {
-    string nam=1;
 }
 
 message GetServiceRequest {
@@ -64,9 +63,19 @@ enum ServiceStatus {
 
 message ServiceHealthResponse {
   ServiceStatus status = 1;
-  int64 timestamp = 2;
-  int64 uptime = 3;
+  int32 timestamp = 2;
+  int32 uptime = 3;
   StorageStatus storage = 4;
+}
+
+// Heartbeat Messages
+message HeartbeatRequest {
+  string serviceId = 1;
+}
+
+message HeartbeatResponse {
+  bool acknowledged = 1;
+  string message = 2;
 }
 
 service Registry {
@@ -75,4 +84,6 @@ service Registry {
   rpc ListServices (ListServicesRequest) returns (ListServicesResponse);
   rpc UnregisterService (UnregisterServiceRequest) returns (UnregisterServiceResponse);
   rpc HealthCheck (Empty) returns (ServiceHealthResponse);
+  rpc SendHeartbeat (HeartbeatRequest) returns (HeartbeatResponse);
+
 }

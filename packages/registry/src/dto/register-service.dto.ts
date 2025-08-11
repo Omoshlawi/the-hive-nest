@@ -13,11 +13,8 @@ const RegisterServiceSchema = z.object({
   //  { example: '1.0.0' }
   version: z.string(),
   // { example: 'service-instance-uuid-123' }
-  instanceId: z.string().optional(),
-  //       example: 300,
-
-  ttl: z.coerce.number().min(30).optional(),
-  metadata: z.object().optional(),
+  tags: z.string().array().optional().default([]),
+  metadata: z.record(z.string(), z.string()).optional(),
 });
 
 export class RegisterServiceDto extends createZodDto(RegisterServiceSchema) {}

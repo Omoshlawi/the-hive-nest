@@ -1,12 +1,11 @@
 import {
-  HealthResponseDto,
-  HeartbeatDto,
+  GetServiceDto,
+  ListServicesDto,
   RegisterServiceDto,
-  RegistryService,
-  ServiceByNameandVersionDto,
-  ServiceQueryDto,
-  ServicesResponseDto,
   REGISTRY_PACKAGE,
+  RegistryClient,
+  SendHeartbeatDto,
+  RegistryController as IRegistryController,
 } from '@hive/registry';
 import {
   Body,
@@ -24,28 +23,24 @@ import {
 } from '@nestjs/common';
 import { ClientGrpcProxy } from '@nestjs/microservices';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { from } from 'rxjs';
 
 @Controller('registry')
 export class RegistryController implements OnModuleInit {
-  private registryService: RegistryService;
+  private registryService: RegistryClient;
   constructor(
     @Inject(REGISTRY_PACKAGE.V1.TOKEN) private client: ClientGrpcProxy,
   ) {}
   onModuleInit() {
-    this.registryService = this.client.getService<RegistryService>('Registry');
+    this.registryService = this.client.getService<RegistryClient>('Registry');
   }
 
   @Post('register')
   @ApiOperation({ summary: 'Register a service instance' })
   @ApiResponse({ status: 201, description: 'Service registered successfully' })
-  register(@Body() registerDto: RegisterServiceDto) {
-    return this.registryService.RegisterService({
+  registerService(@Body() registerDto: RegisterServiceDto) {
+    return this.registryService.registerService({
       ...registerDto,
-      timestamp: Date.now(),
-      instanceId: '134',
-      ttl: registerDto?.ttl ?? 30,
-      metadata: {},
+      metadata: registerDto.metadata ?? {},
     });
   }
 
@@ -55,9 +50,9 @@ export class RegistryController implements OnModuleInit {
     status: 200,
     description: 'Service deregistered successfully',
   })
-  async deregister(@Param('instanceId') instanceId: string) {
-    const success = await this.registryService.UnregisterService({
-      instanceId,
+  async unregisterService(@Param('instanceId') instanceId: string) {
+    const success = await this.registryService.unregisterService({
+      id: instanceId,
     });
     return {
       message: `Service ${instanceId} deregistered successfully`,
@@ -68,44 +63,28 @@ export class RegistryController implements OnModuleInit {
   @Get('services')
   @ApiOperation({ summary: 'Discover services' })
   @ApiResponse({ status: 200, description: 'Services retrieved successfully' })
-  async findServices(@Query() query: ServiceQueryDto) {
-    const results: any = await this.registryService.ListServices(query);
+  async listServices(@Query() query: ListServicesDto) {
+    // TODO: for query, params are optional but grpc generated types the fields aint optional, take alook
+    const results: any = await this.registryService.listServices(query as any);
     return results;
   }
 
   @ApiOperation({
     summary: 'Find and load balance a service by name and version',
   })
-  @Get('services/find-by-version/load-balance')
-  async findByNameAndVersion(@Query() query: ServiceByNameandVersionDto) {
-    const service =
-      await this.registryService.GetServiceByNameAndVersion(query);
+  @Get('services/find')
+  async getService(@Query() query: GetServiceDto) {
+    const service = await this.registryService.getService(query);
     if (!service)
       throw new NotFoundException({ detail: 'No matching service found' });
     return service;
-  }
-  @ApiOperation({
-    summary: 'Find all services by name and version',
-  })
-  @Get('services/find-by-version')
-  async findAllByNameAndVersion(
-    @Query() query: ServiceByNameandVersionDto,
-  ): Promise<ServicesResponseDto> {
-    const results: any =
-      await this.registryService.ListServicesByNameAndVersion(query);
-    return {
-      message: 'Matching Sercices retrieved successfully',
-      results,
-    };
   }
 
   @Post('heartbeat')
   @ApiOperation({ summary: 'Send service heartbeat' })
   @ApiResponse({ status: 200, description: 'Heartbeat received successfully' })
-  async heartbeat(@Body() heartbeatDto: HeartbeatDto) {
-    const success = await this.registryService.SendHeartbeat({
-      instanceId: heartbeatDto.instanceId!,
-    });
+  async sendHeartbeat(@Body() heartbeatDto: SendHeartbeatDto) {
+    const success = await this.registryService.sendHeartbeat(heartbeatDto);
     if (!success) {
       throw new HttpException(
         'Service instance not found',
@@ -124,7 +103,7 @@ export class RegistryController implements OnModuleInit {
     status: 200,
     description: 'Health status retrieved successfully',
   })
-  getHealth(): Promise<HealthResponseDto> {
-    return this.registryService.CheckHealth({});
+  healthCheck() {
+    return this.registryService.healthCheck({});
   }
 }

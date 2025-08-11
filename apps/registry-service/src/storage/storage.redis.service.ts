@@ -1,12 +1,12 @@
-import { BaseStorage, ServiceInfo, ServiceRegistryEntry } from '@hive/registry';
 import { Injectable } from '@nestjs/common';
+import { ServiceRegistration, BaseStorage } from '@hive/registry';
 import { RedisService } from './redis.service';
 import { AppConfig } from 'src/config/app.config';
 
 @Injectable()
 export class RedisStorage extends BaseStorage {
   private readonly keyPrefix: string;
-  private readonly instanceIndexPrefix: string;
+  private readonly ttl: number;
 
   constructor(
     private readonly redisService: RedisService,
@@ -14,168 +14,47 @@ export class RedisStorage extends BaseStorage {
   ) {
     super();
     this.keyPrefix = `${this.config.serviceName}:${this.config.serviceVersion}:services:`;
-    this.instanceIndexPrefix = `${this.config.serviceName}:${this.config.serviceVersion}:instances:`;
+    this.ttl = this.config.serviceTtl || 0; // 0 means no TTL
   }
 
   async initialize(): Promise<void> {
-    this.logger.log('Initializing Redis storage');
-
     try {
       // Test Redis connection
       await this.redisService.getClient().ping();
-      this.initialized = true;
-      this.logger.log('Redis storage initialized successfully');
+      super.initialize();
     } catch (error) {
       this.logger.error('Failed to initialize Redis storage:', error);
       throw error;
     }
   }
 
-  async register(
-    serviceInfo: Omit<ServiceInfo, 'ttl'>,
-  ): Promise<ServiceRegistryEntry> {
-    const entry = this.createRegistryEntry(serviceInfo);
-
-    try {
-      // Remove existing instance if it exists
-      await this.deregister(serviceInfo.instanceId);
-
-      const serviceKey = this.keyPrefix + entry.id;
-      const instanceKey = this.instanceIndexPrefix + serviceInfo.instanceId;
-
-      const pipeline = this.redisService.getClient().pipeline();
-
-      // Store service entry with TTL if specified
-      if (this.config.serviceTtl) {
-        pipeline.set(
-          serviceKey,
-          JSON.stringify({ ...entry, ttl: this.config.serviceTtl }),
-          'EX',
-          this.config.serviceTtl,
-        );
-        pipeline.set(instanceKey, entry.id, 'EX', this.config.serviceTtl);
-      } else {
-        pipeline.set(serviceKey, JSON.stringify(entry));
-        pipeline.set(instanceKey, entry.id);
-      }
-
-      await pipeline.exec();
-
-      this.logger.log(
-        `Registered service: ${serviceInfo.name}:${serviceInfo.version} (${serviceInfo.instanceId})`,
-      );
-      return entry;
-    } catch (error) {
-      this.logger.error(`Failed to register service: ${error.message}`);
-      throw error;
-    }
-  }
-
-  async deregister(instanceId: string): Promise<boolean> {
-    try {
-      const instanceKey = this.instanceIndexPrefix + instanceId;
-      const id = await this.redisService.getClient().get(instanceKey);
-
-      if (!id) return false;
-
-      const serviceKey = this.keyPrefix + id;
-      const pipeline = this.redisService.getClient().pipeline();
-
-      pipeline.del(serviceKey);
-      pipeline.del(instanceKey);
-
-      const results = await pipeline.exec();
-      const deleted =
-        (results?.[0]?.[1] as number) + (results?.[1]?.[1] as number);
-
-      if (deleted > 0) {
-        this.logger.log(`Deregistered service instance: ${instanceId}`);
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      this.logger.error(`Failed to deregister service: ${error.message}`);
-      return false;
-    }
-  }
-
-  async findByName(serviceName: string): Promise<ServiceRegistryEntry[]> {
+  async getAll(): Promise<ServiceRegistration[]> {
     try {
       const pattern = this.keyPrefix + '*';
       const keys = await this.redisService.getClient().keys(pattern);
 
-      if (keys.length === 0) return [];
+      if (keys.length === 0) {
+        this.logger.debug('No services found in Redis storage');
+        return [];
+      }
 
       const servicesData = await this.redisService.getClient().mget(keys);
-      const results: ServiceRegistryEntry[] = [];
+      const results: ServiceRegistration[] = [];
 
       for (const entryJson of servicesData) {
         if (!entryJson) continue;
 
         try {
-          const entry: ServiceRegistryEntry = JSON.parse(entryJson);
-
-          // No need to check expiration - Redis handles it automatically
-          if (this.matchesPattern(entry.name, serviceName)) {
-            results.push(entry);
-          }
+          const service: ServiceRegistration = JSON.parse(entryJson);
+          results.push(service);
         } catch (error) {
           this.logger.warn(`Failed to parse service entry: ${error.message}`);
         }
       }
 
-      return results;
-    } catch (error) {
-      this.logger.error(`Failed to find services by name: ${error.message}`);
-      return [];
-    }
-  }
-
-  async findByInstanceId(
-    instanceId: string,
-  ): Promise<ServiceRegistryEntry | null> {
-    try {
-      const instanceKey = this.instanceIndexPrefix + instanceId;
-      const id = await this.redisService.getClient().get(instanceKey);
-
-      if (!id) return null;
-
-      const serviceKey = this.keyPrefix + id;
-      const entryJson = await this.redisService.getClient().get(serviceKey);
-
-      if (!entryJson) return null;
-
-      return JSON.parse(entryJson);
-    } catch (error) {
-      this.logger.error(
-        `Failed to find service by instance ID: ${error.message}`,
+      this.logger.debug(
+        `Retrieved ${results.length} services from Redis storage`,
       );
-      return null;
-    }
-  }
-
-  async findAll(): Promise<ServiceRegistryEntry[]> {
-    try {
-      const pattern = this.keyPrefix + '*';
-      const keys = await this.redisService.getClient().keys(pattern);
-
-      if (keys.length === 0) return [];
-
-      const servicesData = await this.redisService.getClient().mget(keys);
-      const results: ServiceRegistryEntry[] = [];
-
-      for (const entryJson of servicesData) {
-        if (!entryJson) continue;
-
-        try {
-          const entry: ServiceRegistryEntry = JSON.parse(entryJson);
-          results.push(entry);
-        } catch (error) {
-          this.logger.warn(`Failed to parse service entry: ${error.message}`);
-        }
-      }
-
       return results;
     } catch (error) {
       this.logger.error(`Failed to get all services: ${error.message}`);
@@ -183,62 +62,142 @@ export class RedisStorage extends BaseStorage {
     }
   }
 
-  async heartbeat(instanceId: string): Promise<boolean> {
+  async get(id: string): Promise<ServiceRegistration | null> {
     try {
-      const instanceKey = this.instanceIndexPrefix + instanceId;
-      const id = await this.redisService.getClient().get(instanceKey);
-
-      if (!id) return false;
-
       const serviceKey = this.keyPrefix + id;
       const entryJson = await this.redisService.getClient().get(serviceKey);
 
-      if (!entryJson) return false;
-
-      const entry: ServiceRegistryEntry = JSON.parse(entryJson);
-      const now = Date.now();
-      entry.timestamp = now;
-
-      // Update entry and refresh TTL
-      if (entry.ttl) {
-        await this.redisService
-          .getClient()
-          .set(serviceKey, JSON.stringify(entry), 'EX', entry.ttl);
-        await this.redisService
-          .getClient()
-          .set(instanceKey, id, 'EX', entry.ttl);
-      } else {
-        await this.redisService
-          .getClient()
-          .set(serviceKey, JSON.stringify(entry));
+      if (!entryJson) {
+        this.logger.debug(`Service with ID ${id} not found in Redis storage`);
+        return null;
       }
 
-      return true;
+      const service: ServiceRegistration = JSON.parse(entryJson);
+      this.logger.debug(
+        `Retrieved service ${service.name}@${service.version} (${id}) from Redis storage`,
+      );
+      return service;
     } catch (error) {
-      this.logger.error(`Failed to update heartbeat: ${error.message}`);
-      return false;
+      this.logger.error(`Failed to get service by ID ${id}: ${error.message}`);
+      return null;
     }
   }
 
-  async cleanup(): Promise<number> {
-    // With Redis TTL, cleanup is automatic!
-    // This method can be a no-op or just return 0
-    this.logger.debug('Redis TTL handles cleanup automatically');
-    return 0;
+  async save(service: ServiceRegistration): Promise<ServiceRegistration> {
+    try {
+      const serviceKey = this.keyPrefix + service.id;
+      const serviceData = JSON.stringify(service);
+
+      // Save with TTL if configured, otherwise save without expiration
+      if (this.ttl > 0) {
+        await this.redisService
+          .getClient()
+          .set(serviceKey, serviceData, 'EX', this.ttl);
+
+        this.logger.debug(
+          `Saved service ${service.name}@${service.version} (${service.id}) ` +
+            `to Redis storage with TTL: ${this.ttl}s`,
+        );
+      } else {
+        await this.redisService.getClient().set(serviceKey, serviceData);
+
+        this.logger.debug(
+          `Saved service ${service.name}@${service.version} (${service.id}) ` +
+            `to Redis storage without TTL`,
+        );
+      }
+
+      return service;
+    } catch (error) {
+      this.logger.error(
+        `Failed to save service ${service.name}@${service.version} (${service.id}): ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  async remove(id: string): Promise<ServiceRegistration | null> {
+    try {
+      // First, get the service to return it if it exists
+      const existingService = await this.get(id);
+
+      if (!existingService) {
+        this.logger.debug(`Service with ID ${id} not found for removal`);
+        return null;
+      }
+
+      const serviceKey = this.keyPrefix + id;
+      const deletedCount = await this.redisService.getClient().del(serviceKey);
+
+      if (deletedCount > 0) {
+        this.logger.log(
+          `Removed service ${existingService.name}@${existingService.version} ` +
+            `(${id}) from Redis storage`,
+        );
+        return existingService;
+      } else {
+        this.logger.warn(
+          `Failed to remove service with ID ${id} from Redis storage`,
+        );
+        return null;
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to remove service with ID ${id}: ${error.message}`,
+      );
+      return null;
+    }
+  }
+
+  async clear(): Promise<number> {
+    try {
+      const pattern = this.keyPrefix + '*';
+      const keys = await this.redisService.getClient().keys(pattern);
+
+      if (keys.length === 0) {
+        this.logger.debug('No services to clear from Redis storage');
+        return 0;
+      }
+
+      const deletedCount = await this.redisService.getClient().del(...keys);
+
+      this.logger.log(`Cleared ${deletedCount} services from Redis storage`);
+      return deletedCount;
+    } catch (error) {
+      this.logger.error(
+        `Failed to clear services from Redis storage: ${error.message}`,
+      );
+      return 0;
+    }
   }
 
   async healthCheck(): Promise<boolean> {
     try {
       await this.redisService.getClient().ping();
-      return this.initialized;
+      const isHealthy = this.initialized;
+
+      this.logger.debug(
+        `Redis storage health check: ${isHealthy ? 'healthy' : 'unhealthy'}`,
+      );
+      return isHealthy;
     } catch (error) {
-      this.logger.error('Redis health check failed:', error);
+      this.logger.error('Redis storage health check failed:', error);
       return false;
     }
   }
-
-  async close(): Promise<void> {
-    this.initialized = false;
-    this.logger.log('Redis storage closed');
+  /**
+   * Get Redis client statistics (useful for monitoring)
+   */
+  async getStats(): Promise<{
+    totalServices: number;
+    keyPrefix: string;
+    ttl: number;
+  }> {
+    const totalServices = (await this.getAll()).length;
+    return {
+      totalServices,
+      keyPrefix: this.keyPrefix,
+      ttl: this.ttl,
+    };
   }
 }

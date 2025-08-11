@@ -171,6 +171,9 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
+      semver:
+        specifier: ^7.7.2
+        version: 7.7.2
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -196,6 +199,9 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.3
+      '@types/semver':
+        specifier: ^7.7.0
+        version: 7.7.0
       '@types/supertest':
         specifier: ^6.0.2
         version: 6.0.3
@@ -381,9 +387,6 @@ importers:
 
   packages/registry:
     dependencies:
-      '@nestjs/axios':
-        specifier: ^4.0.1
-        version: 4.0.1(@nestjs/common@11.1.6)(axios@1.11.0)(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.0.1
         version: 11.1.6(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -402,9 +405,6 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
-      semver:
-        specifier: ^7.7.2
-        version: 7.7.2
       zod:
         specifier: ^4.0.15
         version: 4.0.15
@@ -412,9 +412,6 @@ importers:
       '@types/node':
         specifier: ^22.10.7
         version: 22.17.0
-      '@types/semver':
-        specifier: ^7.7.0
-        version: 7.7.0
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.17.0)(ts-node@10.9.2)
