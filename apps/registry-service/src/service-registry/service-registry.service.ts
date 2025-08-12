@@ -15,14 +15,19 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import semver from 'semver';
+import { AppConfig } from 'src/config/app.config';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ServiceRegistryService.name);
 
-  constructor(private readonly storage: BaseStorage) {}
+  constructor(
+    private readonly storage: BaseStorage,
+    private readonly config: AppConfig,
+  ) {}
 
   async onModuleInit() {
     await this.storage.initialize();
@@ -220,7 +225,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
 
   async sendHeartbeat({
     serviceId,
-  }: SendHeartbeatDto): Promise<HeartbeatResponse|null> {
+  }: SendHeartbeatDto): Promise<HeartbeatResponse | null> {
     this.logger.debug(`Processing heartbeat for service ID: ${serviceId}`);
 
     const service = await this.storage.get(serviceId);
@@ -258,7 +263,34 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     }
     return serviceName === pattern;
   }
+  @Cron(CronExpression.EVERY_MINUTE)
+  private async cleanupExpiredServices(): Promise<void> {
+    this.logger.debug('Running cleanup of expired services...');
 
+    const services = await this.storage.getAll();
+    const now = new Date().getTime();
+    const serviceTtl = this.config.serviceTtl;
+
+    const expireds: ServiceRegistration[] = [];
+
+    for (const service of services) {
+      const isExpired = now - service.timestamp > serviceTtl;
+      if (isExpired) {
+        expireds.push(service);
+      }
+    }
+
+    if (expireds.length > 0) {
+      this.logger.warn(
+        `Found ${expireds.length} expired services. Cleaning them up.`,
+      );
+      for (const expiredService of expireds) {
+        await this.storage.remove(expiredService.id);
+      }
+    } else {
+      this.logger.log('No expired services found.');
+    }
+  }
   /**
    * Check if service version matches the requested version pattern
    * Supports exact matches, ranges, and semver patterns
