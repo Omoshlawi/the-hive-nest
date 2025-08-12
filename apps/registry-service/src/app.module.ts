@@ -4,6 +4,13 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ServiceRegistryModule } from './service-registry/service-registry.module';
+import { APP_FILTER } from '@nestjs/core';
+import { RpcExceptionHandler } from './app.utils';
+
+const RCPExceptionFilter = {
+  provide: APP_FILTER,
+  useClass: RpcExceptionHandler,
+};
 
 @Module({
   imports: [
@@ -12,6 +19,6 @@ import { ServiceRegistryModule } from './service-registry/service-registry.modul
     ServiceRegistryModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, RCPExceptionFilter],
 })
 export class AppModule {}

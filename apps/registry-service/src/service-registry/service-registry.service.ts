@@ -220,7 +220,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
 
   async sendHeartbeat({
     serviceId,
-  }: SendHeartbeatDto): Promise<HeartbeatResponse> {
+  }: SendHeartbeatDto): Promise<HeartbeatResponse|null> {
     this.logger.debug(`Processing heartbeat for service ID: ${serviceId}`);
 
     const service = await this.storage.get(serviceId);
@@ -228,7 +228,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
       this.logger.warn(
         `Heartbeat received for unknown service ID: ${serviceId}`,
       );
-      return { acknowledged: false, message: 'Unknown Service' };
+      return null;
     }
 
     const now = Date.now();
@@ -246,6 +246,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     return {
       acknowledged: true,
       message: 'Heartbeat successful',
+      service,
     };
   }
 

@@ -33,8 +33,8 @@ message GetServiceRequest {
 
 message ListServicesRequest {
   repeated string tags = 1;
-  string name = 2;
-  string version = 3;
+  optional string name = 2;
+  optional string version = 3;
 }
 
 message ListServicesResponse {
@@ -43,11 +43,6 @@ message ListServicesResponse {
 
 message UnregisterServiceRequest {
   string id = 1;
-}
-
-message UnregisterServiceResponse {
-  bool success = 1;
-  string message = 2;
 }
 
 message StorageStatus {
@@ -76,14 +71,14 @@ message HeartbeatRequest {
 message HeartbeatResponse {
   bool acknowledged = 1;
   string message = 2;
+  ServiceRegistration service = 3;
 }
 
 service Registry {
   rpc RegisterService (RegisterServiceRequest) returns (ServiceRegistration);
   rpc GetService (GetServiceRequest) returns (ServiceRegistration);
   rpc ListServices (ListServicesRequest) returns (ListServicesResponse);
-  rpc UnregisterService (UnregisterServiceRequest) returns (UnregisterServiceResponse);
+  rpc UnregisterService (UnregisterServiceRequest) returns (ServiceRegistration);
   rpc HealthCheck (Empty) returns (ServiceHealthResponse);
   rpc SendHeartbeat (HeartbeatRequest) returns (HeartbeatResponse);
-
 }

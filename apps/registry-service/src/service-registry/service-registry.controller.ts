@@ -11,12 +11,11 @@ import {
   ServiceHealthResponse,
   ServiceRegistration,
   UnregisterServiceRequest,
-  UnregisterServiceResponse,
 } from '@hive/registry';
-import { Controller } from '@nestjs/common';
+import { Controller, NotFoundException } from '@nestjs/common';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { ServiceRegistryService } from './service-registry.service';
-import { GrpcMethod } from '@nestjs/microservices';
 @Controller()
 export class ServiceRegistryController implements RegistryController {
   constructor(private registryService: ServiceRegistryService) {}
@@ -30,14 +29,14 @@ export class ServiceRegistryController implements RegistryController {
     return this.registryService.registerService(request);
   }
   @GrpcMethod(REGISTRY_SERVICE_NAME)
-  getService(
-    request: GetServiceRequest,
-  ):
-    | Promise<ServiceRegistration>
-    | Observable<ServiceRegistration>
-    | ServiceRegistration {
-    // TODO Hand null over grpc
-    return this.registryService.getService(request) as any;
+  async getService(request: GetServiceRequest): Promise<ServiceRegistration> {
+    const service = await this.registryService.getService(request);
+    if (!service) {
+      throw new RpcException(
+        new NotFoundException('No matching service found!'),
+      );
+    }
+    return service;
   }
   @GrpcMethod(REGISTRY_SERVICE_NAME)
   async listServices(
@@ -47,15 +46,17 @@ export class ServiceRegistryController implements RegistryController {
     return { services };
   }
   @GrpcMethod(REGISTRY_SERVICE_NAME)
-  unregisterService(
+  async unregisterService(
     request: UnregisterServiceRequest,
-  ):
-    | Promise<UnregisterServiceResponse>
-    | Observable<UnregisterServiceResponse>
-    | UnregisterServiceResponse {
-    // TODO Hand null over grpc
-
-    return this.registryService.unregisterService(request.id) as any;
+  ): Promise<ServiceRegistration> {
+    const service = await this.registryService.unregisterService(request.id);
+    if (!service)
+      throw new RpcException(
+        new NotFoundException(
+          `Service with ID ${request.id} not found for unregistration`,
+        ),
+      );
+    return service;
   }
   @GrpcMethod(REGISTRY_SERVICE_NAME)
   healthCheck(
@@ -67,12 +68,14 @@ export class ServiceRegistryController implements RegistryController {
     return this.registryService.healthCheck();
   }
   @GrpcMethod(REGISTRY_SERVICE_NAME)
-  sendHeartbeat(
-    request: HeartbeatRequest,
-  ):
-    | Promise<HeartbeatResponse>
-    | Observable<HeartbeatResponse>
-    | HeartbeatResponse {
-    return this.registryService.sendHeartbeat(request);
+  async sendHeartbeat(request: HeartbeatRequest): Promise<HeartbeatResponse> {
+    const res = await this.registryService.sendHeartbeat(request);
+    if (!res)
+      throw new RpcException(
+        new NotFoundException(
+          `Service with ID ${request.serviceId} not found for heartbeat`,
+        ),
+      );
+    return res;
   }
 }

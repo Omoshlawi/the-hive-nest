@@ -58,8 +58,8 @@ export interface GetServiceRequest {
 
 export interface ListServicesRequest {
   tags: string[];
-  name: string;
-  version: string;
+  name?: string | undefined;
+  version?: string | undefined;
 }
 
 export interface ListServicesResponse {
@@ -68,11 +68,6 @@ export interface ListServicesResponse {
 
 export interface UnregisterServiceRequest {
   id: string;
-}
-
-export interface UnregisterServiceResponse {
-  success: boolean;
-  message: string;
 }
 
 export interface StorageStatus {
@@ -95,6 +90,7 @@ export interface HeartbeatRequest {
 export interface HeartbeatResponse {
   acknowledged: boolean;
   message: string;
+  service: ServiceRegistration | undefined;
 }
 
 export const HIVE_REGISTRY_V1_PACKAGE_NAME = "hive.registry.v1";
@@ -106,7 +102,7 @@ export interface RegistryClient {
 
   listServices(request: ListServicesRequest): Observable<ListServicesResponse>;
 
-  unregisterService(request: UnregisterServiceRequest): Observable<UnregisterServiceResponse>;
+  unregisterService(request: UnregisterServiceRequest): Observable<ServiceRegistration>;
 
   healthCheck(request: Empty): Observable<ServiceHealthResponse>;
 
@@ -128,7 +124,7 @@ export interface RegistryController {
 
   unregisterService(
     request: UnregisterServiceRequest,
-  ): Promise<UnregisterServiceResponse> | Observable<UnregisterServiceResponse> | UnregisterServiceResponse;
+  ): Promise<ServiceRegistration> | Observable<ServiceRegistration> | ServiceRegistration;
 
   healthCheck(
     request: Empty,

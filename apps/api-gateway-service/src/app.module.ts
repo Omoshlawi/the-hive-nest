@@ -3,9 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigifyModule } from '@itgorillaz/configify';
 import { RegistryModule } from './registry/registry.module';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
-import { ZodValidationExceptionFilter } from './app.utils';
+import { RpcErrorInterceptor, ZodValidationExceptionFilter } from './app.utils';
 
 const ZodPipe = {
   provide: APP_PIPE,
@@ -17,11 +17,14 @@ const ZodExceptionFilter = {
   useClass: ZodValidationExceptionFilter,
 };
 
+const RCPExceptionInterceptor = {
+  provide: APP_INTERCEPTOR,
+  useClass: RpcErrorInterceptor,
+};
+
 @Module({
-  imports: [ConfigifyModule.forRootAsync(), 
-    RegistryModule
-  ],
+  imports: [ConfigifyModule.forRootAsync(), RegistryModule],
   controllers: [AppController],
-  providers: [AppService, ZodPipe, ZodExceptionFilter],
+  providers: [AppService, ZodPipe, ZodExceptionFilter, RCPExceptionInterceptor],
 })
 export class AppModule {}
