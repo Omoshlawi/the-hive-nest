@@ -223,7 +223,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     return response;
   }
 
-  async sendHeartbeat({
+  async heartbeat({
     serviceId,
   }: SendHeartbeatDto): Promise<HeartbeatResponse | null> {
     this.logger.debug(`Processing heartbeat for service ID: ${serviceId}`);

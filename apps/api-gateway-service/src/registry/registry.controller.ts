@@ -3,6 +3,7 @@ import {
   ListServicesDto,
   RegisterServiceDto,
   REGISTRY_PACKAGE,
+  REGISTRY_SERVICE_NAME,
   RegistryClient,
   SendHeartbeatDto,
 } from '@hive/registry';
@@ -15,7 +16,7 @@ import {
   OnModuleInit,
   Param,
   Post,
-  Query
+  Query,
 } from '@nestjs/common';
 import { ClientGrpcProxy } from '@nestjs/microservices';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -28,7 +29,9 @@ export class RegistryController implements OnModuleInit {
     @Inject(REGISTRY_PACKAGE.V1.TOKEN) private client: ClientGrpcProxy,
   ) {}
   onModuleInit() {
-    this.registryService = this.client.getService<RegistryClient>('Registry');
+    this.registryService = this.client.getService<RegistryClient>(
+      REGISTRY_SERVICE_NAME,
+    );
   }
 
   @Post('register')
@@ -74,8 +77,8 @@ export class RegistryController implements OnModuleInit {
   @Post('heartbeat')
   @ApiOperation({ summary: 'Send service heartbeat' })
   @ApiResponse({ status: 200, description: 'Heartbeat received successfully' })
-  sendHeartbeat(@Body() heartbeatDto: SendHeartbeatDto) {
-    return this.registryService.sendHeartbeat(heartbeatDto);
+  heartbeat(@Body() heartbeatDto: SendHeartbeatDto) {
+    return this.registryService.heartbeat(heartbeatDto);
   }
 
   @Get('health')

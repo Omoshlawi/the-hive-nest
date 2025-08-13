@@ -1,8 +1,7 @@
-import { Module } from '@nestjs/common';
-import { RegistryController } from './registry.controller';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { REGISTRY_PACKAGE } from '@hive/registry';
-import { join } from 'path';
+import { Module } from '@nestjs/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { RegistryController } from './registry.controller';
 @Module({
   imports: [
     ClientsModule.register({
@@ -11,9 +10,9 @@ import { join } from 'path';
           name: REGISTRY_PACKAGE.V1.TOKEN,
           transport: Transport.GRPC,
           options: {
-            package: 'hive.registry.v1',
+            package: REGISTRY_PACKAGE.V1.NAME,
             protoPath: REGISTRY_PACKAGE.V1.PROTO_PATH,
-            url: '0.0.0.0:4001',
+            url: '0.0.0.0:4001', // TODO: move env file
           },
         },
       ],

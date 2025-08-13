@@ -68,8 +68,8 @@ export class ServiceRegistryController implements RegistryController {
     return this.registryService.healthCheck();
   }
   @GrpcMethod(REGISTRY_SERVICE_NAME)
-  async sendHeartbeat(request: HeartbeatRequest): Promise<HeartbeatResponse> {
-    const res = await this.registryService.sendHeartbeat(request);
+  async heartbeat(request: HeartbeatRequest): Promise<HeartbeatResponse> {
+    const res = await this.registryService.heartbeat(request);
     if (!res)
       throw new RpcException(
         new NotFoundException(

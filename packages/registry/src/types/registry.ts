@@ -106,7 +106,7 @@ export interface RegistryClient {
 
   healthCheck(request: Empty): Observable<ServiceHealthResponse>;
 
-  sendHeartbeat(request: HeartbeatRequest): Observable<HeartbeatResponse>;
+  heartbeat(request: HeartbeatRequest): Observable<HeartbeatResponse>;
 }
 
 export interface RegistryController {
@@ -130,9 +130,7 @@ export interface RegistryController {
     request: Empty,
   ): Promise<ServiceHealthResponse> | Observable<ServiceHealthResponse> | ServiceHealthResponse;
 
-  sendHeartbeat(
-    request: HeartbeatRequest,
-  ): Promise<HeartbeatResponse> | Observable<HeartbeatResponse> | HeartbeatResponse;
+  heartbeat(request: HeartbeatRequest): Promise<HeartbeatResponse> | Observable<HeartbeatResponse> | HeartbeatResponse;
 }
 
 export function RegistryControllerMethods() {
@@ -143,7 +141,7 @@ export function RegistryControllerMethods() {
       "listServices",
       "unregisterService",
       "healthCheck",
-      "sendHeartbeat",
+      "heartbeat",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

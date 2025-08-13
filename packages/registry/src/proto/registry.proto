@@ -80,5 +80,5 @@ service Registry {
   rpc ListServices (ListServicesRequest) returns (ListServicesResponse);
   rpc UnregisterService (UnregisterServiceRequest) returns (ServiceRegistration);
   rpc HealthCheck (Empty) returns (ServiceHealthResponse);
-  rpc SendHeartbeat (HeartbeatRequest) returns (HeartbeatResponse);
+  rpc Heartbeat (HeartbeatRequest) returns (HeartbeatResponse);
 }
