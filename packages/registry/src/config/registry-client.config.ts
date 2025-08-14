@@ -28,4 +28,6 @@ export class RegistryClientConfig {
     parse: toArray,
   })
   tags: Array<string>;
+  @Value('META', { default: {} })
+  metadata: Record<string, string>;
 }

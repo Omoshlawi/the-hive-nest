@@ -55,7 +55,7 @@ export class ServiceUtils {
     maxAge = 300000,
   ): boolean {
     const now = Date.now();
-    const age = now - service.timestamp;
+    const age = now - +service.timestamp;
 
     // if (service.ttl) {
     //   return age < service.ttl * 1000;
@@ -84,7 +84,7 @@ export class ServiceUtils {
       }
 
       // Finally by timestamp (newer first)
-      return b.timestamp - a.timestamp;
+      return +b.timestamp - +a.timestamp;
     });
   }
 

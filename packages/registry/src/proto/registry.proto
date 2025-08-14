@@ -9,7 +9,7 @@ message ServiceRegistration {
   string host = 3;
   int32 port = 4;
   string version = 5;
-  int32 timestamp = 6; // time created
+  string timestamp = 6; // time created
   repeated string tags = 7;
   map<string, string> metadata = 8; 
 }
@@ -58,7 +58,7 @@ enum ServiceStatus {
 
 message ServiceHealthResponse {
   ServiceStatus status = 1;
-  int32 timestamp = 2;
+  string timestamp = 2;
   int32 uptime = 3;
   StorageStatus storage = 4;
 }

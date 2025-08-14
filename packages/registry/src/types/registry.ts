@@ -24,7 +24,7 @@ export interface ServiceRegistration {
   port: number;
   version: string;
   /** time created */
-  timestamp: number;
+  timestamp: string;
   tags: string[];
   metadata: { [key: string]: string };
 }
@@ -77,7 +77,7 @@ export interface StorageStatus {
 
 export interface ServiceHealthResponse {
   status: ServiceStatus;
-  timestamp: number;
+  timestamp: string;
   uptime: number;
   storage: StorageStatus | undefined;
 }

@@ -18,6 +18,7 @@ import {
 import { Cron, CronExpression } from '@nestjs/schedule';
 import semver from 'semver';
 import { AppConfig } from 'src/config/app.config';
+import { RedisStorage } from 'src/storage/storage.redis.service';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -42,42 +43,47 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
   /**
    * Generate a unique instance ID
    */
-  private generateInstanceId(registerServiceDto: RegisterServiceDto): string {
-    const servicePart =
-      registerServiceDto.name?.replace('@', '').replace('/', '-') || 'unknown';
-    const hostPart =
-      registerServiceDto.host?.replace(/[^a-zA-Z0-9]/g, '-') || 'unknown';
-    const portPart = registerServiceDto.port || 'unknown';
-    const uuid = uuidv4().split('-')[0]; // Short UUID
-    const timestamp = Date.now().toString(36); // Base36 timestamp
+  private async generateUniqueInstanceId(
+    registerServiceDto: RegisterServiceDto,
+    maxRetries = 5,
+  ): Promise<string> {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      const servicePart =
+        registerServiceDto.name?.replace(/[/]/g, '-')?.replace(/[@]/g, '') ||
+        'unknown';
+      const hostPart =
+        registerServiceDto.host?.replace(/[^a-zA-Z0-9]/g, '-') || 'unknown';
+      const portPart = registerServiceDto.port || 'unknown';
+      const uuid = uuidv4();
 
-    return `${servicePart}-${hostPart}-${portPart}-${timestamp}-${uuid}`;
+      const instanceId = `${servicePart}-${hostPart}-${portPart}-${uuid}`;
+
+      // Check if exists atomically
+      const exists = await this.storage.get(instanceId);
+      if (!exists) {
+        return instanceId;
+      }
+
+      this.logger.warn(`ID collision on attempt ${attempt + 1}: ${instanceId}`);
+    }
+
+    throw new Error('Failed to generate unique instance ID after max retries');
   }
 
   async registerService(
     registerDto: RegisterServiceDto,
   ): Promise<ServiceRegistration> {
-    // Generate instanceId if not provided by client
-    const instanceId = this.generateInstanceId(registerDto);
+    const instanceId = await this.generateUniqueInstanceId(registerDto);
 
     const service: ServiceRegistration = {
       ...registerDto,
       id: instanceId,
-      timestamp: Date.now(),
+      timestamp: Date.now().toString(),
       metadata: registerDto.metadata ?? {},
     };
 
-    // Check if instance already exists and handle accordingly
-    const existingInstance = await this.storage.get(instanceId);
-    if (existingInstance) {
-      // If generated ID somehow exists, generate a new one
-      service.id = this.generateInstanceId(registerDto);
-      this.logger.warn(
-        `Instance ID collision detected, generated new ID: ${service.id}`,
-      );
-    }
-
     const savedService = await this.storage.save(service);
+
     this.logger.log(
       `Service registered: ${savedService.name}@${savedService.version} ` +
         `with ID: ${savedService.id} at ${savedService.host}:${savedService.port}`,
@@ -90,6 +96,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     name: serviceName,
     version,
   }: GetServiceDto): Promise<ServiceRegistration | null> {
+    // TODO: Use Health info when finding a service
     const allServices = await this.storage.getAll();
     const services = allServices.filter((entry) =>
       this.matchesPattern(entry.name, serviceName),
@@ -206,7 +213,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     const isHealthy = await this.storage.healthCheck();
     const response = {
       status: isHealthy ? ServiceStatus.HEALTHY : ServiceStatus.UNHEALTHY,
-      timestamp: Date.now(),
+      timestamp: Date.now().toString(),
       uptime: process.uptime(),
       storage: {
         type: this.storage.constructor.name,
@@ -236,7 +243,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
       return null;
     }
 
-    const now = Date.now();
+    const now = Date.now().toString();
     const previousTimestamp = service.timestamp;
     service.timestamp = now;
 
@@ -244,8 +251,8 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
 
     this.logger.debug(
       `Heartbeat acknowledged for ${service.name}@${service.version} (${serviceId}) - ` +
-        `Last seen: ${new Date(previousTimestamp).toISOString()}, ` +
-        `Updated: ${new Date(now).toISOString()}`,
+        `Last seen: ${new Date(+previousTimestamp).toISOString()}, ` +
+        `Updated: ${new Date(+now).toISOString()}`,
     );
 
     return {
@@ -263,32 +270,35 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     }
     return serviceName === pattern;
   }
-  @Cron(CronExpression.EVERY_MINUTE)
+  // @Cron(CronExpression.EVERY_MINUTE)
   private async cleanupExpiredServices(): Promise<void> {
     this.logger.debug('Running cleanup of expired services...');
 
-    const services = await this.storage.getAll();
-    const now = new Date().getTime();
-    const serviceTtl = this.config.serviceTtl;
-
-    const expireds: ServiceRegistration[] = [];
-
-    for (const service of services) {
-      const isExpired = now - service.timestamp > serviceTtl;
-      if (isExpired) {
-        expireds.push(service);
-      }
+    if (this.storage instanceof RedisStorage) {
+      this.logger.debug('Redis Handles ttl internally hence skipping clean up');
+      return;
     }
+    try {
+      const services = await this.storage.getAll();
+      const now = Date.now();
+      const serviceTtl = this.config.serviceTtl;
 
-    if (expireds.length > 0) {
-      this.logger.warn(
-        `Found ${expireds.length} expired services. Cleaning them up.`,
-      );
-      for (const expiredService of expireds) {
-        await this.storage.remove(expiredService.id);
+      const expiredIds = services
+        .filter((service) => now - +service.timestamp > serviceTtl)
+        .map((service) => service.id);
+
+      if (expiredIds.length > 0) {
+        this.logger.warn(`Cleaning up ${expiredIds.length} expired services`);
+
+        // Remove in batches to avoid overwhelming storage
+        const batchSize = 10;
+        for (let i = 0; i < expiredIds.length; i += batchSize) {
+          const batch = expiredIds.slice(i, i + batchSize);
+          await Promise.allSettled(batch.map((id) => this.storage.remove(id)));
+        }
       }
-    } else {
-      this.logger.log('No expired services found.');
+    } catch (error) {
+      this.logger.error(`Cleanup failed: ${error.message}`);
     }
   }
   /**
