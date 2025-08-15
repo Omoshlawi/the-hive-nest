@@ -1,15 +1,11 @@
+import { PROPERTY_HTTP_SERVER_CONFIG_TOKEN } from '@hive/property';
+import { ServerConfig } from '@hive/utils';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { getFreePort } from '@hive/utils';
-import { PORT_TOKEN } from '@hive/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const port = app.get(PORT_TOKEN);
-  await app.listen(port);
-  const serv = app.getHttpServer();
-  console.log('Addr-----', serv?.address()?.port);
-  console.log('Addr-----', await app?.getUrl());
-  console.log('PORT-----', await getFreePort());
+  const conf: ServerConfig = app.get(PROPERTY_HTTP_SERVER_CONFIG_TOKEN);
+  await app.listen(conf.port);
 }
 bootstrap();

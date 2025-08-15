@@ -1,7 +1,4 @@
-import { PORT_TOKEN } from '@hive/common';
 import { Configuration, Value } from '@itgorillaz/configify';
-import { Inject } from '@nestjs/common';
-import z from 'zod';
 
 const toArray = (val: string = '') => {
   return (
@@ -30,4 +27,4 @@ export class RegistryClientConfig {
   tags: Array<string>;
   @Value('META', { default: {} })
   metadata: Record<string, string>;
-}
+} 

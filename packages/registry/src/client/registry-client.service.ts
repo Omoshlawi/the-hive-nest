@@ -2,21 +2,19 @@ import {
   Inject,
   Injectable,
   Logger,
-  OnModuleInit,
   OnModuleDestroy,
+  OnModuleInit,
 } from '@nestjs/common';
 import { ClientGrpcProxy } from '@nestjs/microservices';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { REGISTRY_PACKAGE } from '../constants';
+import { catchError, delay, firstValueFrom, of, retry, timeout } from 'rxjs';
+import { CLIENT_SERVICE_CONFIG_TOKEN, REGISTRY_PACKAGE } from '../constants';
+import { ClientServiceConfig } from '../interfaces';
 import {
-  RegisterServiceRequest,
   REGISTRY_SERVICE_NAME,
   RegistryClient,
   ServiceRegistration,
 } from '../types';
-import { RegistryClientConfig } from '../config';
-import { PORT_TOKEN } from '@hive/common';
-import { firstValueFrom, timeout, catchError, of, retry, delay } from 'rxjs';
 
 @Injectable()
 export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
@@ -30,14 +28,15 @@ export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
   private isShuttingDown = false;
 
   constructor(
-    @Inject(REGISTRY_PACKAGE.V1.TOKEN) private client: ClientGrpcProxy,
-    private config: RegistryClientConfig,
-    @Inject(PORT_TOKEN) private port: number,
+    @Inject(REGISTRY_PACKAGE.V1.TOKEN)
+    private client: ClientGrpcProxy,
+    @Inject(CLIENT_SERVICE_CONFIG_TOKEN)
+    private config: ClientServiceConfig,
   ) {}
 
   async onModuleInit() {
     this.logger.log(
-      `Initializing Registry Client for service: ${this.config.serviceName}:${this.port}`,
+      `Initializing Registry Client for service: ${this.config.service.name}:${this.config.service.port}`,
     );
 
     this.registryService = this.client.getService<RegistryClient>(
@@ -75,7 +74,7 @@ export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
         );
 
         this.serviceInstance = await firstValueFrom(
-          this.registryService.registerService(this.getServiceDetails()).pipe(
+          this.registryService.registerService(this.config.service).pipe(
             timeout(this.REGISTRATION_TIMEOUT),
             retry({
               count: 2,
@@ -213,17 +212,6 @@ export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
       this.logger.error('Failed to unregister service:', error);
       throw error;
     }
-  }
-
-  private getServiceDetails(): RegisterServiceRequest {
-    return {
-      host: 'localhost',
-      metadata: this.config.metadata || {},
-      name: this.config.serviceName,
-      version: this.config.serviceVersion,
-      port: this.port,
-      tags: this.config.tags,
-    };
   }
 
   private sleep(ms: number): Promise<void> {

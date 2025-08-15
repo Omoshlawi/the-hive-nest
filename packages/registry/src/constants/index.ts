@@ -24,3 +24,5 @@ export const REGISTRY_PACKAGE = Object.freeze({
     TOKEN: 'SERVICE_REGISTRY_PACKAGE_V1',
   },
 });
+
+export const CLIENT_SERVICE_CONFIG_TOKEN = 'CLIENT_SERVICE_CONFIG';
