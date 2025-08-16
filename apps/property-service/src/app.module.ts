@@ -1,6 +1,8 @@
 import {
   PROPERTY_HTTP_SERVER_CONFIG_TOKEN,
+  PROPERTY_RPC_SERVER_CONFIG_TOKEN,
   PropertyHTTPServerConfigProvider,
+  PropertyRPCServerConfigProvider,
 } from '@hive/property';
 import { RegistryClientConfig, RegistryClientModule } from '@hive/registry';
 import { ServerConfig } from '@hive/utils';
@@ -27,15 +29,38 @@ import { AppService } from './app.service';
           service: {
             host: http.host,
             port: http.port,
-            metadata: config.metadata || {},
+            metadata: { ...(config.metadata || {}), protocol: 'HTTP' },
             name: config.serviceName,
             version: config.serviceVersion,
-            tags: config.tags || [],
+            tags: [...(config.tags || []), 'HTTP'],
           },
         };
       },
       inject: [RegistryClientConfig, PROPERTY_HTTP_SERVER_CONFIG_TOKEN],
       providers: [PropertyHTTPServerConfigProvider],
+    }),
+    RegistryClientModule.registerForService({
+      useFactory: (config: RegistryClientConfig, grpc: ServerConfig) => {
+        if (!config) {
+          throw new Error('RegistryClientConfig is required');
+        }
+        if (!grpc) {
+          throw new Error('ServerConfig is required');
+        }
+
+        return {
+          service: {
+            host: grpc.host,
+            port: grpc.port,
+            metadata: { ...(config.metadata || {}), protocol: 'GRPC' },
+            name: config.serviceName,
+            version: config.serviceVersion,
+            tags: [...(config.tags || []), 'gRPC'],
+          },
+        };
+      },
+      inject: [RegistryClientConfig, PROPERTY_RPC_SERVER_CONFIG_TOKEN],
+      providers: [PropertyRPCServerConfigProvider],
     }),
   ],
   controllers: [AppController],

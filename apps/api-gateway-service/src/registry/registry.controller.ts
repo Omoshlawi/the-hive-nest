@@ -1,12 +1,12 @@
 import {
-  GetServiceDto,
-  ListServicesDto,
+  QueryServicesDto,
   RegisterServiceDto,
   REGISTRY_PACKAGE,
   REGISTRY_SERVICE_NAME,
   RegistryClient,
   SendHeartbeatDto,
 } from '@hive/registry';
+import { unflattenArray } from '@hive/utils';
 import {
   Body,
   Controller,
@@ -38,6 +38,7 @@ export class RegistryController implements OnModuleInit {
   @ApiOperation({ summary: 'Register a service instance' })
   @ApiResponse({ status: 201, description: 'Service registered successfully' })
   registerService(@Body() registerDto: RegisterServiceDto) {
+    return 'registerDto';
     return this.registryService.registerService({
       ...registerDto,
       metadata: registerDto.metadata ?? {},
@@ -58,20 +59,30 @@ export class RegistryController implements OnModuleInit {
   @Get('services')
   @ApiOperation({ summary: 'Discover services' })
   @ApiResponse({ status: 200, description: 'Services retrieved successfully' })
-  listServices(@Query() query: ListServicesDto) {
-    return this.registryService.listServices(query).pipe(
-      map((services) => ({
-        results: services?.services ?? [],
-      })),
-    );
+  listServices(@Query() query: QueryServicesDto) {
+    return this.registryService
+      .listServices({
+        ...query,
+        metadata: unflattenArray(query.metadata?.split(',') ?? []),
+        tags: query.tags?.split(',') ?? [],
+      })
+      .pipe(
+        map((services) => ({
+          results: services?.services ?? [],
+        })),
+      );
   }
 
   @ApiOperation({
     summary: 'Find and load balance a service by name and version',
   })
   @Get('services/find')
-  getService(@Query() query: GetServiceDto) {
-    return this.registryService.getService(query);
+  getService(@Query() query: QueryServicesDto) {
+    return this.registryService.getService({
+      ...query,
+      metadata: unflattenArray(query.metadata?.split(',') ?? []),
+      tags: query.tags?.split(',') ?? [],
+    });
   }
 
   @Post('heartbeat')

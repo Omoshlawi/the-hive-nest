@@ -26,15 +26,12 @@ message RegisterServiceRequest {
 message Empty {
 }
 
-message GetServiceRequest {
-  string name = 1;
-  string version = 2;
-}
-
-message ListServicesRequest {
+message QueryServicesRequest {
   repeated string tags = 1;
   optional string name = 2;
   optional string version = 3;
+  map<string, string> metadata = 4; 
+
 }
 
 message ListServicesResponse {
@@ -76,8 +73,8 @@ message HeartbeatResponse {
 
 service Registry {
   rpc RegisterService (RegisterServiceRequest) returns (ServiceRegistration);
-  rpc GetService (GetServiceRequest) returns (ServiceRegistration);
-  rpc ListServices (ListServicesRequest) returns (ListServicesResponse);
+  rpc GetService (QueryServicesRequest) returns (ServiceRegistration);
+  rpc ListServices (QueryServicesRequest) returns (ListServicesResponse);
   rpc UnregisterService (UnregisterServiceRequest) returns (ServiceRegistration);
   rpc HealthCheck (Empty) returns (ServiceHealthResponse);
   rpc Heartbeat (HeartbeatRequest) returns (HeartbeatResponse);

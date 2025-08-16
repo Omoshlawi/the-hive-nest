@@ -1,8 +1,8 @@
 import {
   BaseStorage,
-  GetServiceDto,
   HeartbeatResponse,
-  ListServicesDto,
+  QueryServicesDto,
+  QueryServicesRequest,
   RegisterServiceDto,
   SendHeartbeatDto,
   ServiceHealthResponse,
@@ -15,7 +15,6 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import semver from 'semver';
 import { AppConfig } from 'src/config/app.config';
 import { RedisStorage } from 'src/storage/storage.redis.service';
@@ -91,93 +90,133 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
 
     return savedService;
   }
-
-  async getService({
-    name: serviceName,
-    version,
-  }: GetServiceDto): Promise<ServiceRegistration | null> {
-    // TODO: Use Health info when finding a service
-    const allServices = await this.storage.getAll();
-    const services = allServices.filter((entry) =>
-      this.matchesPattern(entry.name, serviceName),
+  async getService(
+    query: QueryServicesRequest,
+  ): Promise<ServiceRegistration | null> {
+    this.logger.debug(
+      `Getting service with query - name: ${query.name || 'any'}, ` +
+        `version: ${query.version || 'any'}, ` +
+        `tags: [${query.tags?.join(', ') || 'none'}], ` +
+        `metadata keys: [${query.metadata ? Object.keys(query.metadata).join(', ') : 'none'}]`,
     );
 
-    // Filter by version using semver
-    const matchingServices = services.filter((service) => {
-      return this.matchesVersion(service.version, version);
-    });
+    // Use the same filtering logic as listServices
+    const services = await this.listServices(query);
 
-    if (matchingServices.length === 0) {
+    if (services.length === 0) {
       this.logger.warn(
-        `No services found for ${serviceName}@${version}. Available versions: ${services
-          .map((s) => s.version)
-          .join(', ')}`,
+        `No services found matching query - name: ${query.name || 'any'}, ` +
+          `version: ${query.version || 'any'}, ` +
+          `tags: [${query.tags?.join(', ') || 'none'}]`,
       );
       return null;
     }
 
     // Load balance by random selection
-    const randomIndex = Math.floor(Math.random() * matchingServices.length);
-    const selectedService = matchingServices[randomIndex];
+    const randomIndex = Math.floor(Math.random() * services.length);
+    const selectedService = services[randomIndex];
 
-    this.logger.debug(
-      `Load balanced ${serviceName}@${version}: selected ${selectedService.id} ` +
-        `(${randomIndex + 1}/${matchingServices.length} instances)`,
+    this.logger.log(
+      `Service selected: ${selectedService.name}@${selectedService.version} ` +
+        `(ID: ${selectedService.id}) at ${selectedService.host}:${selectedService.port} ` +
+        `- Load balanced selection ${randomIndex + 1}/${services.length} available instances`,
     );
 
     return selectedService;
   }
 
-  async listServices({
-    tags,
-    name,
-    version,
-  }: ListServicesDto): Promise<Array<ServiceRegistration>> {
+  async listServices(
+    query: QueryServicesRequest,
+  ): Promise<Array<ServiceRegistration>> {
+    const { tags, name, version, metadata } = query ?? {};
+
     this.logger.debug(
-      `Listing services with filters - name: ${name || 'all'}, ` +
-        `version: ${version || 'all'}, tags: ${tags?.join(', ') || 'none'}`,
+      `Listing services with filters - name: ${name || 'any'}, ` +
+        `version: ${version || 'any'}, ` +
+        `tags: [${tags?.join(', ') || 'none'}], ` +
+        `metadata keys: [${metadata ? Object.keys(metadata).join(', ') : 'none'}]`,
     );
 
     const allServices = await this.storage.getAll();
+    this.logger.debug(
+      `Retrieved ${allServices.length} total services from storage`,
+    );
+
     let filteredServices = allServices;
 
     // Filter by name pattern if provided
     if (name) {
+      const beforeCount = filteredServices.length;
       filteredServices = filteredServices.filter((service) =>
         this.matchesPattern(service.name, name),
       );
       this.logger.debug(
-        `After name filter: ${filteredServices.length} services`,
+        `Name filter '${name}': ${beforeCount} → ${filteredServices.length} services`,
       );
     }
 
     // Filter by version if provided
     if (version) {
+      const beforeCount = filteredServices.length;
       filteredServices = filteredServices.filter((service) =>
         this.matchesVersion(service.version, version),
       );
       this.logger.debug(
-        `After version filter: ${filteredServices.length} services`,
+        `Version filter '${version}': ${beforeCount} → ${filteredServices.length} services`,
       );
     }
 
     // Filter by tags if provided
     if (tags && tags.length > 0) {
+      const beforeCount = filteredServices.length;
       filteredServices = filteredServices.filter((service) => {
-        // Check if service has all required tags
         const serviceTags = service.tags || [];
         return tags.every((tag) => serviceTags.includes(tag));
       });
       this.logger.debug(
-        `After tags filter: ${filteredServices.length} services`,
+        `Tags filter [${tags.join(', ')}]: ${beforeCount} → ${filteredServices.length} services`,
       );
     }
 
-    this.logger.log(
-      `Listed ${filteredServices.length} services matching criteria: ` +
-        `name=${name || 'any'}, version=${version || 'any'}, ` +
-        `tags=[${tags?.join(', ') || 'none'}]`,
-    );
+    // Filter by metadata if provided
+    if (metadata && Object.keys(metadata).length > 0) {
+      const beforeCount = filteredServices.length;
+      filteredServices = filteredServices.filter((service) => {
+        const serviceMetadata = service.metadata || {};
+        return Object.entries(metadata).every(
+          ([key, value]) => serviceMetadata[key] === value,
+        );
+      });
+      this.logger.debug(
+        `Metadata filter {${Object.entries(metadata)
+          .map(([k, v]) => `${k}=${v}`)
+          .join(', ')}}: ` +
+          `${beforeCount} → ${filteredServices.length} services`,
+      );
+    }
+
+    // Log final results with service details
+    if (filteredServices.length > 0) {
+      const servicesSummary = filteredServices
+        .map((s) => `${s.name}@${s.version}(${s.id})`)
+        .join(', ');
+
+      this.logger.log(
+        `Found ${filteredServices.length} service(s) matching criteria: ${servicesSummary}`,
+      );
+    } else {
+      // Show available alternatives when no matches found
+      if (allServices.length > 0) {
+        const availableServices = [
+          ...new Set(allServices.map((s) => `${s.name}@${s.version}`)),
+        ];
+        this.logger.warn(
+          `No services found matching criteria. Available services: ${availableServices.join(', ')}`,
+        );
+      } else {
+        this.logger.warn('No services found - registry is empty');
+      }
+    }
 
     return filteredServices;
   }

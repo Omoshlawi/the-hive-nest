@@ -51,15 +51,16 @@ export interface RegisterServiceRequest_MetadataEntry {
 export interface Empty {
 }
 
-export interface GetServiceRequest {
-  name: string;
-  version: string;
-}
-
-export interface ListServicesRequest {
+export interface QueryServicesRequest {
   tags: string[];
   name?: string | undefined;
   version?: string | undefined;
+  metadata: { [key: string]: string };
+}
+
+export interface QueryServicesRequest_MetadataEntry {
+  key: string;
+  value: string;
 }
 
 export interface ListServicesResponse {
@@ -98,9 +99,9 @@ export const HIVE_REGISTRY_V1_PACKAGE_NAME = "hive.registry.v1";
 export interface RegistryClient {
   registerService(request: RegisterServiceRequest): Observable<ServiceRegistration>;
 
-  getService(request: GetServiceRequest): Observable<ServiceRegistration>;
+  getService(request: QueryServicesRequest): Observable<ServiceRegistration>;
 
-  listServices(request: ListServicesRequest): Observable<ListServicesResponse>;
+  listServices(request: QueryServicesRequest): Observable<ListServicesResponse>;
 
   unregisterService(request: UnregisterServiceRequest): Observable<ServiceRegistration>;
 
@@ -115,11 +116,11 @@ export interface RegistryController {
   ): Promise<ServiceRegistration> | Observable<ServiceRegistration> | ServiceRegistration;
 
   getService(
-    request: GetServiceRequest,
+    request: QueryServicesRequest,
   ): Promise<ServiceRegistration> | Observable<ServiceRegistration> | ServiceRegistration;
 
   listServices(
-    request: ListServicesRequest,
+    request: QueryServicesRequest,
   ): Promise<ListServicesResponse> | Observable<ListServicesResponse> | ListServicesResponse;
 
   unregisterService(

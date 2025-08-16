@@ -24,6 +24,7 @@
     "@grpc/grpc-js": "^1.13.4",
     "@grpc/proto-loader": "^0.8.0",
     "@hive/common": "workspace:*",
+    "@hive/utils": "workspace:*",
     "@hive/registry": "workspace:*",
     "@itgorillaz/configify": "^4.0.1",
     "@nestjs/common": "^11.0.1",

@@ -1,10 +1,9 @@
 import {
   Empty,
-  GetServiceRequest,
   HeartbeatRequest,
   HeartbeatResponse,
-  ListServicesRequest,
   ListServicesResponse,
+  QueryServicesRequest,
   RegisterServiceRequest,
   REGISTRY_SERVICE_NAME,
   RegistryController,
@@ -29,7 +28,9 @@ export class ServiceRegistryController implements RegistryController {
     return this.registryService.registerService(request);
   }
   @GrpcMethod(REGISTRY_SERVICE_NAME)
-  async getService(request: GetServiceRequest): Promise<ServiceRegistration> {
+  async getService(
+    request: QueryServicesRequest,
+  ): Promise<ServiceRegistration> {
     const service = await this.registryService.getService(request);
     if (!service) {
       throw new RpcException(
@@ -40,7 +41,7 @@ export class ServiceRegistryController implements RegistryController {
   }
   @GrpcMethod(REGISTRY_SERVICE_NAME)
   async listServices(
-    request: ListServicesRequest,
+    request: QueryServicesRequest,
   ): Promise<ListServicesResponse> {
     const services = await this.registryService.listServices(request);
     return { services };
