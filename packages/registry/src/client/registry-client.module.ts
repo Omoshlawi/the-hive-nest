@@ -24,6 +24,7 @@ export class RegistryClientModule {
     ];
 
     return {
+      global: options?.isGlobal,
       module: RegistryClientModule,
       imports: [
         ...(options.imports ?? []),
@@ -71,6 +72,7 @@ export class RegistryClientModule {
     const asyncProviders = this.createAsyncProviders(options);
 
     return {
+      global: options?.isGlobal,
       module: RegistryClientModule,
       imports: [
         ...(options.imports ?? []),

@@ -17,6 +17,7 @@ import { AppService } from './app.service';
     ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
     ScheduleModule.forRoot(),
     RegistryClientModule.registerForService({
+      isGlobal: true,
       useFactory: (config: RegistryClientConfig, http: ServerConfig) => {
         if (!config) {
           throw new Error('RegistryClientConfig is required');
@@ -40,6 +41,7 @@ import { AppService } from './app.service';
       providers: [IdentityHTTPServerConfigProvider],
     }),
     RegistryClientModule.registerForService({
+      isGlobal: true,
       useFactory: (config: RegistryClientConfig, grpc: ServerConfig) => {
         if (!config) {
           throw new Error('RegistryClientConfig is required');

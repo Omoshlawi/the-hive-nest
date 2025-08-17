@@ -13,6 +13,7 @@ export interface RegistryClientModuleOptions
     ...args: any[]
   ) => Promise<ClientServiceConfig> | ClientServiceConfig;
   inject?: any[];
+  isGlobal?: boolean;
 }
 
 export interface RegistryClientModuleAsyncOptions
@@ -21,4 +22,5 @@ export interface RegistryClientModuleAsyncOptions
   inject?: any[];
   useClass?: Type<any>;
   useExisting?: string | symbol | Type<any>;
+  isGlobal?: boolean;
 }
