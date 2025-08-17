@@ -1,12 +1,12 @@
 import { Provider } from '@nestjs/common';
 import { getFreePort, ServerConfig } from '@hive/utils';
 import {
-  PROPERTY_HTTP_SERVER_CONFIG_TOKEN,
-  PROPERTY_RPC_SERVER_CONFIG_TOKEN,
+  IDENTITY_HTTP_SERVER_CONFIG_TOKEN,
+  IDENTITY_RPC_SERVER_CONFIG_TOKEN,
 } from '../constants';
 
-export const PropertyHTTPServerConfigProvider: Provider = {
-  provide: PROPERTY_HTTP_SERVER_CONFIG_TOKEN,
+export const IdentityHTTPServerConfigProvider: Provider = {
+  provide: IDENTITY_HTTP_SERVER_CONFIG_TOKEN,
   useFactory: async (): Promise<ServerConfig> => {
     const envPort = parseInt(process.env.PORT || '0');
     const port = envPort === 0 ? await getFreePort() : envPort;
@@ -14,8 +14,8 @@ export const PropertyHTTPServerConfigProvider: Provider = {
     return { port, host };
   },
 };
-export const PropertyRPCServerConfigProvider: Provider = {
-  provide: PROPERTY_RPC_SERVER_CONFIG_TOKEN,
+export const IdentityRPCServerConfigProvider: Provider = {
+  provide: IDENTITY_RPC_SERVER_CONFIG_TOKEN,
   useFactory: async (): Promise<ServerConfig> => {
     const envPort = parseInt(process.env.PORT || '0');
     const port = envPort === 0 ? await getFreePort() : envPort;

@@ -1,9 +1,9 @@
 import {
-  PROPERTY_HTTP_SERVER_CONFIG_TOKEN,
-  PROPERTY_RPC_SERVER_CONFIG_TOKEN,
-  PropertyHTTPServerConfigProvider,
-  PropertyRPCServerConfigProvider,
-} from '@hive/property';
+  IDENTITY_HTTP_SERVER_CONFIG_TOKEN,
+  IDENTITY_RPC_SERVER_CONFIG_TOKEN,
+  IdentityHTTPServerConfigProvider,
+  IdentityRPCServerConfigProvider,
+} from '@hive/identity';
 import { RegistryClientConfig, RegistryClientModule } from '@hive/registry';
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
@@ -36,8 +36,8 @@ import { AppService } from './app.service';
           },
         };
       },
-      inject: [RegistryClientConfig, PROPERTY_HTTP_SERVER_CONFIG_TOKEN],
-      providers: [PropertyHTTPServerConfigProvider],
+      inject: [RegistryClientConfig, IDENTITY_HTTP_SERVER_CONFIG_TOKEN],
+      providers: [IdentityHTTPServerConfigProvider],
     }),
     RegistryClientModule.registerForService({
       useFactory: (config: RegistryClientConfig, grpc: ServerConfig) => {
@@ -55,12 +55,12 @@ import { AppService } from './app.service';
             metadata: { ...(config.metadata || {}), protocol: 'GRPC' },
             name: config.serviceName,
             version: config.serviceVersion,
-            tags: [...(config.tags || []), 'gRPC'],
+            tags: [...(config.tags || []), 'GRPC'],
           },
         };
       },
-      inject: [RegistryClientConfig, PROPERTY_RPC_SERVER_CONFIG_TOKEN],
-      providers: [PropertyRPCServerConfigProvider],
+      inject: [RegistryClientConfig, IDENTITY_RPC_SERVER_CONFIG_TOKEN],
+      providers: [IdentityRPCServerConfigProvider],
     }),
   ],
   controllers: [AppController],

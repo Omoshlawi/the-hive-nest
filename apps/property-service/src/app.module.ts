@@ -55,7 +55,7 @@ import { AppService } from './app.service';
             metadata: { ...(config.metadata || {}), protocol: 'GRPC' },
             name: config.serviceName,
             version: config.serviceVersion,
-            tags: [...(config.tags || []), 'gRPC'],
+            tags: [...(config.tags || []), 'GRPC'],
           },
         };
       },
