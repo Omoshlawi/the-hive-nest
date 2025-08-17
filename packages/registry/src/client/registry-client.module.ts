@@ -56,7 +56,6 @@ export class RegistryClientModule {
               };
             },
             inject: [RegistryClientConfig],
-            // ENSURE CONFIG IS AVAILABLE
             imports: options.imports ?? [],
           },
         ]),
