@@ -21,6 +21,7 @@ import { AppService } from './app.service';
     ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
     ScheduleModule.forRoot(),
     RegistryClientModule.registerForService({
+      isGlobal: true,
       useFactory: (
         config: RegistryClientConfig,
         http: ServerConfig,
