@@ -2,7 +2,7 @@
 // versions:
 //   protoc-gen-ts_proto  v2.7.7
 //   protoc               v3.20.3
-// source: registry.proto
+// source: registry.service.proto
 
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
@@ -20,13 +20,12 @@ export enum ServiceStatus {
 export interface ServiceRegistration {
   id: string;
   name: string;
-  host: string;
-  port: number;
   version: string;
   /** time created */
   timestamp: string;
   tags: string[];
   metadata: { [key: string]: string };
+  endpoints: Endpoint[];
 }
 
 export interface ServiceRegistration_MetadataEntry {
@@ -34,13 +33,24 @@ export interface ServiceRegistration_MetadataEntry {
   value: string;
 }
 
-export interface RegisterServiceRequest {
-  name: string;
+export interface Endpoint {
   host: string;
   port: number;
+  protocol: string;
+  metadata: { [key: string]: string };
+}
+
+export interface Endpoint_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface RegisterServiceRequest {
+  name: string;
   version: string;
   tags: string[];
   metadata: { [key: string]: string };
+  endpoints: Endpoint[];
 }
 
 export interface RegisterServiceRequest_MetadataEntry {
@@ -86,6 +96,14 @@ export interface ServiceHealthResponse {
 /** Heartbeat Messages */
 export interface HeartbeatRequest {
   serviceId: string;
+  tags: string[];
+  metadata: { [key: string]: string };
+  endpoints: Endpoint[];
+}
+
+export interface HeartbeatRequest_MetadataEntry {
+  key: string;
+  value: string;
 }
 
 export interface HeartbeatResponse {

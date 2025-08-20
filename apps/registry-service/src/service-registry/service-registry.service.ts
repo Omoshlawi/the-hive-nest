@@ -1,7 +1,6 @@
 import {
   BaseStorage,
   HeartbeatResponse,
-  QueryServicesDto,
   QueryServicesRequest,
   RegisterServiceDto,
   SendHeartbeatDto,
@@ -50,12 +49,9 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
       const servicePart =
         registerServiceDto.name?.replace(/[/]/g, '-')?.replace(/[@]/g, '') ||
         'unknown';
-      const hostPart =
-        registerServiceDto.host?.replace(/[^a-zA-Z0-9]/g, '-') || 'unknown';
-      const portPart = registerServiceDto.port || 'unknown';
       const uuid = uuidv4();
 
-      const instanceId = `${servicePart}-${hostPart}-${portPart}-${uuid}`;
+      const instanceId = `${servicePart}-${uuid}`;
 
       // Check if exists atomically
       const exists = await this.storage.get(instanceId);
@@ -79,13 +75,19 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
       id: instanceId,
       timestamp: Date.now().toString(),
       metadata: registerDto.metadata ?? {},
+      endpoints:
+        registerDto.endpoints?.map((endpoint) => ({
+          ...endpoint,
+          metadata: endpoint.metadata ?? {},
+          protocol: endpoint.protocol as any,
+        })) ?? [],
     };
 
     const savedService = await this.storage.save(service);
 
     this.logger.log(
       `Service registered: ${savedService.name}@${savedService.version} ` +
-        `with ID: ${savedService.id} at ${savedService.host}:${savedService.port}`,
+        `with ID: ${savedService.id} at endpoints ${savedService.endpoints?.map((i) => `${i.protocol}${i.host}:${i.port}`).join(', ')}`,
     );
 
     return savedService;
@@ -118,7 +120,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
 
     this.logger.log(
       `Service selected: ${selectedService.name}@${selectedService.version} ` +
-        `(ID: ${selectedService.id}) at ${selectedService.host}:${selectedService.port} ` +
+        `(ID: ${selectedService.id})at endpoints ${selectedService.endpoints?.map((i) => `${i.protocol}${i.host}:${i.port}`).join(', ')} ` +
         `- Load balanced selection ${randomIndex + 1}/${services.length} available instances`,
     );
 
@@ -237,7 +239,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     if (removedService) {
       this.logger.log(
         `Service unregistered: ${removedService.name}@${removedService.version} ` +
-          `with ID: ${removedService.id} from ${removedService.host}:${removedService.port}`,
+          `with ID: ${removedService.id} from endpoints ${removedService.endpoints?.map((i) => `${i.protocol}${i.host}:${i.port}`).join(', ')}`,
       );
     } else {
       this.logger.error(`Failed to remove service with ID: ${id} from storage`);
@@ -269,15 +271,17 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     return response;
   }
 
-  async heartbeat({
-    serviceId,
-  }: SendHeartbeatDto): Promise<HeartbeatResponse | null> {
-    this.logger.debug(`Processing heartbeat for service ID: ${serviceId}`);
+  async heartbeat(
+    heartbeat: SendHeartbeatDto,
+  ): Promise<HeartbeatResponse | null> {
+    this.logger.debug(
+      `Processing heartbeat for service ID: ${heartbeat.serviceId}`,
+    );
 
-    const service = await this.storage.get(serviceId);
+    const service = await this.storage.get(heartbeat.serviceId);
     if (!service) {
       this.logger.warn(
-        `Heartbeat received for unknown service ID: ${serviceId}`,
+        `Heartbeat received for unknown service ID: ${heartbeat.serviceId}`,
       );
       return null;
     }
@@ -285,11 +289,18 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     const now = Date.now().toString();
     const previousTimestamp = service.timestamp;
     service.timestamp = now;
-
+    service.metadata = heartbeat.metadata ?? {};
+    service.endpoints =
+      heartbeat.endpoints?.map((endpoint) => ({
+        ...endpoint,
+        metadata: endpoint.metadata ?? {},
+        protocol: endpoint.protocol as any,
+      })) ?? [];
+    service.tags = heartbeat.tags ?? [];
     await this.storage.save(service);
 
     this.logger.debug(
-      `Heartbeat acknowledged for ${service.name}@${service.version} (${serviceId}) - ` +
+      `Heartbeat acknowledged for ${service.name}@${service.version} (${heartbeat.serviceId}) - ` +
         `Last seen: ${new Date(+previousTimestamp).toISOString()}, ` +
         `Updated: ${new Date(+now).toISOString()}`,
     );

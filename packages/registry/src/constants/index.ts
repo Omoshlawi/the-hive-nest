@@ -19,7 +19,7 @@ export const REGISTRY_PACKAGE = Object.freeze({
   V1: {
     NAME: 'hive.registry.v1',
     PROTO_PATH: require.resolve(
-      path.join(__dirname, '../proto/registry.proto'),
+      path.join(__dirname, '../proto/registry.service.proto'),
     ),
     TOKEN: 'SERVICE_REGISTRY_PACKAGE_V1',
   },

@@ -38,10 +38,16 @@ export class RegistryController implements OnModuleInit {
   @ApiOperation({ summary: 'Register a service instance' })
   @ApiResponse({ status: 201, description: 'Service registered successfully' })
   registerService(@Body() registerDto: RegisterServiceDto) {
-    return 'registerDto';
     return this.registryService.registerService({
       ...registerDto,
-      metadata: registerDto.metadata ?? {},
+      endpoints:
+        registerDto.endpoints?.map((endpoint) => ({
+          ...endpoint,
+          metadata: endpoint.metadata ?? {},
+          protocol: endpoint.protocol as any,
+        })) ?? [],
+      metadata: registerDto?.metadata ?? {},
+      tags: registerDto?.tags ?? [],
     });
   }
 
@@ -89,7 +95,17 @@ export class RegistryController implements OnModuleInit {
   @ApiOperation({ summary: 'Send service heartbeat' })
   @ApiResponse({ status: 200, description: 'Heartbeat received successfully' })
   heartbeat(@Body() heartbeatDto: SendHeartbeatDto) {
-    return this.registryService.heartbeat(heartbeatDto);
+    return this.registryService.heartbeat({
+      ...heartbeatDto,
+      endpoints:
+        heartbeatDto.endpoints?.map((endpoint) => ({
+          ...endpoint,
+          metadata: endpoint.metadata ?? {},
+          protocol: endpoint.protocol as any,
+        })) ?? [],
+      tags: heartbeatDto?.tags ?? [],
+      metadata: heartbeatDto?.metadata ?? {},
+    });
   }
 
   @Get('health')

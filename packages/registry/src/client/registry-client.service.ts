@@ -36,7 +36,7 @@ export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     this.logger.log(
-      `Initializing Registry Client for service: ${this.config.service.name}:${this.config.service.port}`,
+      `Initializing Registry Client for service: ${this.config.service.name}@${this.config.service.version}`,
     );
 
     this.registryService = this.client.getService<RegistryClient>(
@@ -150,6 +150,12 @@ export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
         this.registryService
           .heartbeat({
             serviceId: this.serviceInstance.id,
+            endpoints:
+              this.serviceInstance.endpoints ??
+              this.config.service.endpoints ??
+              [],
+            metadata: this.serviceInstance.metadata, // TODO, Get health info and update, this include uptime, resource usage, e.t.c
+            tags: this.serviceInstance.tags,
           })
           .pipe(
             timeout(this.HEARTBEAT_TIMEOUT),
