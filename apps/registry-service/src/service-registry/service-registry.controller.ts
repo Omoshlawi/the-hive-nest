@@ -25,7 +25,15 @@ export class ServiceRegistryController implements RegistryController {
     | Promise<ServiceRegistration>
     | Observable<ServiceRegistration>
     | ServiceRegistration {
-    return this.registryService.registerService(request);
+    return this.registryService.registerService({
+      ...request,
+      endpoints:
+        request.endpoints?.map((endpoint) => ({
+          ...endpoint,
+          metadata: endpoint.metadata ?? {},
+          protocol: endpoint.protocol as any,
+        })) ?? [],
+    });
   }
   @GrpcMethod(REGISTRY_SERVICE_NAME)
   async getService(
@@ -70,7 +78,15 @@ export class ServiceRegistryController implements RegistryController {
   }
   @GrpcMethod(REGISTRY_SERVICE_NAME)
   async heartbeat(request: HeartbeatRequest): Promise<HeartbeatResponse> {
-    const res = await this.registryService.heartbeat(request);
+    const res = await this.registryService.heartbeat({
+      ...request,
+      endpoints:
+        request.endpoints?.map((endpoint) => ({
+          ...endpoint,
+          metadata: endpoint.metadata ?? {},
+          protocol: endpoint.protocol as any,
+        })) ?? [],
+    });
     if (!res)
       throw new RpcException(
         new NotFoundException(

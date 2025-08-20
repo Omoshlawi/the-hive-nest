@@ -2,6 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import { SERVICE_NAME_REGEX } from '../constants';
 import z from 'zod';
 import { COMMA_SEPARATED_REGEX } from '@hive/utils';
+import { RegistryServiceEndpointSchema } from './register-service.dto';
 //   { title: 'Service Info query ' },
 
 export const QueryServicesSchema = z.object({
@@ -31,6 +32,9 @@ export const QueryServicesSchema = z.object({
 export const SendHeartbeatSchema = z.object({
   // example: 'service-instance-uuid-123',
   serviceId: z.string(),
+  tags: z.string().array().optional().default([]),
+  metadata: z.record(z.string(), z.string()).optional(),
+  endpoints: RegistryServiceEndpointSchema.array().nonempty(),
 });
 
 export class QueryServicesDto extends createZodDto(QueryServicesSchema) {}

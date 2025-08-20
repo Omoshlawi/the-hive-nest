@@ -37,17 +37,6 @@ export class ServiceUtils {
   }
 
   /**
-   * Create service URL
-   */
-  static createServiceUrl(
-    service: ServiceRegistration,
-    path = '',
-    protocol = 'http',
-  ): string {
-    return `${protocol}://${service.host}:${service.port}${path}`;
-  }
-
-  /**
    * Check if service is healthy based on timestamp and TTL
    */
   static isServiceHealthy(
