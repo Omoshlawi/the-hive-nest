@@ -14,6 +14,7 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
+import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import semver from 'semver';
 import { AppConfig } from 'src/config/app.config';
 import { RedisStorage } from 'src/storage/storage.redis.service';
@@ -26,6 +27,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly storage: BaseStorage,
     private readonly config: AppConfig,
+    private schedulerRegistry: SchedulerRegistry,
   ) {}
 
   async onModuleInit() {
@@ -320,12 +322,16 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     }
     return serviceName === pattern;
   }
-  // @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'cleanupExpiredServices' })
   private async cleanupExpiredServices(): Promise<void> {
     this.logger.debug('Running cleanup of expired services...');
 
     if (this.storage instanceof RedisStorage) {
-      this.logger.debug('Redis Handles ttl internally hence skipping clean up');
+      this.logger.debug(
+        'Redis Handles ttl internally hence skipping clean up and disabling cleanup task',
+      );
+      this.schedulerRegistry.deleteCronJob('cleanupExpiredServices');
+      this.logger.debug('Cleanup task disabled');
       return;
     }
     try {

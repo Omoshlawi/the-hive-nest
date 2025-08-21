@@ -228,6 +228,9 @@ export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
   public getServiceInstance(): ServiceRegistration | null {
     return this.serviceInstance;
   }
+  public getRegistrycService(): RegistryClient {
+    return this.registryService;
+  }
 
   // Public method to force re-registration
   public async forceReregister(): Promise<void> {

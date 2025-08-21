@@ -1,15 +1,19 @@
-import {
-  CLIENT_SERVICE_CONFIG_TOKEN,
-  ClientServiceConfig,
-} from '@hive/registry';
-import { Inject, Injectable } from '@nestjs/common';
-
+import { RegistryClientService } from '@hive/registry';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { firstValueFrom } from 'rxjs';
 @Injectable()
-export class AppService {
-  constructor(
-    @Inject(CLIENT_SERVICE_CONFIG_TOKEN) private conf: ClientServiceConfig,
-  ) {
-    console.log('-----------', JSON.stringify(conf, null, 2));
+export class AppService implements OnModuleInit {
+  constructor(private readonly registryClient: RegistryClientService) {}
+  onModuleInit() {
+    const service = this.registryClient.getRegistrycService();
+    firstValueFrom(service.listServices({ metadata: {}, tags: [] })).then(
+      (services) => {
+        console.log(
+          '----------Registered services-------------',
+          JSON.stringify(services, null, 2),
+        );
+      },
+    );
   }
   getHello(): string {
     return 'Hello World!';
