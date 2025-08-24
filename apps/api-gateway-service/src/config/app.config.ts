@@ -5,4 +5,6 @@ import z from 'zod';
 export class AppConfig {
   @Value('PORT', { parse: z.coerce.number().parse })
   port: number;
+  @Value('BETTER_AUTH_URL', { parse: z.url().parse })
+  betterAuthUrl: string;
 }

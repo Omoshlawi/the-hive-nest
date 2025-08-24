@@ -8,9 +8,15 @@ import {
   GlobalZodExceptionFilter,
   GlobalZodValidationPipe,
 } from '@hive/common';
+import { AuthModule } from '@thallesp/nestjs-better-auth';
+import { auth } from './lib/auth';
 
 @Module({
-  imports: [ConfigifyModule.forRootAsync(), RegistryModule],
+  imports: [
+    ConfigifyModule.forRootAsync(),
+    AuthModule.forRoot(auth),
+    RegistryModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,

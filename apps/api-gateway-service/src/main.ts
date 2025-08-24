@@ -4,19 +4,40 @@ import { AppConfig } from './config/app.config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NextFunction, Request, Response } from 'express';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
+import { auth } from './lib/auth';
+import { mergeBetterAuthSchema } from '@hive/utils';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: false, // Required for Better Auth
+  });
+  app.setGlobalPrefix('api');
   const appConfig = app.get(AppConfig);
+  const betterAuthOpenAPISchema = await auth.api.generateOpenAPISchema({
+    path: '/api/auth',
+  });
 
   const config = new DocumentBuilder()
     .setTitle('The Hive')
     .setDescription('The Hive API Documentation')
     .setVersion('1.0')
+    // .addServer(`${appConfig.betterAuthUrl}/api/auth`, 'Auth Server')
+    // .addServer(`${appConfig.betterAuthUrl}/api`, 'Api Server')
     .build();
-  const documentFactory = () =>
-    cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
-  SwaggerModule.setup('api', app, documentFactory);
+
+  // Create the main Hive document
+  const hiveDocument = cleanupOpenApiDoc(
+    SwaggerModule.createDocument(app, config),
+  );
+
+  // Merge Better Auth paths and components into Hive document
+  const mergedDocument = mergeBetterAuthSchema(
+    hiveDocument,
+    betterAuthOpenAPISchema,
+  );
+
+  // Setup Swagger with merged documentation
+  SwaggerModule.setup('api', app, mergedDocument);
 
   app.use('/api-doc', (req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Content-Type', 'text/html');
@@ -51,6 +72,7 @@ async function bootstrap() {
           </html>`);
     res.end();
   });
+
   await app.listen(appConfig.port);
 }
 bootstrap();
