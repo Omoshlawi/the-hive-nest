@@ -1,0 +1,110 @@
+syntax = 'proto3';
+
+package hive.identity.v1;
+
+message User {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    bool emailVerified = 4;
+    optional string image = 5;
+    string createdAt = 6;
+    string updatedAt = 7;
+    optional string username = 8;
+    optional string displayUsername = 9;
+    optional bool isAnonymous = 10;
+    optional string role = 11;
+    optional bool banned = 12;
+    string banReason = 13;
+    string banExpires = 14;
+    repeated Member members = 15;
+    repeated Invitation invitations = 16;
+}
+
+message Organization {
+    string id = 1;
+    string name = 2;
+    optional string slug = 3;
+    optional string logo = 4;
+    string createdAt = 5;
+    optional string metadata = 6;
+    repeated Member members = 7;
+    repeated Invitation invitations = 8;
+}
+
+message Member {
+    string id = 1;
+    string organizationId = 2;
+    optional Organization organization = 3;
+    string userId = 4;
+    optional User user = 5;
+    string role = 6;
+    string createdAt = 7;
+}
+
+message Invitation {
+    string id = 1;
+    string organizationId = 2;
+    optional Organization organization = 3;
+    string email = 4;
+    optional string role = 5;
+    string status = 6;
+    string expiresAt = 7;
+    string inviterId = 8;
+    optional User user = 9;
+}
+
+message GetUserRequest {
+    string id = 1;
+}
+
+message GetOrganizationRequest {
+    string id = 1;
+}
+
+message Empty {
+}
+
+message ListOrganizationsRequest {
+    string userId = 1;
+}
+
+message ListOrganizationsResponse {
+    repeated Organization organizations = 1;
+}
+
+message ListMembersRequest {
+    string organizationId = 1;
+}
+message ListMembersResponse {
+    repeated Member members = 1;
+}
+
+
+message ListInvitationsRequest {
+    string organizationId = 1;
+}
+
+message ListInvitationsResponse {
+    repeated Invitation invitations = 1;
+}
+
+message GetMemberRequest {
+    string id = 1;
+}
+
+message GetInvitationRequest {
+    string id = 1;
+}
+
+
+
+service IdentityService {
+    rpc GetUser(GetUserRequest) returns (User);
+    rpc GetOrganization(GetOrganizationRequest) returns (Organization);
+    rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse);
+    rpc ListMembers(ListMembersRequest) returns (ListMembersResponse);
+    rpc ListInvitations(ListInvitationsRequest) returns (ListInvitationsResponse);
+    rpc GetMember(GetMemberRequest) returns (Member);
+    rpc GetInvitation(GetInvitationRequest) returns (Invitation);
+}

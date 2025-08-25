@@ -13,6 +13,8 @@ async function bootstrap() {
   });
   app.setGlobalPrefix('api');
   const appConfig = app.get(AppConfig);
+
+  // Set up swagger docs
   const betterAuthOpenAPISchema = await auth.api.generateOpenAPISchema({
     path: '/api/auth',
   });
@@ -21,8 +23,6 @@ async function bootstrap() {
     .setTitle('The Hive')
     .setDescription('The Hive API Documentation')
     .setVersion('1.0')
-    // .addServer(`${appConfig.betterAuthUrl}/api/auth`, 'Auth Server')
-    // .addServer(`${appConfig.betterAuthUrl}/api`, 'Api Server')
     .build();
 
   // Create the main Hive document
@@ -52,7 +52,7 @@ async function bootstrap() {
             </head>
             <body>
               <!-- Need a Custom Header? Check out this example: https://codepen.io/scalarorg/pen/VwOXqam -->
-              <!-- Note: We’re using our public proxy to avoid CORS issues. You can remove the \`data-proxy-url\` attribute if you don’t need it. -->
+              <!-- Note: We're using our public proxy to avoid CORS issues. You can remove the \`data-proxy-url\` attribute if you don’t need it. -->
               <script
                 id="api-reference"
                 data-url="/api-json"></script>
@@ -72,6 +72,8 @@ async function bootstrap() {
           </html>`);
     res.end();
   });
+
+  // Set up server
 
   await app.listen(appConfig.port);
 }
