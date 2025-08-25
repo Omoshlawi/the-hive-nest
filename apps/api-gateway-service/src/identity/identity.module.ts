@@ -1,14 +1,15 @@
 import { Module } from '@nestjs/common';
-import { IdentityService } from './identity.service';
 import { IdentityController } from './identity.controller';
 import { PrismaService } from '../prisma/prisma.service';
+import { QueryBuilderModule } from '@hive/common';
 
 /**
  *  Handle RPC calls to identity service (concreate implementation for rpc methods in identity package)
 
  */
 @Module({
-  providers: [IdentityService, PrismaService],
+  imports: [QueryBuilderModule],
+  providers: [PrismaService],
   controllers: [IdentityController],
 })
 export class IdentityModule {}

@@ -1,5 +1,4 @@
 import { Controller, NotFoundException } from '@nestjs/common';
-import { IdentityService } from './identity.service';
 import {
   GetInvitationRequest,
   GetMemberRequest,
@@ -23,19 +22,24 @@ import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { auth } from '../lib/auth';
 import { PrismaService } from '../prisma/prisma.service';
 import { IdentityMappersUtils } from './indentity.utils';
+import {
+  CustomRepresentationService,
+  PaginationService,
+  SortService,
+} from '@hive/common';
 
 @Controller('identity')
 export class IdentityController implements IdentityServiceController {
   constructor(
-    private readonly identityService: IdentityService,
     private readonly prisma: PrismaService,
+    private readonly representation: CustomRepresentationService,
   ) {}
 
   @GrpcMethod(IDENTITY_SERVICE_NAME)
   async getUser({ id, rep }: GetUserRequest): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where: { id },
-
+      ...this.representation.buildCustomRepresentationQuery(rep),
     });
     if (!user) {
       throw new RpcException(new NotFoundException('User not found'));
