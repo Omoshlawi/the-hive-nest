@@ -5,7 +5,12 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NextFunction, Request, Response } from 'express';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { auth } from './lib/auth';
-import { mergeBetterAuthSchema } from '@hive/utils';
+import { mergeBetterAuthSchema, ServerConfig } from '@hive/utils';
+import {
+  IDENTITY_PACKAGE,
+  IDENTITY_RPC_SERVER_CONFIG_TOKEN,
+} from '@hive/identity';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -73,8 +78,17 @@ async function bootstrap() {
     res.end();
   });
 
-  // Set up server
-
+  // Set up identity server
+  const serverConfig: ServerConfig = app.get(IDENTITY_RPC_SERVER_CONFIG_TOKEN);
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.GRPC,
+    options: {
+      package: IDENTITY_PACKAGE.V1.NAME,
+      protoPath: IDENTITY_PACKAGE.V1.PROTO_PATH,
+      url: `0.0.0.0:${serverConfig.port}`,
+    },
+  });
+  await app.startAllMicroservices();
   await app.listen(appConfig.port);
 }
 bootstrap();

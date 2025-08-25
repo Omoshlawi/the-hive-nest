@@ -64,6 +64,7 @@ export interface Invitation {
 
 export interface GetUserRequest {
   id: string;
+  rep?: string | undefined;
 }
 
 export interface GetOrganizationRequest {

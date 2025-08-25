@@ -1,26 +1,28 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigifyModule } from '@itgorillaz/configify';
-import { RegistryModule } from './registry/registry.module';
 import {
   GlobalRpcExceptionInterceptor,
   GlobalZodExceptionFilter,
   GlobalZodValidationPipe,
 } from '@hive/common';
-import { AuthModule } from '@thallesp/nestjs-better-auth';
-import { auth } from './lib/auth';
+import {
+  HIVE_IDENTITY_SERVICE_NAME,
+  IDENTITY_RPC_SERVER_CONFIG_TOKEN,
+  IdentityRPCServerConfigProvider,
+} from '@hive/identity';
 import {
   Endpoint,
   RegistryClientConfig,
   RegistryClientModule,
 } from '@hive/registry';
 import { ServerConfig } from '@hive/utils';
-import {
-  IDENTITY_RPC_SERVER_CONFIG_TOKEN,
-  HIVE_IDENTITY_SERVICE_NAME,
-  IdentityRPCServerConfigProvider,
-} from '@hive/identity';
+import { ConfigifyModule } from '@itgorillaz/configify';
+import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
+import { AuthModule } from '@thallesp/nestjs-better-auth';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { IdentityModule } from './identity/identity.module';
+import { auth } from './lib/auth';
+import { RegistryModule } from './registry/registry.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import {
     AuthModule.forRoot(auth),
     // For direct communication with registry on registry endpoints
     RegistryModule,
+    // TODO: Document registry package indicating importance of schedule module and config to enebale client module to work well
+    ScheduleModule.forRoot(),
     // For identity service discovery on registry service
     RegistryClientModule.registerForService({
       isGlobal: true,
@@ -35,7 +39,6 @@ import {
         if (!config) {
           throw new Error('RegistryClientConfig is required');
         }
-
         return {
           service: {
             metadata: config.metadata ?? {},
@@ -58,6 +61,8 @@ import {
       inject: [RegistryClientConfig, IDENTITY_RPC_SERVER_CONFIG_TOKEN],
       providers: [IdentityRPCServerConfigProvider],
     }),
+    // Handle RPC calls to identity service (concreate implementation for rpc methods in identity package)
+    IdentityModule,
   ],
   controllers: [AppController],
   providers: [
