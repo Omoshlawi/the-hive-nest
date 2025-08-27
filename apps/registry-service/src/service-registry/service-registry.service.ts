@@ -7,6 +7,8 @@ import {
   ServiceHealthResponse,
   ServiceRegistration,
   ServiceStatus,
+  ServiceUpdate,
+  ServiceUpdate_UpdateType,
 } from '@hive/registry';
 import {
   Injectable,
@@ -15,6 +17,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
+import { Observable, Subject } from 'rxjs';
 import semver from 'semver';
 import { AppConfig } from 'src/config/app.config';
 import { RedisStorage } from 'src/storage/storage.redis.service';
@@ -23,6 +26,7 @@ import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ServiceRegistryService.name);
+  private readonly serviceUpdates$ = new Subject<ServiceUpdate>();
 
   constructor(
     private readonly storage: BaseStorage,
@@ -33,6 +37,12 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
     await this.storage.initialize();
     this.logger.log('Registry service initialized');
+    if (this.storage instanceof RedisStorage) {
+      this.logger.debug('Listening for ttl events');
+      this.storage.onServiceExpired((service) => {
+        this.emitServiceUpdate(ServiceUpdate_UpdateType.REMOVED, service);
+      });
+    }
   }
 
   async onModuleDestroy() {
@@ -67,6 +77,20 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     throw new Error('Failed to generate unique instance ID after max retries');
   }
 
+  getServiceUpdates(): Observable<ServiceUpdate> {
+    return this.serviceUpdates$.asObservable();
+  }
+
+  private emitServiceUpdate(
+    type: ServiceUpdate_UpdateType,
+    service: ServiceRegistration,
+  ) {
+    this.logger.debug(
+      `Emitting service update: ${type} -> ${service.name}@${service.version}`,
+    );
+    this.serviceUpdates$.next({ type, service });
+  }
+
   async registerService(
     registerDto: RegisterServiceDto,
   ): Promise<ServiceRegistration> {
@@ -86,6 +110,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     };
 
     const savedService = await this.storage.save(service);
+    this.emitServiceUpdate(ServiceUpdate_UpdateType.ADDED, savedService);
 
     this.logger.log(
       `Service registered: ${savedService.name}@${savedService.version} ` +
@@ -239,6 +264,8 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     const removedService = await this.storage.remove(id);
 
     if (removedService) {
+      this.emitServiceUpdate(ServiceUpdate_UpdateType.REMOVED, removedService);
+
       this.logger.log(
         `Service unregistered: ${removedService.name}@${removedService.version} ` +
           `with ID: ${removedService.id} from endpoints ${removedService.endpoints?.map((i) => `${i.protocol}${i.host}:${i.port}`).join(', ')}`,
@@ -300,6 +327,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
       })) ?? [];
     service.tags = heartbeat.tags ?? [];
     await this.storage.save(service);
+    this.emitServiceUpdate(ServiceUpdate_UpdateType.UPDATED, service);
 
     this.logger.debug(
       `Heartbeat acknowledged for ${service.name}@${service.version} (${heartbeat.serviceId}) - ` +
@@ -350,7 +378,18 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
         const batchSize = 10;
         for (let i = 0; i < expiredIds.length; i += batchSize) {
           const batch = expiredIds.slice(i, i + batchSize);
-          await Promise.allSettled(batch.map((id) => this.storage.remove(id)));
+          await Promise.allSettled(
+            batch.map(async (id) => {
+              const removedService = await this.storage.remove(id);
+              if (!removedService) return;
+              // Emite those removed through timeout
+              this.emitServiceUpdate(
+                ServiceUpdate_UpdateType.REMOVED,
+                removedService,
+              );
+              return removedService;
+            }),
+          );
         }
       }
     } catch (error) {

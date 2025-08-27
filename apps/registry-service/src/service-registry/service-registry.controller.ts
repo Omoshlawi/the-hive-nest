@@ -9,6 +9,7 @@ import {
   RegistryController,
   ServiceHealthResponse,
   ServiceRegistration,
+  ServiceUpdate,
   UnregisterServiceRequest,
 } from '@hive/registry';
 import { Controller, NotFoundException } from '@nestjs/common';
@@ -18,6 +19,10 @@ import { ServiceRegistryService } from './service-registry.service';
 @Controller()
 export class ServiceRegistryController implements RegistryController {
   constructor(private registryService: ServiceRegistryService) {}
+  @GrpcMethod(REGISTRY_SERVICE_NAME)
+  watchServices(request: Empty): Observable<ServiceUpdate> {
+    return this.registryService.getServiceUpdates();
+  }
   @GrpcMethod(REGISTRY_SERVICE_NAME)
   registerService(
     request: RegisterServiceRequest,

@@ -8,6 +8,7 @@ import {
   Endpoint,
   RegistryClientConfig,
   RegistryClientModule,
+  RegistryClientService,
 } from '@hive/registry';
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
@@ -15,13 +16,17 @@ import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import {
+  HIVE_IDENTITY_SERVICE_NAME,
+  IdentityClientModule,
+} from '@hive/identity';
 
 @Module({
   imports: [
     ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
     ScheduleModule.forRoot(),
     RegistryClientModule.registerForService({
-      isGlobal: true,
+      isGlobal: true, // Set to true to allow access my module IdentityClientModule which internally uses it.When false then you must import the module in IdentityClientModule
       useFactory: (
         config: RegistryClientConfig,
         http: ServerConfig,
@@ -70,6 +75,24 @@ import { AppService } from './app.service';
         PropertyRPCServerConfigProvider,
       ],
     }),
+    // IdentityClientModule.register({
+    //   useFactory: (config: RegistryClientConfig) => {
+    //     if (!config) {
+    //       throw new Error('RegistryClientConfig is required!');
+    //     }
+    //     return {
+    //       service: {
+    //         metadata: {},
+    //         name: HIVE_IDENTITY_SERVICE_NAME,
+    //         version: config.serviceVersion, // use same version as host for compatbility
+    //         tags: [], // Tag the server used in service
+
+    //       },
+
+    //     };
+    //   },
+    //   inject: [RegistryClientConfig],
+    // }),
   ],
   controllers: [AppController],
   providers: [AppService],

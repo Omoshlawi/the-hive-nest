@@ -112,6 +112,18 @@ export interface HeartbeatResponse {
   service: ServiceRegistration | undefined;
 }
 
+export interface ServiceUpdate {
+  type: ServiceUpdate_UpdateType;
+  service: ServiceRegistration | undefined;
+}
+
+export enum ServiceUpdate_UpdateType {
+  ADDED = 0,
+  UPDATED = 1,
+  REMOVED = 2,
+  UNRECOGNIZED = -1,
+}
+
 export const HIVE_REGISTRY_V1_PACKAGE_NAME = "hive.registry.v1";
 
 export interface RegistryClient {
@@ -126,6 +138,8 @@ export interface RegistryClient {
   healthCheck(request: Empty): Observable<ServiceHealthResponse>;
 
   heartbeat(request: HeartbeatRequest): Observable<HeartbeatResponse>;
+
+  watchServices(request: Empty): Observable<ServiceUpdate>;
 }
 
 export interface RegistryController {
@@ -150,6 +164,8 @@ export interface RegistryController {
   ): Promise<ServiceHealthResponse> | Observable<ServiceHealthResponse> | ServiceHealthResponse;
 
   heartbeat(request: HeartbeatRequest): Promise<HeartbeatResponse> | Observable<HeartbeatResponse> | HeartbeatResponse;
+
+  watchServices(request: Empty): Observable<ServiceUpdate>;
 }
 
 export function RegistryControllerMethods() {
@@ -161,6 +177,7 @@ export function RegistryControllerMethods() {
       "unregisterService",
       "healthCheck",
       "heartbeat",
+      "watchServices",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

@@ -78,6 +78,16 @@ message HeartbeatResponse {
   ServiceRegistration service = 3;
 }
 
+message ServiceUpdate {
+  enum UpdateType {
+    ADDED = 0;
+    UPDATED = 1;
+    REMOVED = 2;
+  }
+  UpdateType type = 1;
+  ServiceRegistration service = 2;
+}
+
 service Registry {
   rpc RegisterService (RegisterServiceRequest) returns (ServiceRegistration);
   rpc GetService (QueryServicesRequest) returns (ServiceRegistration);
@@ -85,4 +95,5 @@ service Registry {
   rpc UnregisterService (UnregisterServiceRequest) returns (ServiceRegistration);
   rpc HealthCheck (Empty) returns (ServiceHealthResponse);
   rpc Heartbeat (HeartbeatRequest) returns (HeartbeatResponse);
+  rpc WatchServices (Empty) returns (stream ServiceUpdate);
 }

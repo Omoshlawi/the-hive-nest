@@ -108,7 +108,7 @@ export interface GetInvitationRequest {
 
 export const HIVE_IDENTITY_V1_PACKAGE_NAME = "hive.identity.v1";
 
-export interface IdentityServiceClient {
+export interface IdentityClient {
   getUser(request: GetUserRequest): Observable<User>;
 
   getOrganization(request: GetOrganizationRequest): Observable<Organization>;
@@ -124,7 +124,7 @@ export interface IdentityServiceClient {
   getInvitation(request: GetInvitationRequest): Observable<Invitation>;
 }
 
-export interface IdentityServiceController {
+export interface IdentityController {
   getUser(request: GetUserRequest): Promise<User> | Observable<User> | User;
 
   getOrganization(request: GetOrganizationRequest): Promise<Organization> | Observable<Organization> | Organization;
@@ -146,7 +146,7 @@ export interface IdentityServiceController {
   getInvitation(request: GetInvitationRequest): Promise<Invitation> | Observable<Invitation> | Invitation;
 }
 
-export function IdentityServiceControllerMethods() {
+export function IdentityControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
       "getUser",
@@ -159,14 +159,14 @@ export function IdentityServiceControllerMethods() {
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("IdentityService", method)(constructor.prototype[method], method, descriptor);
+      GrpcMethod("Identity", method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("IdentityService", method)(constructor.prototype[method], method, descriptor);
+      GrpcStreamMethod("Identity", method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
 
-export const IDENTITY_SERVICE_NAME = "IdentityService";
+export const IDENTITY_SERVICE_NAME = "Identity";

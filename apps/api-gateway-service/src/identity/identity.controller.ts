@@ -5,7 +5,7 @@ import {
   GetOrganizationRequest,
   GetUserRequest,
   IDENTITY_SERVICE_NAME,
-  IdentityServiceController,
+  IdentityController as RIdentityController,
   Invitation,
   ListInvitationsRequest,
   ListInvitationsResponse,
@@ -29,7 +29,7 @@ import {
 } from '@hive/common';
 
 @Controller('identity')
-export class IdentityController implements IdentityServiceController {
+export class IdentityController implements RIdentityController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly representation: CustomRepresentationService,

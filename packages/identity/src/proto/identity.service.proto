@@ -101,7 +101,7 @@ message GetInvitationRequest {
 
 
 
-service IdentityService {
+service Identity {
     rpc GetUser(GetUserRequest) returns (User);
     rpc GetOrganization(GetOrganizationRequest) returns (Organization);
     rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse);

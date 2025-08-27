@@ -13,3 +13,7 @@ export const IDENTITY_PACKAGE = Object.freeze({
     TOKEN: 'SERVICE_IDENTITY_PACKAGE_V1',
   },
 });
+/**
+ * Token used to create service query using factory pattern in Identity module
+ */
+export const IDENTITY_SERVICE_CONFIG_TOKEN = 'IDENTITY_SERVICE_CONFIG';
