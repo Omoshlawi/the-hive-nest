@@ -75,24 +75,22 @@ import {
         PropertyRPCServerConfigProvider,
       ],
     }),
-    // IdentityClientModule.register({
-    //   useFactory: (config: RegistryClientConfig) => {
-    //     if (!config) {
-    //       throw new Error('RegistryClientConfig is required!');
-    //     }
-    //     return {
-    //       service: {
-    //         metadata: {},
-    //         name: HIVE_IDENTITY_SERVICE_NAME,
-    //         version: config.serviceVersion, // use same version as host for compatbility
-    //         tags: [], // Tag the server used in service
-
-    //       },
-
-    //     };
-    //   },
-    //   inject: [RegistryClientConfig],
-    // }),
+    IdentityClientModule.register({
+      useFactory: (config: RegistryClientConfig) => {
+        if (!config) {
+          throw new Error('RegistryClientConfig is required!');
+        }
+        return {
+          service: {
+            metadata: {},
+            name: HIVE_IDENTITY_SERVICE_NAME,
+            version: config.serviceVersion, // use same version as host for compatbility
+            tags: [], // Tag the server used in service
+          },
+        };
+      },
+      inject: [RegistryClientConfig],
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
