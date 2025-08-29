@@ -9,6 +9,7 @@ import {
   ServiceStatus,
   ServiceUpdate,
   ServiceUpdate_UpdateType,
+  ServiceUtils,
 } from '@hive/registry';
 import {
   Injectable,
@@ -18,10 +19,8 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { Observable, Subject } from 'rxjs';
-import semver from 'semver';
 import { AppConfig } from 'src/config/app.config';
 import { RedisStorage } from 'src/storage/storage.redis.service';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
@@ -58,19 +57,12 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     maxRetries = 5,
   ): Promise<string> {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
-      const servicePart =
-        registerServiceDto.name?.replace(/[/]/g, '-')?.replace(/[@]/g, '') ||
-        'unknown';
-      const uuid = uuidv4();
-
-      const instanceId = `${servicePart}-${uuid}`;
-
+      const instanceId = ServiceUtils.generateInstanceId(registerServiceDto);
       // Check if exists atomically
       const exists = await this.storage.get(instanceId);
       if (!exists) {
         return instanceId;
       }
-
       this.logger.warn(`ID collision on attempt ${attempt + 1}: ${instanceId}`);
     }
 
@@ -96,22 +88,13 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
   ): Promise<ServiceRegistration> {
     const instanceId = await this.generateUniqueInstanceId(registerDto);
 
-    const service: ServiceRegistration = {
-      ...registerDto,
-      id: instanceId,
-      timestamp: Date.now().toString(),
-      metadata: registerDto.metadata ?? {},
-      endpoints:
-        registerDto.endpoints?.map((endpoint) => ({
-          ...endpoint,
-          metadata: endpoint.metadata ?? {},
-          protocol: endpoint.protocol as any,
-        })) ?? [],
-    };
+    const service = ServiceUtils.createRegistryServiceEntry(
+      instanceId,
+      registerDto,
+    );
 
     const savedService = await this.storage.save(service);
     this.emitServiceUpdate(ServiceUpdate_UpdateType.ADDED, savedService);
-
     this.logger.log(
       `Service registered: ${savedService.name}@${savedService.version} ` +
         `with ID: ${savedService.id} at endpoints ${savedService.endpoints?.map((i) => `${i.protocol}${i.host}:${i.port}`).join(', ')}`,
@@ -141,17 +124,16 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
       return null;
     }
 
-    // Load balance by random selection
-    const randomIndex = Math.floor(Math.random() * services.length);
-    const selectedService = services[randomIndex];
+    const { index, service } =
+      ServiceUtils.loadBalanceAndFindOneService(services);
 
     this.logger.log(
-      `Service selected: ${selectedService.name}@${selectedService.version} ` +
-        `(ID: ${selectedService.id})at endpoints ${selectedService.endpoints?.map((i) => `${i.protocol}${i.host}:${i.port}`).join(', ')} ` +
-        `- Load balanced selection ${randomIndex + 1}/${services.length} available instances`,
+      `Service selected: ${service.name}@${service.version} ` +
+        `(ID: ${service.id})at endpoints ${service.endpoints?.map((i) => `${i.protocol}${i.host}:${i.port}`).join(', ')} ` +
+        `- Load balanced selection ${index + 1}/${services.length} available instances`,
     );
 
-    return selectedService;
+    return service;
   }
 
   async listServices(
@@ -171,59 +153,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
       `Retrieved ${allServices.length} total services from storage`,
     );
 
-    let filteredServices = allServices;
-
-    // Filter by name pattern if provided
-    if (name) {
-      const beforeCount = filteredServices.length;
-      filteredServices = filteredServices.filter((service) =>
-        this.matchesPattern(service.name, name),
-      );
-      this.logger.debug(
-        `Name filter '${name}': ${beforeCount} → ${filteredServices.length} services`,
-      );
-    }
-
-    // Filter by version if provided
-    if (version) {
-      const beforeCount = filteredServices.length;
-      filteredServices = filteredServices.filter((service) =>
-        this.matchesVersion(service.version, version),
-      );
-      this.logger.debug(
-        `Version filter '${version}': ${beforeCount} → ${filteredServices.length} services`,
-      );
-    }
-
-    // Filter by tags if provided
-    if (tags && tags.length > 0) {
-      const beforeCount = filteredServices.length;
-      filteredServices = filteredServices.filter((service) => {
-        const serviceTags = service.tags || [];
-        return tags.every((tag) => serviceTags.includes(tag));
-      });
-      this.logger.debug(
-        `Tags filter [${tags.join(', ')}]: ${beforeCount} → ${filteredServices.length} services`,
-      );
-    }
-
-    // Filter by metadata if provided
-    if (metadata && Object.keys(metadata).length > 0) {
-      const beforeCount = filteredServices.length;
-      filteredServices = filteredServices.filter((service) => {
-        const serviceMetadata = service.metadata || {};
-        return Object.entries(metadata).every(
-          ([key, value]) => serviceMetadata[key] === value,
-        );
-      });
-      this.logger.debug(
-        `Metadata filter {${Object.entries(metadata)
-          .map(([k, v]) => `${k}=${v}`)
-          .join(', ')}}: ` +
-          `${beforeCount} → ${filteredServices.length} services`,
-      );
-    }
-
+    let filteredServices = ServiceUtils.filterServices(allServices, query);
     // Log final results with service details
     if (filteredServices.length > 0) {
       const servicesSummary = filteredServices
@@ -342,14 +272,6 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     };
   }
 
-  private matchesPattern(serviceName: string, pattern: string): boolean {
-    // Support wildcards like @hive/* or exact matches
-    if (pattern.endsWith('*')) {
-      const prefix = pattern.slice(0, -1);
-      return serviceName.startsWith(prefix);
-    }
-    return serviceName === pattern;
-  }
   @Cron(CronExpression.EVERY_MINUTE, { name: 'cleanupExpiredServices' })
   private async cleanupExpiredServices(): Promise<void> {
     this.logger.debug('Running cleanup of expired services...');
@@ -364,12 +286,9 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
     }
     try {
       const services = await this.storage.getAll();
-      const now = Date.now();
       const serviceTtl = this.config.serviceTtl;
 
-      const expiredIds = services
-        .filter((service) => now - +service.timestamp > serviceTtl)
-        .map((service) => service.id);
+      const expiredIds = ServiceUtils.expiredServiceIds(services, serviceTtl);
 
       if (expiredIds.length > 0) {
         this.logger.warn(`Cleaning up ${expiredIds.length} expired services`);
@@ -396,38 +315,5 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
       this.logger.error(`Cleanup failed: ${error.message}`);
     }
   }
-  /**
-   * Check if service version matches the requested version pattern
-   * Supports exact matches, ranges, and semver patterns
-   */
-  private matchesVersion(
-    serviceVersion: string,
-    requestedVersion: string,
-  ): boolean {
-    try {
-      // Exact match
-      if (serviceVersion === requestedVersion) {
-        return true;
-      }
 
-      // Support semver ranges like "^1.0.0", "~1.2.0", ">=1.0.0"
-      if (semver.valid(serviceVersion) && semver.validRange(requestedVersion)) {
-        return semver.satisfies(serviceVersion, requestedVersion);
-      }
-
-      // Support wildcards for non-semver versions
-      if (requestedVersion.endsWith('*')) {
-        const prefix = requestedVersion.slice(0, -1);
-        return serviceVersion.startsWith(prefix);
-      }
-
-      return false;
-    } catch (error) {
-      this.logger.error(
-        `Error matching version ${serviceVersion} against ${requestedVersion}: ${error.message}`,
-      );
-      // Fallback to exact string match if semver parsing fails
-      return serviceVersion === requestedVersion;
-    }
-  }
 }

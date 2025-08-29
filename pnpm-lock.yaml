@@ -416,12 +416,6 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
-      semver:
-        specifier: ^7.7.2
-        version: 7.7.2
-      uuid:
-        specifier: ^11.1.0
-        version: 11.1.0
       zod:
         specifier: ^4.0.15
         version: 4.0.17
@@ -447,9 +441,6 @@ importers:
       '@types/lodash':
         specifier: ^4.17.20
         version: 4.17.20
-      '@types/semver':
-        specifier: ^7.7.0
-        version: 7.7.0
       '@types/supertest':
         specifier: ^6.0.2
         version: 6.0.3
@@ -839,6 +830,12 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
+      semver:
+        specifier: ^7.7.2
+        version: 7.7.2
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
       zod:
         specifier: ^4.0.15
         version: 4.0.17
@@ -846,6 +843,9 @@ importers:
       '@types/node':
         specifier: ^22.10.7
         version: 22.17.2
+      '@types/semver':
+        specifier: ^7.7.0
+        version: 7.7.0
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.17.2)(ts-node@10.9.2)
