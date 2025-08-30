@@ -21,7 +21,6 @@ export interface RegistryClientModuleOptions
     ...args: any[]
   ) => Promise<ClientServiceConfig> | ClientServiceConfig;
   inject?: any[];
-  isGlobal?: boolean;
 }
 
 export interface RegistryClientModuleAsyncOptions

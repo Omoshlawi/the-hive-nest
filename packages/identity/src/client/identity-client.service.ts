@@ -12,7 +12,6 @@ import { Observable } from 'rxjs';
   tags: [],
   serviceName: IDENTITY_SERVICE_NAME,
 })
-@Injectable()
 export class IdentityClientService {
   /** Logger instance for logging service activity */
   private readonly logger = new Logger(IdentityClientService.name);

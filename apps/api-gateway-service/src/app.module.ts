@@ -10,8 +10,8 @@ import {
 } from '@hive/identity';
 import {
   Endpoint,
+  HiveServiceModule,
   RegistryClientConfig,
-  RegistryClientModule,
 } from '@hive/registry';
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
@@ -33,33 +33,37 @@ import { RegistryModule } from './registry/registry.module';
     // TODO: Document registry package indicating importance of schedule module and config to enebale client module to work well
     ScheduleModule.forRoot(),
     // For identity service discovery on registry service
-    RegistryClientModule.registerForService({
-      isGlobal: true,
-      useFactory: (config: RegistryClientConfig, grpc: ServerConfig) => {
-        if (!config) {
-          throw new Error('RegistryClientConfig is required');
-        }
-        return {
-          service: {
-            metadata: config.metadata ?? {},
-            name: HIVE_IDENTITY_SERVICE_NAME,
-            version: config.serviceVersion,
-            tags: [grpc ? 'grpc' : undefined].filter(Boolean) as Array<string>, // Tag the server used in service
-            endpoints: [
-              grpc
-                ? {
-                    host: grpc.host,
-                    port: grpc.port,
-                    protocol: 'grpc',
-                    metadata: {},
-                  }
-                : undefined,
-            ].filter(Boolean) as Array<Endpoint>,
-          },
-        };
+    HiveServiceModule.forRoot({
+      services: [],
+      client: {
+        useFactory: (config: RegistryClientConfig, grpc: ServerConfig) => {
+          if (!config) {
+            throw new Error('RegistryClientConfig is required');
+          }
+          return {
+            service: {
+              metadata: config.metadata ?? {},
+              name: HIVE_IDENTITY_SERVICE_NAME,
+              version: config.serviceVersion,
+              tags: [grpc ? 'grpc' : undefined].filter(
+                Boolean,
+              ) as Array<string>, // Tag the server used in service
+              endpoints: [
+                grpc
+                  ? {
+                      host: grpc.host,
+                      port: grpc.port,
+                      protocol: 'grpc',
+                      metadata: {},
+                    }
+                  : undefined,
+              ].filter(Boolean) as Array<Endpoint>,
+            },
+          };
+        },
+        inject: [RegistryClientConfig, IDENTITY_RPC_SERVER_CONFIG_TOKEN],
+        providers: [IdentityRPCServerConfigProvider],
       },
-      inject: [RegistryClientConfig, IDENTITY_RPC_SERVER_CONFIG_TOKEN],
-      providers: [IdentityRPCServerConfigProvider],
     }),
     // Handle RPC calls to identity service (concreate implementation for rpc methods in identity package)
     IdentityModule,
