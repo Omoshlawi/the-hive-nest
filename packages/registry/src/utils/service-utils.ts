@@ -1,9 +1,9 @@
+import { Logger } from '@nestjs/common';
+import semver from 'semver';
+import { v4 as uuidv4 } from 'uuid';
 import { SERVICE_NAME_REGEX } from '../constants';
 import { RegisterServiceDto } from '../dto';
 import { QueryServicesRequest, ServiceRegistration } from '../types';
-import { v4 as uuidv4 } from 'uuid';
-import semver from 'semver';
-import { Logger } from '@nestjs/common';
 
 export class ServiceUtils {
   private static readonly logger = new Logger(ServiceUtils.name);

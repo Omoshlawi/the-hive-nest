@@ -6,9 +6,9 @@ import {
 } from '@hive/property';
 import {
   Endpoint,
+  HiveServiceModule,
   RegistryClientConfig,
   RegistryClientModule,
-  RegistryClientService,
 } from '@hive/registry';
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
@@ -16,10 +16,7 @@ import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import {
-  HIVE_IDENTITY_SERVICE_NAME,
-  IdentityClientModule,
-} from '@hive/identity';
+import { IdentityClientService } from '@hive/identity';
 
 @Module({
   imports: [
@@ -75,21 +72,9 @@ import {
         PropertyRPCServerConfigProvider,
       ],
     }),
-    IdentityClientModule.register({
-      useFactory: (config: RegistryClientConfig) => {
-        if (!config) {
-          throw new Error('RegistryClientConfig is required!');
-        }
-        return {
-          service: {
-            metadata: {},
-            name: HIVE_IDENTITY_SERVICE_NAME,
-            version: config.serviceVersion, // use same version as host for compatbility
-            tags: [], // Tag the server used in service
-          },
-        };
-      },
-      inject: [RegistryClientConfig],
+    HiveServiceModule.forRoot({
+      services: [IdentityClientService],
+      global: true,
     }),
   ],
   controllers: [AppController],

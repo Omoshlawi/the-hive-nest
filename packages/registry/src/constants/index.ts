@@ -27,3 +27,6 @@ export const REGISTRY_PACKAGE = Object.freeze({
 });
 
 export const CLIENT_SERVICE_CONFIG_TOKEN = 'CLIENT_SERVICE_CONFIG';
+
+export const HIVE_SERVICE_METADATA_KEY = Symbol('HiveService');
+export const HIVE_SERVICE_PROVIDERS = Symbol('HiveServiceProviders');

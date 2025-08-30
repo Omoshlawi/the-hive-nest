@@ -1,8 +1,16 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
-import { RegisterServiceRequest } from '../types';
+import { RegisterServiceRequest, ServiceRegistration } from '../types';
 
 export * from './storage.interface';
 
+export type HiveServiceConfig = Partial<ServiceRegistration> & {
+  package: string;
+  protoPath: string;
+  /**
+   * GRPC Service name
+   */
+  serviceName: string;
+};
 export interface ClientServiceConfig {
   service: RegisterServiceRequest;
 }
