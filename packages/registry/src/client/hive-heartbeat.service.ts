@@ -5,22 +5,17 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
-import { ClientGrpcProxy } from '@nestjs/microservices';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { catchError, delay, firstValueFrom, of, retry, timeout } from 'rxjs';
-import { CLIENT_SERVICE_CONFIG_TOKEN, REGISTRY_PACKAGE } from '../constants';
+import { CLIENT_SERVICE_CONFIG_TOKEN } from '../constants';
 import { ClientServiceConfig } from '../interfaces';
-import {
-  REGISTRY_SERVICE_NAME,
-  RegistryClient,
-  ServiceRegistration,
-} from '../types';
+import { ServiceRegistration } from '../types';
+import { HiveDiscoveryService } from './hive-discovery.service';
 
 @Injectable()
-export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
-  private registryService: RegistryClient;
+export class HiveHeartbeatService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(HiveHeartbeatService.name);
   private serviceInstance: ServiceRegistration | null = null;
-  private readonly logger = new Logger(RegistryClientService.name);
   private registrationAttempts = 0;
   private readonly MAX_REGISTRATION_ATTEMPTS = 5;
   private readonly REGISTRATION_TIMEOUT = 10000; // 10 seconds
@@ -28,26 +23,21 @@ export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
   private isShuttingDown = false;
 
   constructor(
-    @Inject(REGISTRY_PACKAGE.V1.TOKEN)
-    private client: ClientGrpcProxy,
+    private readonly discoveryService: HiveDiscoveryService,
     @Inject(CLIENT_SERVICE_CONFIG_TOKEN)
-    private config: ClientServiceConfig,
+    private readonly config: ClientServiceConfig,
   ) {}
 
   async onModuleInit() {
     this.logger.log(
-      `Initializing Registry Client for service: ${this.config.service.name}@${this.config.service.version}`,
-    );
-
-    this.registryService = this.client.getService<RegistryClient>(
-      REGISTRY_SERVICE_NAME,
+      `Initializing ${HiveHeartbeatService.name} for: ${this.config.service.name}@${this.config.service.version}`,
     );
 
     await this.registerWithRetry();
   }
 
   async onModuleDestroy() {
-    this.logger.log('Shutting down Registry Client...');
+    this.logger.log('Shutting down Heartbeat Service...');
     this.isShuttingDown = true;
 
     if (this.serviceInstance) {
@@ -73,8 +63,9 @@ export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
           `Registration attempt ${this.registrationAttempts}/${this.MAX_REGISTRATION_ATTEMPTS}`,
         );
 
+        const registryService = this.discoveryService.getRegistryService();
         this.serviceInstance = await firstValueFrom(
-          this.registryService.registerService(this.config.service).pipe(
+          registryService.registerService(this.config.service).pipe(
             timeout(this.REGISTRATION_TIMEOUT),
             retry({
               count: 2,
@@ -146,8 +137,9 @@ export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
         `Sending heartbeat for service ID: ${this.serviceInstance.id}`,
       );
 
+      const registryService = this.discoveryService.getRegistryService();
       await firstValueFrom(
-        this.registryService
+        registryService
           .heartbeat({
             serviceId: this.serviceInstance.id,
             endpoints:
@@ -161,8 +153,8 @@ export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
             timeout(this.HEARTBEAT_TIMEOUT),
             catchError((error) => {
               this.logger.error('Heartbeat failed:', error.message);
-
               // If heartbeat fails, the service might be unregistered
+
               if (
                 error.code === 'NOT_FOUND' ||
                 error.message.includes('not found')
@@ -198,8 +190,9 @@ export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
     }
 
     try {
+      const registryService = this.discoveryService.getRegistryService();
       await firstValueFrom(
-        this.registryService
+        registryService
           .unregisterService({
             id: this.serviceInstance.id,
           })
@@ -224,15 +217,10 @@ export class RegistryClientService implements OnModuleInit, OnModuleDestroy {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  // Public method to get current registration status
   public getServiceInstance(): ServiceRegistration | null {
     return this.serviceInstance;
   }
-  public getRegistrycService(): RegistryClient {
-    return this.registryService;
-  }
 
-  // Public method to force re-registration
   public async forceReregister(): Promise<void> {
     this.logger.log('Forcing re-registration...');
     this.serviceInstance = null;

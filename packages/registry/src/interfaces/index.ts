@@ -13,9 +13,10 @@ export type HiveServiceConfig = Partial<ServiceRegistration> & {
 };
 export interface ClientServiceConfig {
   service: RegisterServiceRequest;
+  
 }
 
-export interface RegistryClientModuleOptions
+export interface RegistryClientOptions
   extends Pick<ModuleMetadata, 'providers' | 'imports'> {
   useFactory: (
     ...args: any[]
@@ -23,11 +24,10 @@ export interface RegistryClientModuleOptions
   inject?: any[];
 }
 
-export interface RegistryClientModuleAsyncOptions
+export interface RegistryClientAsyncOptions
   extends Pick<ModuleMetadata, 'providers' | 'imports'> {
   useFactory?: (...args: any[]) => Promise<any> | any;
   inject?: any[];
   useClass?: Type<any>;
   useExisting?: string | symbol | Type<any>;
-  isGlobal?: boolean;
 }

@@ -7,55 +7,41 @@ import {
   HIVE_SERVICE_METADATA_KEY,
   REGISTRY_PACKAGE,
 } from '../constants';
-import {
-  HiveServiceConfig,
-  RegistryClientModuleAsyncOptions,
-  RegistryClientModuleOptions,
-} from '../interfaces';
+import { HiveServiceConfig, RegistryClientAsyncOptions } from '../interfaces';
 import { HiveServiceClient } from './hive-service-client.service';
-import { RegistryClientService } from './registry-client.service';
+import { HiveDiscoveryService } from './hive-discovery.service';
+import { ScheduleModule } from '@nestjs/schedule';
+import { HiveHeartbeatService } from './hive-heartbeat.service';
 
 export interface HiveServiceModuleOptions {
   services?: Type<any>[];
   global?: boolean;
-  client?: RegistryClientModuleOptions;
+  client?: RegistryClientAsyncOptions;
+  enableHeartbeat?: boolean;
 }
 
 @Module({})
 export class HiveServiceModule {
-  static forRoot(options: HiveServiceModuleOptions = {}): DynamicModule {
+  /**
+   * RECOMMENDED: Use this ONLY in AppModule
+   * Choose whether to include heartbeat functionality or not
+   */
+  static forRoot(options: HiveServiceModuleOptions): DynamicModule {
+    if (options.enableHeartbeat && !options.client) {
+      throw new Error(
+        'Client configuration is required when heartbeat is enabled',
+      );
+    }
     const providers: Provider[] = [
       ...(options.client?.providers ?? []),
-      RegistryClientService,
-      this.createAsyncProvider(options.client),
+      HiveDiscoveryService,
+      ...(options.client
+        ? [this.createAsyncConfigProvider(options.client)]
+        : []),
       Reflector,
+      ...this.serviceSpecificProviders(options.services),
+      ...(options.enableHeartbeat ? [HiveHeartbeatService] : []),
     ];
-
-    // Add service-specific providers
-    if (options.services) {
-      for (const serviceClass of options.services) {
-        providers.push({
-          provide: serviceClass,
-          useFactory: (
-            registryClient: RegistryClientService,
-            reflector: Reflector,
-          ) => {
-            const config = reflector.get<HiveServiceConfig>(
-              HIVE_SERVICE_METADATA_KEY,
-              serviceClass,
-            );
-            if (!config) {
-              throw new Error(
-                `Service ${serviceClass.name} is not decorated with @HiveService`,
-              );
-            }
-            const client = new HiveServiceClient(config, registryClient);
-            return new serviceClass(client);
-          },
-          inject: [RegistryClientService, Reflector],
-        });
-      }
-    }
 
     return {
       module: HiveServiceModule,
@@ -93,19 +79,65 @@ export class HiveServiceModule {
             imports: options.client?.imports ?? [],
           },
         ]),
+        ...(options.enableHeartbeat ? [ScheduleModule.forRoot()] : []),
       ],
       providers,
       exports: [
-        RegistryClientService,
-        ...(options.services || []),
-        CLIENT_SERVICE_CONFIG_TOKEN,
+        HiveDiscoveryService,
+        ...(options.services ?? []),
+        ...(options.client ? [CLIENT_SERVICE_CONFIG_TOKEN] : []),
+        ...(options.enableHeartbeat ? [HiveHeartbeatService] : []),
       ],
       global: options.global,
     };
   }
 
-  private static createAsyncProvider(
-    options?: RegistryClientModuleAsyncOptions,
+  /**
+   * Relies on forRoot called and app(root) module
+   * ✅ RECOMMENDED: Use this in feature modules
+   * Creates service clients that use the singleton RegistryClientService
+   */
+  static forFeatureStandAlone(services: Array<Type<any>>): DynamicModule {
+    if (!services || services.length === 0) {
+      throw new Error('At least one service must be provided to forFeature()');
+    }
+    return this.forRoot({ services });
+  }
+  static forFeature(services: Array<Type<any>>): DynamicModule {
+    return {
+      module: HiveServiceModule,
+      providers: [Reflector, ...this.serviceSpecificProviders(services)],
+      exports: services,
+    };
+  }
+
+  private static serviceSpecificProviders(
+    services: Array<Type<any>> = [],
+  ): Array<Provider> {
+    return services.map((serviceClass) => ({
+      provide: serviceClass,
+      useFactory: (
+        discoveryService: HiveDiscoveryService,
+        reflector: Reflector,
+      ) => {
+        const config = reflector.get<HiveServiceConfig>(
+          HIVE_SERVICE_METADATA_KEY,
+          serviceClass,
+        );
+        if (!config) {
+          throw new Error(
+            `Service ${serviceClass.name} is not decorated with @HiveService`,
+          );
+        }
+        const client = new HiveServiceClient(config, discoveryService);
+        return new serviceClass(client);
+      },
+      inject: [HiveDiscoveryService, Reflector],
+    }));
+  }
+
+  private static createAsyncConfigProvider(
+    options?: RegistryClientAsyncOptions,
   ): Provider {
     if (options?.useFactory) {
       return {

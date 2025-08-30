@@ -5,7 +5,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { HiveServiceConfig } from '../interfaces';
-import { RegistryClientService } from './registry-client.service';
+import { HiveDiscoveryService } from './hive-discovery.service';
 import {
   ClientGrpcProxy,
   ClientProxyFactory,
@@ -24,7 +24,7 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
   private serviceGrpcClientProxyPool: Map<string, ClientGrpcProxy> = new Map();
   constructor(
     private readonly config: HiveServiceConfig,
-    private readonly registryClient: RegistryClientService,
+    private readonly discoveryService: HiveDiscoveryService,
   ) {}
 
   onModuleInit() {
@@ -33,19 +33,16 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
   }
 
   private setupServiceWatcher() {
-    this.registryClient
-      .getRegistrycService()
-      .watchServices({})
-      .subscribe({
-        next: (updateStream) => this.handleServiceUpdate(updateStream),
-        error: (error) => {
-          this.logger.error('Service watch stream error', error);
-          // Implement reconnection logic here
-        },
-        complete: () => {
-          this.logger.warn('Service watch stream completed unexpectedly');
-        },
-      });
+    this.discoveryService.watchServices().subscribe({
+      next: (updateStream) => this.handleServiceUpdate(updateStream),
+      error: (error) => {
+        this.logger.error('Service watch stream error', error);
+        // Implement reconnection logic here
+      },
+      complete: () => {
+        this.logger.warn('Service watch stream completed unexpectedly');
+      },
+    });
   }
 
   private handleServiceUpdate(updateStream: ServiceUpdate) {
