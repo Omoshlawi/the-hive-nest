@@ -22,7 +22,24 @@ import { Observable } from 'rxjs';
   tags: [],
   serviceName: IDENTITY_SERVICE_NAME,
 })
-export class HiveIdentityClientService extends BaseHiveService {
+export class HiveIdentityClientService
+  implements OnModuleInit, OnModuleDestroy
+{
+  protected readonly logger: Logger;
+
+  constructor(protected readonly hiveServiceClient: HiveServiceClient) {
+    this.logger = new Logger(this.constructor.name);
+  }
+
+  onModuleInit() {
+    this.logger.debug('Initializing Hive service client');
+    this.hiveServiceClient.onModuleInit?.();
+  }
+
+  onModuleDestroy() {
+    this.logger.debug('Destroying Hive service client');
+    return this.hiveServiceClient.onModuleDestroy?.();
+  }
   /**
    * Example method to call identity service
    */
@@ -41,15 +58,5 @@ export class HiveIdentityClientService extends BaseHiveService {
 
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  async onModuleInit() {
-    // Manually trigger HiveServiceClient lifecycle
-    await this.hiveServiceClient.onModuleInit?.();
-  }
-
-  async onModuleDestroy() {
-    // Cleanup
-    await this.hiveServiceClient.onModuleDestroy?.();
   }
 }

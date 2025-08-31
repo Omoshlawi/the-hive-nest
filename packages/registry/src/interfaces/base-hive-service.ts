@@ -8,13 +8,13 @@ export abstract class BaseHiveService implements OnModuleInit, OnModuleDestroy {
     this.logger = new Logger(this.constructor.name);
   }
 
-  async onModuleInit() {
+  onModuleInit() {
     this.logger.debug('Initializing Hive service client');
-    await this.hiveServiceClient.onModuleInit?.();
+    return this.hiveServiceClient.onModuleInit?.();
   }
 
-  async onModuleDestroy() {
+  onModuleDestroy() {
     this.logger.debug('Destroying Hive service client');
-    await this.hiveServiceClient.onModuleDestroy?.();
+    return this.hiveServiceClient.onModuleDestroy?.();
   }
 }
