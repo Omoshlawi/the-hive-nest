@@ -119,6 +119,7 @@ export class HiveServiceModule {
       useFactory: (
         discoveryService: HiveDiscoveryService,
         reflector: Reflector,
+        registryConfig: RegistryClientConfig,
       ) => {
         const config = reflector.get<HiveServiceConfig>(
           HIVE_SERVICE_METADATA_KEY,
@@ -129,10 +130,19 @@ export class HiveServiceModule {
             `Service ${serviceClass.name} is not decorated with @HiveService`,
           );
         }
-        const client = new HiveServiceClient(config, discoveryService);
+
+        // Life cycle methods are initiated in consuming service client instances for efficiency
+        const client = new HiveServiceClient(
+          {
+            ...config,
+            version: config.version ?? registryConfig.serviceVersion,
+          },
+          discoveryService,
+        );
+
         return new serviceClass(client);
       },
-      inject: [HiveDiscoveryService, Reflector],
+      inject: [HiveDiscoveryService, Reflector, RegistryClientConfig],
     }));
   }
 

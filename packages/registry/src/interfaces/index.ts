@@ -2,7 +2,7 @@ import { ModuleMetadata, Type } from '@nestjs/common';
 import { RegisterServiceRequest, ServiceRegistration } from '../types';
 
 export * from './storage.interface';
-
+export * from './base-hive-service';
 export type HiveServiceConfig = Partial<ServiceRegistration> & {
   package: string;
   protoPath: string;
@@ -13,7 +13,6 @@ export type HiveServiceConfig = Partial<ServiceRegistration> & {
 };
 export interface ClientServiceConfig {
   service: RegisterServiceRequest;
-  
 }
 
 export interface RegistryClientOptions

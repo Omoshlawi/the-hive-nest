@@ -4,24 +4,27 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
-import { HiveServiceConfig } from '../interfaces';
-import { HiveDiscoveryService } from './hive-discovery.service';
 import {
   ClientGrpcProxy,
   ClientProxyFactory,
   Transport,
 } from '@nestjs/microservices';
+import { timer } from 'rxjs';
+import { retry, tap } from 'rxjs/operators';
+import { HiveServiceConfig } from '../interfaces';
 import {
   Endpoint,
   ServiceRegistration,
   ServiceUpdate,
   ServiceUpdate_UpdateType,
 } from '../types';
+import { HiveDiscoveryService } from './hive-discovery.service';
 
 @Injectable()
 export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
   private readonly logger: Logger = new Logger(HiveServiceClient.name);
   private serviceGrpcClientProxyPool: Map<string, ClientGrpcProxy> = new Map();
+
   constructor(
     private readonly config: HiveServiceConfig,
     private readonly discoveryService: HiveDiscoveryService,
@@ -29,20 +32,80 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     this.logger.debug('Setting up service stream processing');
+    this.validateConfiguration();
     this.setupServiceWatcher();
   }
 
+  private validateConfiguration() {
+    const required = ['name', 'package', 'protoPath'];
+    const missing = required.filter((field) => !this.config[field]);
+
+    if (missing.length > 0) {
+      const error = `Missing required configuration fields: ${missing.join(', ')}`;
+      this.logger.error(error);
+      throw new Error(error);
+    }
+
+    if (!this.config.serviceName) {
+      this.logger.warn(
+        `No serviceName provided for ${this.config.name}, using default naming`,
+      );
+    }
+  }
+
+  /**
+   * Sets up a robust watcher for the service discovery stream.
+   * This method  includes retry logic with exponential backoff
+   * to handle transient connection failures gracefully.
+   */
   private setupServiceWatcher() {
-    this.discoveryService.watchServices().subscribe({
-      next: (updateStream) => this.handleServiceUpdate(updateStream),
-      error: (error) => {
-        this.logger.error('Service watch stream error', error);
-        // Implement reconnection logic here
-      },
-      complete: () => {
-        this.logger.warn('Service watch stream completed unexpectedly');
-      },
-    });
+    try {
+      this.discoveryService
+        .watchServices()
+        .pipe(
+          // Use the `tap` operator to log messages before the retry attempt.
+          tap({
+            error: (err) =>
+              this.logger.warn(
+                `Service watch stream failed. Retrying connection...`,
+                err,
+              ),
+          }),
+          // The `retry` operator will resubscribe to the source Observable
+          // on error. The `delay` function implements an exponential backoff.
+          retry({
+            delay: (error, retryCount) => {
+              const delayMs = Math.pow(2, retryCount) * 1000;
+              this.logger.log(
+                `Attempt #${retryCount}: Retrying stream after ${delayMs / 1000}s...`,
+              );
+              return timer(delayMs);
+            },
+          }),
+        )
+        .subscribe({
+          next: (updateStream) => this.handleServiceUpdate(updateStream),
+          error: (error) => {
+            this.logger.error(
+              'Service watch stream failed after all retry attempts. The service client is now in a potentially unstable state.',
+              error,
+            );
+            // Future-proof: Consider adding a mechanism here to alert a health check or a monitoring system.
+          },
+          complete: () => {
+            this.logger.warn('Service watch stream completed unexpectedly');
+            // Implement logic here to re-establish the connection if needed.
+            // For now, the `retry` logic in the pipe handles this, but a full
+            // shutdown/re-initialization might be necessary for certain scenarios.
+          },
+        });
+    } catch (error) {
+      // Catch any synchronous errors that might occur during the initial call.
+      this.logger.error(
+        'Failed to initialize the service watch stream.',
+        error,
+      );
+    }
   }
 
   private handleServiceUpdate(updateStream: ServiceUpdate) {

@@ -1,4 +1,4 @@
-import { IdentityClientService } from '@hive/identity';
+import { HiveIdentityClientService } from '@hive/identity';
 import {
   PROPERTY_HTTP_SERVER_CONFIG_TOKEN,
   PROPERTY_RPC_SERVER_CONFIG_TOKEN,
@@ -21,7 +21,7 @@ import { AppService } from './app.service';
     ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
     HiveServiceModule.forRoot({
       enableHeartbeat: true,
-      services: [IdentityClientService],
+      services: [HiveIdentityClientService],
       client: {
         useFactory: (
           config: RegistryClientConfig,
