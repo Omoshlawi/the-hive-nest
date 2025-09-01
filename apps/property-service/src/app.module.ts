@@ -15,6 +15,9 @@ import { ConfigifyModule } from '@itgorillaz/configify';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AmenitiesModule } from './amenities/amenities.module';
+import { QueryBuilderModule } from '@hive/common';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -73,6 +76,9 @@ import { AppService } from './app.service';
         ],
       },
     }),
+    AmenitiesModule,
+    QueryBuilderModule.register({ global: true }),
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

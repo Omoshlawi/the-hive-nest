@@ -1,18 +1,18 @@
 import z from 'zod';
 
-export const paginationQuerySchema = z.object({
+export const PaginationQuerySchema = z.object({
   page: z.coerce.number().min(1).nonnegative().optional(), // TODO MOVE TO CONFIG CLASS PAGINATION
   limit: z.coerce.number().nonnegative().optional(), // TODO Same here
 });
 
-export const orderQuerySchema = z.object({
+export const OrderQuerySchema = z.object({
   orderBy: z
     .string()
     .regex(/^-?[a-zA-Z_][a-zA-Z0-9_.]*(?:,-?[a-zA-Z_][a-zA-Z0-9_.]*)*$/)
     .optional(), // TODO Add regex for validating order by
 });
 
-export const customRepresentationQuerySchema = z.object({
+export const CustomRepresentationQuerySchema = z.object({
   v: z
     .string()
     .optional()
@@ -20,14 +20,14 @@ export const customRepresentationQuerySchema = z.object({
 });
 
 export const sortAndRepresentationSchema = z.object({
-  ...orderQuerySchema.shape,
-  ...customRepresentationQuerySchema.shape,
+  ...OrderQuerySchema.shape,
+  ...CustomRepresentationQuerySchema.shape,
 });
 
-export const queryBuilderSchema = z.object({
-  ...paginationQuerySchema.shape,
-  ...orderQuerySchema.shape,
-  ...customRepresentationQuerySchema.shape,
+export const QueryBuilderSchema = z.object({
+  ...PaginationQuerySchema.shape,
+  ...OrderQuerySchema.shape,
+  ...CustomRepresentationQuerySchema.shape,
 });
 
 function hasBalancedParentheses(str: string): boolean {

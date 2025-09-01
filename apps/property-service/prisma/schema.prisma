@@ -1,0 +1,213 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AttributeType {
+  id             String  @id @default(uuid()) @db.Uuid
+  name           String  @unique
+  organizationId String? // Nullable if global
+  icon           Json // {name, family}
+
+  // organization   Organization? @relation(fields: [organizationId], references: [id])
+  voided             Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  assignedProperties PropertyAttribute[]
+
+  @@unique([name, organizationId]) // Prevent duplicate names within an organization
+}
+
+model Amenity {
+  id             String  @id @default(uuid()) @db.Uuid
+  name           String
+  organizationId String?
+  icon           Json // {name, family}
+
+  // organization   Organization? @relation(fields: [organizationId], references: [id])
+  voided             Boolean           @default(false)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  assignedProperties PropertyAmenity[]
+
+  @@unique([name, organizationId])
+}
+
+model Category {
+  id             String             @id @default(uuid()) @db.Uuid
+  name           String
+  organizationId String?           
+  icon           Json // {name, family}
+  // organization   Organization? @relation(fields: [organizationId], references: [id])
+  voided         Boolean            @default(false)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  properties     PropertyCategory[]
+
+  @@unique([name, organizationId])
+}
+
+enum PropertyStatus {
+  DRAFT //  signifies that the record is incomplete and actively being worked on. It allows for saving partial data without requiring full validation.
+  BLOCKED //Admin-flagged as problematic (fraud, legal issues, etc.)
+  ARCHIVED // Historic data; property no longer tracked actively (e.g., sold long ago)
+  APPROVED // has successfully passed all internal validation and review processes and considered complete, accurate, and fully compliant with internal standards hence eligible for Listing 
+  REJECTED // Rejected due to invalid/incomplete/unverifiable information
+  PAUSED // Temporarily not in use (e.g., maintenance, dispute, owner unavailable)
+  PENDING // Property has been submitted by an agent/user and is under internal review
+}
+
+model PropertyStatusHistory {
+  id             String         @id @default(uuid()) @db.Uuid
+  propertyId     String         @db.Uuid
+  property       Property       @relation(fields: [propertyId], onDelete: Cascade, references: [id])
+  previousStatus PropertyStatus
+  newStatus      PropertyStatus
+  changedBy      String?
+  reason         String?        @db.Text
+  createdAt      DateTime       @default(now())
+}
+
+model Property {
+  id             String  @id @default(uuid()) @db.Uuid
+  propertyNumber String  @unique
+  name           String
+  description    String? @db.Text
+  thumbnail      String?
+  isVirtual      Boolean @default(false) // used to group or organize real properties for logical, operational, or hierarchical purposes.Also perfome batch operations on related real properties
+
+  status PropertyStatus @default(DRAFT)
+
+  organizationId String
+  organization   Json?
+  addressId      String
+  address        Json?
+
+  // Relationships
+  relationshipsAsA Relationship[]      @relation("PropertyARelationship")
+  relationshipsAsB Relationship[]      @relation("PropertyBRelationship")
+  attributes       PropertyAttribute[]
+  media            PropertyMedia[]
+  amenities        PropertyAmenity[]
+  categories       PropertyCategory[]
+
+  createdBy     String                  @db.Uuid
+  voided        Boolean                 @default(false)
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  statusHistory PropertyStatusHistory[]
+}
+
+model RelationshipType {
+  id            String         @id @default(uuid()) @db.Uuid
+  description   String?        @db.Text
+  aIsToB        String         @unique // e.g., "is parent of", "contains", "has parking"
+  bIsToA        String         @unique // e.g., "is child of", "is part of", "belongs to parking"
+  voided        Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  relationships Relationship[]
+
+  @@unique([aIsToB, bIsToA])
+}
+
+model Relationship {
+  id          String    @id @default(uuid()) @db.Uuid
+  propertyAId String    @db.Uuid
+  propertyBId String    @db.Uuid
+  startDate   DateTime
+  endDate     DateTime?
+
+  typeId String           @db.Uuid
+  type   RelationshipType @relation(fields: [typeId], onDelete: Cascade, references: [id])
+
+  propertyA Property @relation("PropertyARelationship", fields: [propertyAId], references: [id], onDelete: Cascade)
+  propertyB Property @relation("PropertyBRelationship", fields: [propertyBId], references: [id], onDelete: Cascade)
+
+  voided    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([propertyAId, propertyBId, typeId])
+}
+
+model PropertyMedia {
+  id          String            @id @default(uuid()) @db.Uuid
+  propertyId  String            @db.Uuid
+  type        PropertyMediaType
+  url         String
+  title       String?
+  description String?           @db.Text
+  metadata    Json? // Additional media metadata like meme type, size,e.t.c
+  order       Int               @default(0)
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  voided    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PropertyMediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  TOUR_3D
+}
+
+model PropertyAttribute {
+  id          String @id @default(uuid()) @db.Uuid
+  propertyId  String @db.Uuid
+  attributeId String @db.Uuid
+  value       String // Custom value for this property
+
+  property  Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  attribute AttributeType @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+
+  voided    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([propertyId, attributeId])
+}
+
+model PropertyAmenity {
+  id         String @id @default(uuid()) @db.Uuid
+  propertyId String @db.Uuid
+  amenityId  String @db.Uuid
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  amenity  Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  voided    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([propertyId, amenityId])
+}
+
+model PropertyCategory {
+  id         String @id @default(uuid()) @db.Uuid
+  propertyId String @db.Uuid
+  categoryId String @db.Uuid
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  voided    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([propertyId, categoryId])
+}

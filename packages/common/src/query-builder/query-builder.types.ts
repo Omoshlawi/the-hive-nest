@@ -1,9 +1,9 @@
 import z from 'zod';
 import {
   sortAndRepresentationSchema,
-  paginationQuerySchema,
-  customRepresentationQuerySchema,
-  orderQuerySchema,
+  PaginationQuerySchema,
+  CustomRepresentationQuerySchema,
+  OrderQuerySchema,
 } from './query-builder.utils';
 
 export interface PaginationControls {
@@ -20,14 +20,14 @@ export interface PaginatedResult<T> {
   pagination: PaginationControls;
 }
 
-export type PaginationQuery = z.infer<typeof paginationQuerySchema>;
+export type PaginationQuery = z.infer<typeof PaginationQuerySchema>;
 export type SortAndRepresentionQuery = z.infer<
   typeof sortAndRepresentationSchema
 >;
 export type CustomRepresentationQuery = z.infer<
-  typeof customRepresentationQuerySchema
+  typeof CustomRepresentationQuerySchema
 >;
-export type SortQuery = z.infer<typeof orderQuerySchema>;
+export type SortQuery = z.infer<typeof OrderQuerySchema>;
 
 export type FunctionFirstArgument<T> = T extends (...args: any[]) => any
   ? Parameters<T>[0]

@@ -13,7 +13,7 @@ export class SortService {
    * @param queryString - Comma-separated field names, optionally prefixed with '-' for desc
    * @returns Object with orderBy property containing the parsed sort configuration
    */
-  buildSortQuery(queryString?: string) {
+  buildSortQuery(queryString?: string): Record<string, any> {
     if (!queryString?.trim()) {
       return {};
     }
