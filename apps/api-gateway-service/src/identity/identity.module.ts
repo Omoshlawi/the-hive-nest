@@ -20,7 +20,7 @@ import {
  */
 @Module({
   imports: [
-    QueryBuilderModule,
+    QueryBuilderModule.register(),
     HiveServiceModule.forRoot({
       services: [],
       enableHeartbeat: true,

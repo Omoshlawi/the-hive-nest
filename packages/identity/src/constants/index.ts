@@ -1,12 +1,12 @@
 import path from 'path';
-import { protobufPackage } from '../types/identity.service';
+import { HIVE_IDENTITY_V1_PACKAGE_NAME } from '../types/identity.service';
 
 export const IDENTITY_HTTP_SERVER_CONFIG_TOKEN = 'IDENTITY_HTTP_SERVER_CONFIG';
 export const IDENTITY_RPC_SERVER_CONFIG_TOKEN = 'IDENTITY_RPC_SERVER_CONFIG';
 export const HIVE_IDENTITY_SERVICE_NAME = '@hive/identity-service';
 export const IDENTITY_PACKAGE = Object.freeze({
   V1: {
-    NAME: protobufPackage,
+    NAME: HIVE_IDENTITY_V1_PACKAGE_NAME,
     PROTO_PATH: require.resolve(
       path.join(__dirname, '../proto/identity.service.proto'),
     ),
