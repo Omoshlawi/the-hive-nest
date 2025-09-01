@@ -1,6 +1,9 @@
 syntax = 'proto3';
 
 import "amenity.message.proto";
+import "property.message.proto";
+import "category.message.proto";
+import "attribute-type.message.proto";
 
 package hive.property.v1;
 
@@ -11,5 +14,27 @@ service Property {
     rpc createAmenity(CreateAmenityRequest) returns (GetAmenityResponse){};
     rpc updateAmenity(UpdateAmenityRequest) returns (GetAmenityResponse){};
     rpc deleteAmenity(DeleteAmenityRequest) returns (GetAmenityResponse){};
+
+    // categories
+    rpc queryCategories(QueryCategoryRequest) returns (QueryCategoryResponse){};
+    rpc getCategory(GetCategoryRequest) returns (GetCategoryResponse){};
+    rpc createCategory(CreateCategoryRequest) returns (GetCategoryResponse){};
+    rpc updateCategory(UpdateCategoryRequest) returns (GetCategoryResponse){};
+    rpc deleteCategory(DeleteCategoryRequest) returns (GetCategoryResponse){};
+
+    // attribute types
+    rpc queryAttributeTypes(QueryAttributeTypeRequest) returns (QueryAttributeTypeResponse){};
+    rpc getAttributeType(GetAttributeTypeRequest) returns (GetAttributeTypeResponse){};
+    rpc createAttributeType(CreateAttributeTypeRequest) returns (GetAttributeTypeResponse){};
+    rpc updateAttributeType(UpdateAttributeTypeRequest) returns (GetAttributeTypeResponse){};
+    rpc deleteAttributeType(DeleteAttributeTypeRequest) returns (GetAttributeTypeResponse){};
+
+    // Property
+    rpc queryProperties(QueryPropertyRequest) returns (QueryPropertyResponse){};
+    rpc getProperty(GetPropertyRequest) returns (GetPropertyResponse){};
+    rpc createProperty(CreatePropertyRequest) returns (GetPropertyResponse){};
+    rpc updateProperty(UpdatePropertyRequest) returns (GetPropertyResponse){};
+    rpc deleteProperty(DeletePropertyRequest) returns (GetPropertyResponse){};
+
 
 }

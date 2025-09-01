@@ -1,0 +1,52 @@
+syntax = 'proto3';
+
+import "common.message.proto";
+
+
+message Category {
+    string id = 1;
+    string name = 2;
+    optional string organizationId = 3;
+    Icon icon = 4;
+    bool voided = 5;
+    string createdAt = 6;
+    string updatedAt = 7;
+    // repeated PropertyCategory properties = 8; // TODO: define
+}
+
+message QueryCategoryRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string search = 2;
+    optional string organizationId = 3;
+    optional bool includeVoided = 4;
+}
+
+message QueryCategoryResponse {
+    repeated Category data = 1;
+    map<string, string> metadata = 2; 
+}
+
+message CreateCategoryRequest {
+    QueryBuilder queryBuilder = 1;
+    string name = 2;
+    optional string organizationId = 3;
+    Icon icon = 4;
+}
+message UpdateCategoryRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string name = 2;
+    optional Icon icon = 3;
+}
+message GetCategoryRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+}
+message GetCategoryResponse {
+    Category data = 1;
+    map<string, string> metadata = 2; 
+}
+message DeleteCategoryRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+    optional bool purge = 3;
+}

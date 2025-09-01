@@ -16,6 +16,33 @@ import {
   QueryAmenityResponse,
   UpdateAmenityRequest,
 } from "./amenity.message";
+import {
+  CreateAttributeTypeRequest,
+  DeleteAttributeTypeRequest,
+  GetAttributeTypeRequest,
+  GetAttributeTypeResponse,
+  QueryAttributeTypeRequest,
+  QueryAttributeTypeResponse,
+  UpdateAttributeTypeRequest,
+} from "./attribute-type.message";
+import {
+  CreateCategoryRequest,
+  DeleteCategoryRequest,
+  GetCategoryRequest,
+  GetCategoryResponse,
+  QueryCategoryRequest,
+  QueryCategoryResponse,
+  UpdateCategoryRequest,
+} from "./category.message";
+import {
+  CreatePropertyRequest,
+  DeletePropertyRequest,
+  GetPropertyRequest,
+  GetPropertyResponse,
+  QueryPropertyRequest,
+  QueryPropertyResponse,
+  UpdatePropertyRequest,
+} from "./property.message";
 
 export const protobufPackage = "hive.property.v1";
 
@@ -33,6 +60,42 @@ export interface PropertyClient {
   updateAmenity(request: UpdateAmenityRequest): Observable<GetAmenityResponse>;
 
   deleteAmenity(request: DeleteAmenityRequest): Observable<GetAmenityResponse>;
+
+  /** categories */
+
+  queryCategories(request: QueryCategoryRequest): Observable<QueryCategoryResponse>;
+
+  getCategory(request: GetCategoryRequest): Observable<GetCategoryResponse>;
+
+  createCategory(request: CreateCategoryRequest): Observable<GetCategoryResponse>;
+
+  updateCategory(request: UpdateCategoryRequest): Observable<GetCategoryResponse>;
+
+  deleteCategory(request: DeleteCategoryRequest): Observable<GetCategoryResponse>;
+
+  /** attribute types */
+
+  queryAttributeTypes(request: QueryAttributeTypeRequest): Observable<QueryAttributeTypeResponse>;
+
+  getAttributeType(request: GetAttributeTypeRequest): Observable<GetAttributeTypeResponse>;
+
+  createAttributeType(request: CreateAttributeTypeRequest): Observable<GetAttributeTypeResponse>;
+
+  updateAttributeType(request: UpdateAttributeTypeRequest): Observable<GetAttributeTypeResponse>;
+
+  deleteAttributeType(request: DeleteAttributeTypeRequest): Observable<GetAttributeTypeResponse>;
+
+  /** Property */
+
+  queryProperties(request: QueryPropertyRequest): Observable<QueryPropertyResponse>;
+
+  getProperty(request: GetPropertyRequest): Observable<GetPropertyResponse>;
+
+  createProperty(request: CreatePropertyRequest): Observable<GetPropertyResponse>;
+
+  updateProperty(request: UpdatePropertyRequest): Observable<GetPropertyResponse>;
+
+  deleteProperty(request: DeletePropertyRequest): Observable<GetPropertyResponse>;
 }
 
 export interface PropertyController {
@@ -57,11 +120,98 @@ export interface PropertyController {
   deleteAmenity(
     request: DeleteAmenityRequest,
   ): Promise<GetAmenityResponse> | Observable<GetAmenityResponse> | GetAmenityResponse;
+
+  /** categories */
+
+  queryCategories(
+    request: QueryCategoryRequest,
+  ): Promise<QueryCategoryResponse> | Observable<QueryCategoryResponse> | QueryCategoryResponse;
+
+  getCategory(
+    request: GetCategoryRequest,
+  ): Promise<GetCategoryResponse> | Observable<GetCategoryResponse> | GetCategoryResponse;
+
+  createCategory(
+    request: CreateCategoryRequest,
+  ): Promise<GetCategoryResponse> | Observable<GetCategoryResponse> | GetCategoryResponse;
+
+  updateCategory(
+    request: UpdateCategoryRequest,
+  ): Promise<GetCategoryResponse> | Observable<GetCategoryResponse> | GetCategoryResponse;
+
+  deleteCategory(
+    request: DeleteCategoryRequest,
+  ): Promise<GetCategoryResponse> | Observable<GetCategoryResponse> | GetCategoryResponse;
+
+  /** attribute types */
+
+  queryAttributeTypes(
+    request: QueryAttributeTypeRequest,
+  ): Promise<QueryAttributeTypeResponse> | Observable<QueryAttributeTypeResponse> | QueryAttributeTypeResponse;
+
+  getAttributeType(
+    request: GetAttributeTypeRequest,
+  ): Promise<GetAttributeTypeResponse> | Observable<GetAttributeTypeResponse> | GetAttributeTypeResponse;
+
+  createAttributeType(
+    request: CreateAttributeTypeRequest,
+  ): Promise<GetAttributeTypeResponse> | Observable<GetAttributeTypeResponse> | GetAttributeTypeResponse;
+
+  updateAttributeType(
+    request: UpdateAttributeTypeRequest,
+  ): Promise<GetAttributeTypeResponse> | Observable<GetAttributeTypeResponse> | GetAttributeTypeResponse;
+
+  deleteAttributeType(
+    request: DeleteAttributeTypeRequest,
+  ): Promise<GetAttributeTypeResponse> | Observable<GetAttributeTypeResponse> | GetAttributeTypeResponse;
+
+  /** Property */
+
+  queryProperties(
+    request: QueryPropertyRequest,
+  ): Promise<QueryPropertyResponse> | Observable<QueryPropertyResponse> | QueryPropertyResponse;
+
+  getProperty(
+    request: GetPropertyRequest,
+  ): Promise<GetPropertyResponse> | Observable<GetPropertyResponse> | GetPropertyResponse;
+
+  createProperty(
+    request: CreatePropertyRequest,
+  ): Promise<GetPropertyResponse> | Observable<GetPropertyResponse> | GetPropertyResponse;
+
+  updateProperty(
+    request: UpdatePropertyRequest,
+  ): Promise<GetPropertyResponse> | Observable<GetPropertyResponse> | GetPropertyResponse;
+
+  deleteProperty(
+    request: DeletePropertyRequest,
+  ): Promise<GetPropertyResponse> | Observable<GetPropertyResponse> | GetPropertyResponse;
 }
 
 export function PropertyControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["queryAmenities", "getAmenity", "createAmenity", "updateAmenity", "deleteAmenity"];
+    const grpcMethods: string[] = [
+      "queryAmenities",
+      "getAmenity",
+      "createAmenity",
+      "updateAmenity",
+      "deleteAmenity",
+      "queryCategories",
+      "getCategory",
+      "createCategory",
+      "updateCategory",
+      "deleteCategory",
+      "queryAttributeTypes",
+      "getAttributeType",
+      "createAttributeType",
+      "updateAttributeType",
+      "deleteAttributeType",
+      "queryProperties",
+      "getProperty",
+      "createProperty",
+      "updateProperty",
+      "deleteProperty",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("Property", method)(constructor.prototype[method], method, descriptor);

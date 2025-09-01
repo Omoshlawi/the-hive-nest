@@ -1,0 +1,52 @@
+syntax = 'proto3';
+
+import "common.message.proto";
+
+
+message Property {
+    string id = 1;
+    string name = 2;
+    optional string organizationId = 3;
+    Icon icon = 4;
+    bool voided = 5;
+    string createdAt = 6;
+    string updatedAt = 7;
+    // repeated PropertyAttribute assignedProperties = 8; // TODO: define
+}
+
+message QueryPropertyRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string search = 2;
+    optional string organizationId = 3;
+    optional bool includeVoided = 4;
+}
+
+message QueryPropertyResponse {
+    repeated Property data = 1;
+    map<string, string> metadata = 2; 
+}
+
+message CreatePropertyRequest {
+    QueryBuilder queryBuilder = 1;
+    string name = 2;
+    optional string organizationId = 3;
+    Icon icon = 4;
+}
+message UpdatePropertyRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string name = 2;
+    optional Icon icon = 3;
+}
+message GetPropertyRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+}
+message GetPropertyResponse {
+    Property data = 1;
+    map<string, string> metadata = 2; 
+}
+message DeletePropertyRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+    optional bool purge = 3;
+}
