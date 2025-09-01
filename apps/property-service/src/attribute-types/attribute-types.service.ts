@@ -27,7 +27,7 @@ export class AttributeTypesService {
 
   async getAll(query: QueryAttributeTypeDto) {
     const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.category.findMany
+      typeof this.prismaService.attributeType.findMany
     > = {
       where: {
         AND: [
@@ -44,8 +44,8 @@ export class AttributeTypesService {
       ...this.sortService.buildSortQuery(query.orderBy),
     };
     const [data, totalCount] = await Promise.all([
-      this.prismaService.category.findMany(dbQuery),
-      this.prismaService.category.count(pick(dbQuery, 'where')),
+      this.prismaService.attributeType.findMany(dbQuery),
+      this.prismaService.attributeType.count(pick(dbQuery, 'where')),
     ]);
     return {
       data,
@@ -54,7 +54,7 @@ export class AttributeTypesService {
   }
 
   async getById(query: GetAttributeTypeDto) {
-    const data = await this.prismaService.category.findUnique({
+    const data = await this.prismaService.attributeType.findUnique({
       where: {
         id: query.id,
       },
@@ -68,7 +68,7 @@ export class AttributeTypesService {
 
   async create(query: CreatAttributeTypeDto) {
     const { v, ...props } = query;
-    const data = await this.prismaService.category.create({
+    const data = await this.prismaService.attributeType.create({
       data: props,
       ...this.representationService.buildCustomRepresentationQuery(v),
     });
@@ -81,7 +81,7 @@ export class AttributeTypesService {
 
   async update(id: string, query: UpdateAttributeTypeDto) {
     const { v, ...props } = query;
-    const data = this.prismaService.category.update({
+    const data = this.prismaService.attributeType.update({
       where: { id },
       data: props,
       ...this.representationService.buildCustomRepresentationQuery(v),
@@ -96,12 +96,12 @@ export class AttributeTypesService {
     const { v, purge } = query;
     let data: AttributeType;
     if (purge) {
-      data = await this.prismaService.category.delete({
+      data = await this.prismaService.attributeType.delete({
         where: { id },
         ...this.representationService.buildCustomRepresentationQuery(v),
       });
     } else {
-      data = await this.prismaService.category.update({
+      data = await this.prismaService.attributeType.update({
         where: { id },
         data: { voided: true },
         ...this.representationService.buildCustomRepresentationQuery(v),
