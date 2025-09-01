@@ -92,8 +92,8 @@ export class CategoriesService {
       metadata: {},
     };
   }
-  async delete(id: string, query: DeleteCategoryDto) {
-    const { v, purge } = query;
+  async delete(query: DeleteCategoryDto) {
+    const { v, purge, id } = query;
     let data: Category;
     if (purge) {
       data = await this.prismaService.category.delete({

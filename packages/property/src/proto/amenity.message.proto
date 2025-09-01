@@ -36,6 +36,8 @@ message UpdateAmenityRequest {
     QueryBuilder queryBuilder = 1;
     optional string name = 2;
     optional Icon icon = 3;
+    string id = 4;
+
 }
 message GetAmenityRequest {
     QueryBuilder queryBuilder = 1;

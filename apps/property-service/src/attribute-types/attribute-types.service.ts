@@ -92,8 +92,8 @@ export class AttributeTypesService {
       metadata: {},
     };
   }
-  async delete(id: string, query: DeleteAttributeTypeDto) {
-    const { v, purge } = query;
+  async delete(query: DeleteAttributeTypeDto) {
+    const { v, purge, id } = query;
     let data: AttributeType;
     if (purge) {
       data = await this.prismaService.attributeType.delete({

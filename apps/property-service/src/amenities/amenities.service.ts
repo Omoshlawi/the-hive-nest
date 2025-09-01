@@ -49,7 +49,7 @@ export class AmenitiesService {
     ]);
     return {
       data,
-      metadata: { totalCount },
+      metadata: { totalCount: totalCount.toString() },
     };
   }
 
@@ -92,8 +92,8 @@ export class AmenitiesService {
       metadata: {},
     };
   }
-  async delete(id: string, query: DeleteAmenityDto) {
-    const { v, purge } = query;
+  async delete(query: DeleteAmenityDto) {
+    const { v, purge, id } = query;
     let data: Amenity;
     if (purge) {
       data = await this.prismaService.amenity.delete({
