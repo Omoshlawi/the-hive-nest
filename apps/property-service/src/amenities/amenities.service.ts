@@ -5,11 +5,11 @@ import {
   SortService,
 } from '@hive/common';
 import {
-  CreatAmenityDto,
-  DeleteAmenityDto,
-  GetAmenityDto,
-  QueryAmenityDto,
-  UpdateAmenityDto,
+  CreateAmenityRequest,
+  DeleteAmenityRequest,
+  GetAmenityRequest,
+  QueryAmenityRequest,
+  UpdateAmenityRequest,
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
 import { Amenity } from 'generated/prisma';
@@ -25,13 +25,13 @@ export class AmenitiesService {
     private readonly representationService: CustomRepresentationService,
   ) {}
 
-  async getAll(query: QueryAmenityDto) {
+  async getAll(query: QueryAmenityRequest) {
     const dbQuery: FunctionFirstArgument<
       typeof this.prismaService.amenity.findMany
     > = {
       where: {
         AND: [
-          { voided: query?.includeVoided ? undefined : false, OR: [{}] },
+          { voided: query?.includeVoided ? undefined : false },
           {
             OR: query.search
               ? [{ name: { contains: query.search } }]
@@ -39,9 +39,11 @@ export class AmenitiesService {
           },
         ],
       },
-      ...this.paginationService.buildPaginationQuery(query),
-      ...this.representationService.buildCustomRepresentationQuery(query.v),
-      ...this.sortService.buildSortQuery(query.orderBy),
+      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
+      ...this.representationService.buildCustomRepresentationQuery(
+        query.queryBuilder?.v,
+      ),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
     };
     const [data, totalCount] = await Promise.all([
       this.prismaService.amenity.findMany(dbQuery),
@@ -53,12 +55,14 @@ export class AmenitiesService {
     };
   }
 
-  async getById(id: string, query: GetAmenityDto) {
+  async getById(query: GetAmenityRequest) {
     const data = await this.prismaService.amenity.findUnique({
       where: {
-        id: id,
+        id: query.id,
       },
-      ...this.representationService.buildCustomRepresentationQuery(query.v),
+      ...this.representationService.buildCustomRepresentationQuery(
+        query.queryBuilder?.v,
+      ),
     });
     return {
       data,
@@ -66,11 +70,13 @@ export class AmenitiesService {
     };
   }
 
-  async create(query: CreatAmenityDto) {
-    const { v, ...props } = query;
+  async create(query: CreateAmenityRequest) {
+    const { queryBuilder, ...props } = query;
     const data = await this.prismaService.amenity.create({
-      data: props,
-      ...this.representationService.buildCustomRepresentationQuery(v),
+      data: props as any,
+      ...this.representationService.buildCustomRepresentationQuery(
+        queryBuilder?.v,
+      ),
     });
 
     return {
@@ -79,12 +85,14 @@ export class AmenitiesService {
     };
   }
 
-  async update(id: string, query: UpdateAmenityDto) {
-    const { v, ...props } = query;
-    const data = this.prismaService.amenity.update({
+  async update(query: UpdateAmenityRequest) {
+    const { queryBuilder, id, ...props } = query;
+    const data = await this.prismaService.amenity.update({
       where: { id },
-      data: props,
-      ...this.representationService.buildCustomRepresentationQuery(v),
+      data: props as any,
+      ...this.representationService.buildCustomRepresentationQuery(
+        queryBuilder?.v,
+      ),
     });
 
     return {
@@ -92,19 +100,23 @@ export class AmenitiesService {
       metadata: {},
     };
   }
-  async delete(id: string, query: DeleteAmenityDto) {
-    const { v, purge } = query;
+  async delete(query: DeleteAmenityRequest) {
+    const { id, purge, queryBuilder } = query;
     let data: Amenity;
     if (purge) {
       data = await this.prismaService.amenity.delete({
         where: { id },
-        ...this.representationService.buildCustomRepresentationQuery(v),
+        ...this.representationService.buildCustomRepresentationQuery(
+          queryBuilder?.v,
+        ),
       });
     } else {
       data = await this.prismaService.amenity.update({
         where: { id },
         data: { voided: true },
-        ...this.representationService.buildCustomRepresentationQuery(v),
+        ...this.representationService.buildCustomRepresentationQuery(
+          queryBuilder?.v,
+        ),
       });
     }
     return {

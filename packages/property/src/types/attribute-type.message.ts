@@ -48,6 +48,7 @@ export interface UpdateAttributeTypeRequest {
   queryBuilder: QueryBuilder | undefined;
   name?: string | undefined;
   icon?: Icon | undefined;
+  id: string;
 }
 
 export interface GetAttributeTypeRequest {

@@ -1,6 +1,6 @@
 import z from 'zod';
 import {
-  sortAndRepresentationSchema,
+  SortAndRepresentationSchema,
   PaginationQuerySchema,
   CustomRepresentationQuerySchema,
   OrderQuerySchema,
@@ -22,7 +22,7 @@ export interface PaginatedResult<T> {
 
 export type PaginationQuery = z.infer<typeof PaginationQuerySchema>;
 export type SortAndRepresentionQuery = z.infer<
-  typeof sortAndRepresentationSchema
+  typeof SortAndRepresentationSchema
 >;
 export type CustomRepresentationQuery = z.infer<
   typeof CustomRepresentationQuerySchema

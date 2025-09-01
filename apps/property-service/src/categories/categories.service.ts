@@ -1,5 +1,3 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import {
   CustomRepresentationService,
   FunctionFirstArgument,
@@ -7,14 +5,16 @@ import {
   SortService,
 } from '@hive/common';
 import {
-  CreatCategoryDto,
-  DeleteCategoryDto,
-  GetCategoryDto,
-  QueryCategoryDto,
-  UpdateCategoryDto,
+  CreateCategoryRequest,
+  DeleteCategoryRequest,
+  GetCategoryRequest,
+  QueryCategoryRequest,
+  UpdateCategoryRequest,
 } from '@hive/property';
-import { Category } from '../../generated/prisma';
+import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
+import { Category } from '../../generated/prisma';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CategoriesService {
@@ -25,7 +25,7 @@ export class CategoriesService {
     private readonly representationService: CustomRepresentationService,
   ) {}
 
-  async getAll(query: QueryCategoryDto) {
+  async getAll(query: QueryCategoryRequest) {
     const dbQuery: FunctionFirstArgument<
       typeof this.prismaService.category.findMany
     > = {
@@ -39,9 +39,11 @@ export class CategoriesService {
           },
         ],
       },
-      ...this.paginationService.buildPaginationQuery(query),
-      ...this.representationService.buildCustomRepresentationQuery(query.v),
-      ...this.sortService.buildSortQuery(query.orderBy),
+      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
+      ...this.representationService.buildCustomRepresentationQuery(
+        query.queryBuilder?.v,
+      ),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
     };
     const [data, totalCount] = await Promise.all([
       this.prismaService.category.findMany(dbQuery),
@@ -53,12 +55,14 @@ export class CategoriesService {
     };
   }
 
-  async getById(id: string, query: GetCategoryDto) {
+  async getById(query: GetCategoryRequest) {
     const data = await this.prismaService.category.findUnique({
       where: {
-        id: id,
+        id: query.id,
       },
-      ...this.representationService.buildCustomRepresentationQuery(query.v),
+      ...this.representationService.buildCustomRepresentationQuery(
+        query.queryBuilder?.v,
+      ),
     });
     return {
       data,
@@ -66,11 +70,13 @@ export class CategoriesService {
     };
   }
 
-  async create(query: CreatCategoryDto) {
-    const { v, ...props } = query;
+  async create(query: CreateCategoryRequest) {
+    const { queryBuilder, ...props } = query;
     const data = await this.prismaService.category.create({
-      data: props,
-      ...this.representationService.buildCustomRepresentationQuery(v),
+      data: props as any,
+      ...this.representationService.buildCustomRepresentationQuery(
+        queryBuilder?.v,
+      ),
     });
 
     return {
@@ -79,12 +85,14 @@ export class CategoriesService {
     };
   }
 
-  async update(id: string, query: UpdateCategoryDto) {
-    const { v, ...props } = query;
-    const data = this.prismaService.category.update({
+  async update(query: UpdateCategoryRequest) {
+    const { queryBuilder, id, ...props } = query;
+    const data = await this.prismaService.category.update({
       where: { id },
-      data: props,
-      ...this.representationService.buildCustomRepresentationQuery(v),
+      data: props as any,
+      ...this.representationService.buildCustomRepresentationQuery(
+        queryBuilder?.v,
+      ),
     });
 
     return {
@@ -92,19 +100,23 @@ export class CategoriesService {
       metadata: {},
     };
   }
-  async delete(id: string, query: DeleteCategoryDto) {
-    const { v, purge } = query;
+  async delete(query: DeleteCategoryRequest) {
+    const { queryBuilder, id, purge } = query;
     let data: Category;
     if (purge) {
       data = await this.prismaService.category.delete({
         where: { id },
-        ...this.representationService.buildCustomRepresentationQuery(v),
+        ...this.representationService.buildCustomRepresentationQuery(
+          queryBuilder?.v,
+        ),
       });
     } else {
       data = await this.prismaService.category.update({
         where: { id },
         data: { voided: true },
-        ...this.representationService.buildCustomRepresentationQuery(v),
+        ...this.representationService.buildCustomRepresentationQuery(
+          queryBuilder?.v,
+        ),
       });
     }
     return {

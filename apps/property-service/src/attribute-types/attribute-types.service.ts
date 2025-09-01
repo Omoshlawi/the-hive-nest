@@ -1,5 +1,3 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import {
   CustomRepresentationService,
   FunctionFirstArgument,
@@ -7,14 +5,16 @@ import {
   SortService,
 } from '@hive/common';
 import {
-  CreatAttributeTypeDto,
-  DeleteAttributeTypeDto,
-  GetAttributeTypeDto,
-  QueryAttributeTypeDto,
-  UpdateAttributeTypeDto,
+  CreateAttributeTypeRequest,
+  DeleteAttributeTypeRequest,
+  GetAttributeTypeRequest,
+  QueryAttributeTypeRequest,
+  UpdateAttributeTypeRequest
 } from '@hive/property';
-import { AttributeType } from '../../generated/prisma';
+import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
+import { AttributeType } from '../../generated/prisma';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AttributeTypesService {
@@ -25,13 +25,13 @@ export class AttributeTypesService {
     private readonly representationService: CustomRepresentationService,
   ) {}
 
-  async getAll(query: QueryAttributeTypeDto) {
+  async getAll(query: QueryAttributeTypeRequest) {
     const dbQuery: FunctionFirstArgument<
       typeof this.prismaService.attributeType.findMany
     > = {
       where: {
         AND: [
-          { voided: query?.includeVoided ? undefined : false, OR: [{}] },
+          { voided: query?.includeVoided ? undefined : false },
           {
             OR: query.search
               ? [{ name: { contains: query.search } }]
@@ -39,9 +39,11 @@ export class AttributeTypesService {
           },
         ],
       },
-      ...this.paginationService.buildPaginationQuery(query),
-      ...this.representationService.buildCustomRepresentationQuery(query.v),
-      ...this.sortService.buildSortQuery(query.orderBy),
+      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
+      ...this.representationService.buildCustomRepresentationQuery(
+        query.queryBuilder?.v,
+      ),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
     };
     const [data, totalCount] = await Promise.all([
       this.prismaService.attributeType.findMany(dbQuery),
@@ -53,12 +55,14 @@ export class AttributeTypesService {
     };
   }
 
-  async getById(id: string, query: GetAttributeTypeDto) {
+  async getById(query: GetAttributeTypeRequest) {
     const data = await this.prismaService.attributeType.findUnique({
       where: {
-        id: id,
+        id: query.id,
       },
-      ...this.representationService.buildCustomRepresentationQuery(query.v),
+      ...this.representationService.buildCustomRepresentationQuery(
+        query.queryBuilder?.v,
+      ),
     });
     return {
       data,
@@ -66,11 +70,13 @@ export class AttributeTypesService {
     };
   }
 
-  async create(query: CreatAttributeTypeDto) {
-    const { v, ...props } = query;
+  async create(query: CreateAttributeTypeRequest) {
+    const { queryBuilder, ...props } = query;
     const data = await this.prismaService.attributeType.create({
-      data: props,
-      ...this.representationService.buildCustomRepresentationQuery(v),
+      data: props as any,
+      ...this.representationService.buildCustomRepresentationQuery(
+        queryBuilder?.v,
+      ),
     });
 
     return {
@@ -79,12 +85,14 @@ export class AttributeTypesService {
     };
   }
 
-  async update(id: string, query: UpdateAttributeTypeDto) {
-    const { v, ...props } = query;
-    const data = this.prismaService.attributeType.update({
+  async update(query: UpdateAttributeTypeRequest) {
+    const { queryBuilder, id, ...props } = query;
+    const data = await this.prismaService.attributeType.update({
       where: { id },
-      data: props,
-      ...this.representationService.buildCustomRepresentationQuery(v),
+      data: props as any,
+      ...this.representationService.buildCustomRepresentationQuery(
+        queryBuilder?.v,
+      ),
     });
 
     return {
@@ -92,19 +100,23 @@ export class AttributeTypesService {
       metadata: {},
     };
   }
-  async delete(id: string, query: DeleteAttributeTypeDto) {
-    const { v, purge } = query;
+  async delete(query: DeleteAttributeTypeRequest) {
+    const { queryBuilder, id, purge } = query;
     let data: AttributeType;
     if (purge) {
       data = await this.prismaService.attributeType.delete({
         where: { id },
-        ...this.representationService.buildCustomRepresentationQuery(v),
+        ...this.representationService.buildCustomRepresentationQuery(
+          queryBuilder?.v,
+        ),
       });
     } else {
       data = await this.prismaService.attributeType.update({
         where: { id },
         data: { voided: true },
-        ...this.representationService.buildCustomRepresentationQuery(v),
+        ...this.representationService.buildCustomRepresentationQuery(
+          queryBuilder?.v,
+        ),
       });
     }
     return {

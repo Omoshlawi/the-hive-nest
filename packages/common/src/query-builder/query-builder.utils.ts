@@ -1,3 +1,4 @@
+import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
 
 export const PaginationQuerySchema = z.object({
@@ -19,7 +20,7 @@ export const CustomRepresentationQuerySchema = z.object({
     .refine(validateRepString, { error: 'Invalid custom representation' }), // TODO Add regex validator
 });
 
-export const sortAndRepresentationSchema = z.object({
+export const SortAndRepresentationSchema = z.object({
   ...OrderQuerySchema.shape,
   ...CustomRepresentationQuerySchema.shape,
 });
@@ -28,6 +29,13 @@ export const QueryBuilderSchema = z.object({
   ...PaginationQuerySchema.shape,
   ...OrderQuerySchema.shape,
   ...CustomRepresentationQuerySchema.shape,
+});
+
+export const DeleteQuerySchema = CustomRepresentationQuerySchema.extend({
+  purge: z
+    .stringbool({ truthy: ['true', '1'], falsy: ['false', '0'] })
+    .optional()
+    .default(false),
 });
 
 function hasBalancedParentheses(str: string): boolean {
@@ -52,3 +60,14 @@ export function validateRepString(repString: string): boolean {
   // return hasBalancedParentheses(repString);
   return true;
 }
+
+export class PaginationQueryDto extends createZodDto(PaginationQuerySchema) {}
+export class OrderQueryDto extends createZodDto(OrderQuerySchema) {}
+export class CustomRepresentationQueryDto extends createZodDto(
+  CustomRepresentationQuerySchema,
+) {}
+export class SortAndRepresentationDto extends createZodDto(
+  SortAndRepresentationSchema,
+) {}
+export class QueryBuilderDto extends createZodDto(QueryBuilderSchema) {}
+export class DeleteQueryDto extends createZodDto(DeleteQuerySchema) {}
