@@ -1,9 +1,9 @@
 import { CustomRepresentationQueryDto, DeleteQueryDto } from '@hive/common';
 import {
-  CreatAmenityDto,
+  CreatAttributeTypeDto,
   HivePropertyServiceClient,
-  QueryAmenityDto,
-  UpdateAmenityDto,
+  QueryAttributeTypeDto,
+  UpdateAttributeTypeDto,
 } from '@hive/property';
 import {
   Body,
@@ -18,13 +18,13 @@ import {
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 
-@Controller('amenities')
-export class AmenitiesController {
+@Controller('attribute-types')
+export class AttributeTypesController {
   constructor(private propertyservice: HivePropertyServiceClient) {}
   @Get('/')
-  @ApiOperation({ summary: 'Query Amenities' })
-  queryAmenity(@Query() query: QueryAmenityDto) {
-    return this.propertyservice.queryAmenities({
+  @ApiOperation({ summary: 'Query attribute types' })
+  queryAttributeType(@Query() query: QueryAttributeTypeDto) {
+    return this.propertyservice.queryAttributeTypes({
       queryBuilder: {
         limit: query.limit,
         orderBy: query.orderBy,
@@ -37,46 +37,46 @@ export class AmenitiesController {
     });
   }
   @Post('/')
-  @ApiOperation({ summary: 'Create Amenity' })
-  createAmenity(
-    @Body() createAmenityDto: CreatAmenityDto,
+  @ApiOperation({ summary: 'Create AttributeType' })
+  createAttributeType(
+    @Body() createAttributeTypeDto: CreatAttributeTypeDto,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.createAmenity({
+    return this.propertyservice.createAttributeType({
       queryBuilder: {
         v: query.v,
       },
-      ...createAmenityDto,
+      ...createAttributeTypeDto,
     });
   }
   @Get('/:id')
-  @ApiOperation({ summary: 'Get Amenity' })
-  getAmenity(
+  @ApiOperation({ summary: 'Get AttributeType' })
+  getAttributeType(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.getAmenity({ id, queryBuilder: query });
+    return this.propertyservice.getAttributeType({ id, queryBuilder: query });
   }
   @Patch('/:id')
-  @ApiOperation({ summary: 'Update Amenity' })
-  updateAmenity(
+  @ApiOperation({ summary: 'Update AttributeType' })
+  updateAttributeType(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateAmenityDto: UpdateAmenityDto,
+    @Body() updateAttributeTypeDto: UpdateAttributeTypeDto,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.updateAmenity({
+    return this.propertyservice.updateAttributeType({
       id,
       queryBuilder: { v: query?.v },
-      ...updateAmenityDto,
+      ...updateAttributeTypeDto,
     });
   }
   @Delete('/:id')
-  @ApiOperation({ summary: 'Delete Amenity' })
-  deleteAmenity(
+  @ApiOperation({ summary: 'Delete AttributeType' })
+  deleteAttributeType(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,
   ) {
-    return this.propertyservice.deleteAmenity({
+    return this.propertyservice.deleteAttributeType({
       id,
       queryBuilder: { v: query.v },
       purge: query.purge,

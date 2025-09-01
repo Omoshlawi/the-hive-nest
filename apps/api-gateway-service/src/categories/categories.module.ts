@@ -1,15 +1,15 @@
-import { HiveServiceModule } from '@hive/registry';
 import { Module } from '@nestjs/common';
+import { CategoriesController } from './categories.controller';
+import { HiveServiceModule } from '@hive/registry';
 import { HivePropertyServiceClient } from '@hive/property';
-import { AmenitiesController } from './amenities.controller';
+
 @Module({
+  controllers: [CategoriesController],
   imports: [
     HiveServiceModule.forRoot({
       enableHeartbeat: false,
       services: [HivePropertyServiceClient],
     }),
   ],
-  providers: [],
-  controllers: [AmenitiesController],
 })
-export class AmenitiesModule {}
+export class CategoriesModule {}

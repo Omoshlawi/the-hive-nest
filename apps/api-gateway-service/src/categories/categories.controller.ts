@@ -1,9 +1,9 @@
 import { CustomRepresentationQueryDto, DeleteQueryDto } from '@hive/common';
 import {
-  CreatAmenityDto,
+  CreatCategoryDto,
   HivePropertyServiceClient,
-  QueryAmenityDto,
-  UpdateAmenityDto,
+  QueryCategoryDto,
+  UpdateCategoryDto,
 } from '@hive/property';
 import {
   Body,
@@ -17,14 +17,13 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-
-@Controller('amenities')
-export class AmenitiesController {
+@Controller('categories')
+export class CategoriesController {
   constructor(private propertyservice: HivePropertyServiceClient) {}
   @Get('/')
-  @ApiOperation({ summary: 'Query Amenities' })
-  queryAmenity(@Query() query: QueryAmenityDto) {
-    return this.propertyservice.queryAmenities({
+  @ApiOperation({ summary: 'Query Categories' })
+  queryCategory(@Query() query: QueryCategoryDto) {
+    return this.propertyservice.queryCategories({
       queryBuilder: {
         limit: query.limit,
         orderBy: query.orderBy,
@@ -37,46 +36,46 @@ export class AmenitiesController {
     });
   }
   @Post('/')
-  @ApiOperation({ summary: 'Create Amenity' })
-  createAmenity(
-    @Body() createAmenityDto: CreatAmenityDto,
+  @ApiOperation({ summary: 'Create Category' })
+  createCategory(
+    @Body() createCategoryDto: CreatCategoryDto,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.createAmenity({
+    return this.propertyservice.createCategory({
       queryBuilder: {
         v: query.v,
       },
-      ...createAmenityDto,
+      ...createCategoryDto,
     });
   }
   @Get('/:id')
-  @ApiOperation({ summary: 'Get Amenity' })
-  getAmenity(
+  @ApiOperation({ summary: 'Get Category' })
+  getCategory(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.getAmenity({ id, queryBuilder: query });
+    return this.propertyservice.getCategory({ id, queryBuilder: query });
   }
   @Patch('/:id')
-  @ApiOperation({ summary: 'Update Amenity' })
-  updateAmenity(
+  @ApiOperation({ summary: 'Update Category' })
+  updateCategory(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateAmenityDto: UpdateAmenityDto,
+    @Body() updateCategoryDto: UpdateCategoryDto,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.updateAmenity({
+    return this.propertyservice.updateCategory({
       id,
       queryBuilder: { v: query?.v },
-      ...updateAmenityDto,
+      ...updateCategoryDto,
     });
   }
   @Delete('/:id')
-  @ApiOperation({ summary: 'Delete Amenity' })
-  deleteAmenity(
+  @ApiOperation({ summary: 'Delete Category' })
+  deleteCategory(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,
   ) {
-    return this.propertyservice.deleteAmenity({
+    return this.propertyservice.deleteCategory({
       id,
       queryBuilder: { v: query.v },
       purge: query.purge,

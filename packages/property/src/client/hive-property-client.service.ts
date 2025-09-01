@@ -41,7 +41,7 @@ import { Observable } from 'rxjs';
   serviceName: PROPERTY_SERVICE_NAME,
   name: HIVE_PROPERTY_SERVICE_NAME,
 })
-export class HiveProperyServiceClient
+export class HivePropertyServiceClient
   implements OnModuleInit, OnModuleDestroy, PropertyClient
 {
   constructor(private client: HiveServiceClient) {}
@@ -77,50 +77,60 @@ export class HiveProperyServiceClient
   queryCategories(
     request: QueryCategoryRequest,
   ): Observable<QueryCategoryResponse> {
-    throw new Error('Method not implemented.');
+    const property = this.loadBalance();
+    return property.queryCategories(request);
   }
   getCategory(request: GetCategoryRequest): Observable<GetCategoryResponse> {
-    throw new Error('Method not implemented.');
+    const property = this.loadBalance();
+    return property.getCategory(request);
   }
   createCategory(
     request: CreateCategoryRequest,
   ): Observable<GetCategoryResponse> {
-    throw new Error('Method not implemented.');
+    const property = this.loadBalance();
+    return property.createCategory(request);
   }
   updateCategory(
     request: UpdateCategoryRequest,
   ): Observable<GetCategoryResponse> {
-    throw new Error('Method not implemented.');
+    const property = this.loadBalance();
+    return property.updateCategory(request);
   }
   deleteCategory(
     request: DeleteCategoryRequest,
   ): Observable<GetCategoryResponse> {
-    throw new Error('Method not implemented.');
+    const property = this.loadBalance();
+    return property.deleteCategory(request);
   }
   queryAttributeTypes(
     request: QueryAttributeTypeRequest,
   ): Observable<QueryAttributeTypeResponse> {
-    throw new Error('Method not implemented.');
+    const property = this.loadBalance();
+    return property.queryAttributeTypes(request);
   }
   getAttributeType(
     request: GetAttributeTypeRequest,
   ): Observable<GetAttributeTypeResponse> {
-    throw new Error('Method not implemented.');
+    const property = this.loadBalance();
+    return property.getAttributeType(request);
   }
   createAttributeType(
     request: CreateAttributeTypeRequest,
   ): Observable<GetAttributeTypeResponse> {
-    throw new Error('Method not implemented.');
+    const property = this.loadBalance();
+    return property.createAttributeType(request);
   }
   updateAttributeType(
     request: UpdateAttributeTypeRequest,
   ): Observable<GetAttributeTypeResponse> {
-    throw new Error('Method not implemented.');
+    const property = this.loadBalance();
+    return property.updateAttributeType(request);
   }
   deleteAttributeType(
     request: DeleteAttributeTypeRequest,
   ): Observable<GetAttributeTypeResponse> {
-    throw new Error('Method not implemented.');
+    const property = this.loadBalance();
+    return property.deleteAttributeType(request);
   }
   queryProperties(
     request: QueryPropertyRequest,

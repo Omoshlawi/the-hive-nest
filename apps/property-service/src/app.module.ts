@@ -1,3 +1,4 @@
+import { QueryBuilderModule } from '@hive/common';
 import { HiveIdentityClientService } from '@hive/identity';
 import {
   PROPERTY_HTTP_SERVER_CONFIG_TOKEN,
@@ -13,14 +14,12 @@ import {
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
 import { Module } from '@nestjs/common';
+import { AmenitiesModule } from './amenities/amenities.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AmenitiesModule } from './amenities/amenities.module';
-import { QueryBuilderModule } from '@hive/common';
-import { PrismaModule } from './prisma/prisma.module';
-import { CategoriesController } from './categories/categories.controller';
-import { CategoriesModule } from './categories/categories.module';
 import { AttributeTypesModule } from './attribute-types/attribute-types.module';
+import { CategoriesModule } from './categories/categories.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -85,7 +84,7 @@ import { AttributeTypesModule } from './attribute-types/attribute-types.module';
     CategoriesModule,
     AttributeTypesModule,
   ],
-  controllers: [AppController, CategoriesController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}

@@ -1,7 +1,8 @@
-import { HiveServiceModule } from '@hive/registry';
 import { Module } from '@nestjs/common';
+import { AttributeTypesController } from './attribute-types.controller';
+import { HiveServiceModule } from '@hive/registry';
 import { HivePropertyServiceClient } from '@hive/property';
-import { AmenitiesController } from './amenities.controller';
+
 @Module({
   imports: [
     HiveServiceModule.forRoot({
@@ -9,7 +10,6 @@ import { AmenitiesController } from './amenities.controller';
       services: [HivePropertyServiceClient],
     }),
   ],
-  providers: [],
-  controllers: [AmenitiesController],
+  controllers: [AttributeTypesController],
 })
-export class AmenitiesModule {}
+export class AttributeTypesModule {}

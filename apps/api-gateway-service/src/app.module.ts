@@ -6,12 +6,14 @@ import {
 import { ConfigifyModule } from '@itgorillaz/configify';
 import { Module } from '@nestjs/common';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
+import { AmenitiesModule } from './amenities/amenities.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AttributeTypesModule } from './attribute-types/attribute-types.module';
+import { CategoriesModule } from './categories/categories.module';
 import { IdentityModule } from './identity/identity.module';
 import { auth } from './lib/auth';
 import { RegistryModule } from './registry/registry.module';
-import { AmenitiesModule } from './amenities/amenities.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { AmenitiesModule } from './amenities/amenities.module';
     // Handle RPC calls to identity service (concreate implementation for rpc methods in identity package)
     IdentityModule,
     AmenitiesModule,
+    CategoriesModule,
+    AttributeTypesModule,
   ],
   controllers: [AppController],
   providers: [
