@@ -10,7 +10,6 @@ import {
 } from '@hive/property';
 import { Controller, NotFoundException } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
-import { Observable } from 'rxjs';
 import { AmenitiesService } from './amenities.service';
 
 @Controller('amenities')
@@ -31,36 +30,21 @@ export class AmenitiesController {
     return res as unknown as GetAmenityResponse;
   }
   @GrpcMethod(PROPERTY_SERVICE_NAME, 'createAmenity')
-  createAmenity(
-    request: CreateAmenityRequest,
-  ):
-    | Promise<GetAmenityResponse>
-    | Observable<GetAmenityResponse>
-    | GetAmenityResponse {
+  createAmenity(request: CreateAmenityRequest): Promise<GetAmenityResponse> {
     return this.amenitiesService.create(
       request,
-    ) as unknown as GetAmenityResponse;
+    ) as unknown as Promise<GetAmenityResponse>;
   }
   @GrpcMethod(PROPERTY_SERVICE_NAME, 'updateAmenity')
-  updateAmenity(
-    request: UpdateAmenityRequest,
-  ):
-    | Promise<GetAmenityResponse>
-    | Observable<GetAmenityResponse>
-    | GetAmenityResponse {
+  updateAmenity(request: UpdateAmenityRequest): Promise<GetAmenityResponse> {
     return this.amenitiesService.update(
       request,
-    ) as unknown as GetAmenityResponse;
+    ) as unknown as Promise<GetAmenityResponse>;
   }
   @GrpcMethod(PROPERTY_SERVICE_NAME, 'deleteAmenity')
-  deleteAmenity(
-    request: DeleteAmenityRequest,
-  ):
-    | Promise<GetAmenityResponse>
-    | Observable<GetAmenityResponse>
-    | GetAmenityResponse {
+  deleteAmenity(request: DeleteAmenityRequest): Promise<GetAmenityResponse> {
     return this.amenitiesService.delete(
       request,
-    ) as unknown as GetAmenityResponse;
+    ) as unknown as Promise<GetAmenityResponse>;
   }
 }
