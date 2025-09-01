@@ -8,10 +8,13 @@ export const QueryAmenitySchema = z.object({
   ...QueryBuilderSchema.shape,
   search: z.string().optional(),
   organizationId: z.string().optional(),
-  includeVoided: z.stringbool({
-    truthy: ['true', 'yes', '1'],
-    falsy: ['false', 'no', '0'],
-  }),
+  includeVoided: z
+    .stringbool({
+      truthy: ['true', '1'],
+      falsy: ['false', '0'],
+    })
+    .optional()
+    .default(false),
 });
 
 // IconSchema
@@ -41,6 +44,8 @@ export const DeleteAmenitySchema = GetAmenitySchema.extend({
 
 export class QueryAmenityDto extends createZodDto(QueryAmenitySchema) {}
 export class CreatAmenityDto extends createZodDto(AmenitySchema) {}
-export class UpdateAmenityDto extends createZodDto(AmenitySchema.partial()) {}
+export class UpdateAmenityDto extends createZodDto(
+  AmenitySchema.omit({ organizationId: true }).partial(),
+) {}
 export class GetAmenityDto extends createZodDto(GetAmenitySchema) {}
 export class DeleteAmenityDto extends createZodDto(DeleteAmenitySchema) {}

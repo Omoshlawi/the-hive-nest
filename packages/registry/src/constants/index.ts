@@ -1,5 +1,5 @@
 import path from 'path';
-import { protobufPackage } from '../types';
+import { HIVE_REGISTRY_V1_PACKAGE_NAME } from '../types';
 /**
  * Validates service names that follow the pattern: @hive/<name>-service
  *
@@ -18,7 +18,7 @@ export const SERVICE_NAME_REGEX = /^@hive\/[a-z]+(-[a-z]+)*-service$/;
 // Export package information
 export const REGISTRY_PACKAGE = Object.freeze({
   V1: {
-    NAME: protobufPackage,
+    NAME: HIVE_REGISTRY_V1_PACKAGE_NAME,
     PROTO_PATH: require.resolve(
       path.join(__dirname, '../proto/registry.service.proto'),
     ),

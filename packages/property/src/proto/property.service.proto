@@ -1,0 +1,15 @@
+syntax = 'proto3';
+
+import "amenity.message.proto";
+
+package hive.property.v1;
+
+service Property {
+    // amenities
+    rpc queryAmenities(QueryAmenityRequest) returns (QueryAmenityResponse){};
+    rpc getAmenity(GetAmenityRequest) returns (GetAmenityResponse){};
+    rpc createAmenity(CreateAmenityRequest) returns (GetAmenityResponse){};
+    rpc updateAmenity(UpdateAmenityRequest) returns (GetAmenityResponse){};
+    rpc deleteAmenity(DeleteAmenityRequest) returns (GetAmenityResponse){};
+
+}

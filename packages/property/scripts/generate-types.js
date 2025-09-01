@@ -22,7 +22,11 @@ async function findProtoFiles(dir) {
         // Recursively search subdirectories
         const subFiles = await findProtoFiles(fullPath);
         files.push(...subFiles);
-      } else if (item.isFile() && path.extname(item.name) === '.proto') {
+      } else if (
+        item.isFile() &&
+        // path.extname(item.name) === '.proto' &&
+        item.name.endsWith('.service.proto')
+      ) {
         files.push(fullPath);
       }
     }

@@ -1,0 +1,21 @@
+syntax = 'proto3';
+
+
+message Empty {
+
+}
+
+message Icon {
+    string name = 1;
+    string family = 2;
+}
+
+message QueryBuilder {
+    // Pagination queries
+    optional int32 page = 1;
+    optional int32 limit = 2;
+    // Sord queries
+    optional string orderBy = 3;
+    // Custome rep queries
+    optional string v = 4;
+}

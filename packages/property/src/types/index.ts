@@ -1,0 +1,2 @@
+export * from './property.service';
+export { Amenity, CreateAmenityRequest, DeleteAmenityRequest, GetAmenityRequest, GetAmenityResponse, GetAmenityResponse_MetadataEntry, QueryAmenityRequest, QueryAmenityResponse, QueryAmenityResponse_MetadataEntry, UpdateAmenityRequest, _PACKAGE_NAME, protobufPackage} from "./amenity.message"
