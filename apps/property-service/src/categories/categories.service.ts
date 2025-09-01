@@ -1,3 +1,5 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import {
   CustomRepresentationService,
   FunctionFirstArgument,
@@ -5,19 +7,17 @@ import {
   SortService,
 } from '@hive/common';
 import {
-  CreatAmenityDto,
-  DeleteAmenityDto,
-  GetAmenityDto,
-  QueryAmenityDto,
-  UpdateAmenityDto,
+  CreatCategoryDto,
+  DeleteCategoryDto,
+  GetCategoryDto,
+  QueryCategoryDto,
+  UpdateCategoryDto,
 } from '@hive/property';
-import { Injectable } from '@nestjs/common';
-import { Amenity } from 'generated/prisma';
+import { Category } from '../../generated/prisma';
 import { pick } from 'lodash';
-import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class AmenitiesService {
+export class CategoriesService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly sortService: SortService,
@@ -25,9 +25,9 @@ export class AmenitiesService {
     private readonly representationService: CustomRepresentationService,
   ) {}
 
-  async getAll(query: QueryAmenityDto) {
+  async getAll(query: QueryCategoryDto) {
     const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.amenity.findMany
+      typeof this.prismaService.category.findMany
     > = {
       where: {
         AND: [
@@ -44,8 +44,8 @@ export class AmenitiesService {
       ...this.sortService.buildSortQuery(query.orderBy),
     };
     const [data, totalCount] = await Promise.all([
-      this.prismaService.amenity.findMany(dbQuery),
-      this.prismaService.amenity.count(pick(dbQuery, 'where')),
+      this.prismaService.category.findMany(dbQuery),
+      this.prismaService.category.count(pick(dbQuery, 'where')),
     ]);
     return {
       data,
@@ -53,8 +53,8 @@ export class AmenitiesService {
     };
   }
 
-  async getById(query: GetAmenityDto) {
-    const data = await this.prismaService.amenity.findUnique({
+  async getById(query: GetCategoryDto) {
+    const data = await this.prismaService.category.findUnique({
       where: {
         id: query.id,
       },
@@ -66,9 +66,9 @@ export class AmenitiesService {
     };
   }
 
-  async create(query: CreatAmenityDto) {
+  async create(query: CreatCategoryDto) {
     const { v, ...props } = query;
-    const data = await this.prismaService.amenity.create({
+    const data = await this.prismaService.category.create({
       data: props,
       ...this.representationService.buildCustomRepresentationQuery(v),
     });
@@ -79,9 +79,9 @@ export class AmenitiesService {
     };
   }
 
-  async update(id: string, query: UpdateAmenityDto) {
+  async update(id: string, query: UpdateCategoryDto) {
     const { v, ...props } = query;
-    const data = this.prismaService.amenity.update({
+    const data = this.prismaService.category.update({
       where: { id },
       data: props,
       ...this.representationService.buildCustomRepresentationQuery(v),
@@ -92,16 +92,16 @@ export class AmenitiesService {
       metadata: {},
     };
   }
-  async delete(id: string, query: DeleteAmenityDto) {
+  async delete(id: string, query: DeleteCategoryDto) {
     const { v, purge } = query;
-    let data: Amenity;
+    let data: Category;
     if (purge) {
-      data = await this.prismaService.amenity.delete({
+      data = await this.prismaService.category.delete({
         where: { id },
         ...this.representationService.buildCustomRepresentationQuery(v),
       });
     } else {
-      data = await this.prismaService.amenity.update({
+      data = await this.prismaService.category.update({
         where: { id },
         data: { voided: true },
         ...this.representationService.buildCustomRepresentationQuery(v),

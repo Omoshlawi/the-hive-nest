@@ -18,6 +18,9 @@ import { AppService } from './app.service';
 import { AmenitiesModule } from './amenities/amenities.module';
 import { QueryBuilderModule } from '@hive/common';
 import { PrismaModule } from './prisma/prisma.module';
+import { CategoriesController } from './categories/categories.controller';
+import { CategoriesModule } from './categories/categories.module';
+import { AttributeTypesModule } from './attribute-types/attribute-types.module';
 
 @Module({
   imports: [
@@ -79,8 +82,10 @@ import { PrismaModule } from './prisma/prisma.module';
     AmenitiesModule,
     QueryBuilderModule.register({ global: true }),
     PrismaModule,
+    CategoriesModule,
+    AttributeTypesModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, CategoriesController],
   providers: [AppService],
 })
 export class AppModule {}
