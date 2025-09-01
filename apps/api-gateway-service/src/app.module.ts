@@ -11,6 +11,7 @@ import { AppService } from './app.service';
 import { IdentityModule } from './identity/identity.module';
 import { auth } from './lib/auth';
 import { RegistryModule } from './registry/registry.module';
+import { AmenitiesModule } from './amenities/amenities.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { RegistryModule } from './registry/registry.module';
     RegistryModule,
     // Handle RPC calls to identity service (concreate implementation for rpc methods in identity package)
     IdentityModule,
+    AmenitiesModule,
   ],
   controllers: [AppController],
   providers: [

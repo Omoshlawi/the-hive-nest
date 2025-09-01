@@ -33,7 +33,6 @@ export const CategorySchema = z.object({
 
 export const GetCategorySchema = z.object({
   ...CustomRepresentationQuerySchema.shape,
-  id: z.uuid(),
 });
 
 export const DeleteCategorySchema = GetCategorySchema.extend({

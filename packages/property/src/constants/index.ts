@@ -12,3 +12,4 @@ export const PROPERTY_PACKAGE = Object.freeze({
     TOKEN: 'SERVICE_PROPERTY_PACKAGE_V1',
   },
 });
+export const HIVE_PROPERTY_SERVICE_NAME = '@hive/property-service';

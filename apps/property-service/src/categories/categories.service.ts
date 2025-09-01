@@ -53,10 +53,10 @@ export class CategoriesService {
     };
   }
 
-  async getById(query: GetCategoryDto) {
+  async getById(id: string, query: GetCategoryDto) {
     const data = await this.prismaService.category.findUnique({
       where: {
-        id: query.id,
+        id: id,
       },
       ...this.representationService.buildCustomRepresentationQuery(query.v),
     });
@@ -92,8 +92,8 @@ export class CategoriesService {
       metadata: {},
     };
   }
-  async delete(query: DeleteCategoryDto) {
-    const { v, purge, id } = query;
+  async delete(id: string, query: DeleteCategoryDto) {
+    const { v, purge } = query;
     let data: Category;
     if (purge) {
       data = await this.prismaService.category.delete({

@@ -33,8 +33,7 @@ export class AmenitiesController {
   }
   @GrpcMethod(PROPERTY_SERVICE_NAME, 'getAmenity')
   async getAmenity(request: GetAmenityRequest): Promise<GetAmenityResponse> {
-    const res = await this.amenitiesService.getById({
-      id: request.id,
+    const res = await this.amenitiesService.getById(request.id, {
       v: request?.queryBuilder?.v,
     });
     if (!res.data)
@@ -72,8 +71,7 @@ export class AmenitiesController {
     | Promise<GetAmenityResponse>
     | Observable<GetAmenityResponse>
     | GetAmenityResponse {
-    return this.amenitiesService.delete({
-      ...request,
+    return this.amenitiesService.delete(request.id, {
       purge: request.purge ?? false,
     }) as unknown as GetAmenityResponse;
   }

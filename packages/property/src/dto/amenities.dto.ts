@@ -32,7 +32,6 @@ export const AmenitySchema = z.object({
 
 export const GetAmenitySchema = z.object({
   ...CustomRepresentationQuerySchema.shape,
-  id: z.uuid(),
 });
 
 export const DeleteAmenitySchema = GetAmenitySchema.extend({

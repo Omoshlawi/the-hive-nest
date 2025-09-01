@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ServiceRegistration } from 'types';
+import { ServiceRegistration } from '../types';
 import { BaseStorage } from './base-storage';
 
 @Injectable()

@@ -33,7 +33,6 @@ export const AttributeTypeSchema = z.object({
 
 export const GetAttributeTypeSchema = z.object({
   ...CustomRepresentationQuerySchema.shape,
-  id: z.uuid(),
 });
 
 export const DeleteAttributeTypeSchema = GetAttributeTypeSchema.extend({

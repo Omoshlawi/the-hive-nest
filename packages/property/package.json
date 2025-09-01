@@ -51,6 +51,7 @@
     "@nestjs/swagger": "^11.2.0",
     "nestjs-zod": "5.0.0-beta.20250806T023752",
     "@itgorillaz/configify": "^4.0.1",
+    "@hive/registry": "workspace:*",
     "@hive/utils": "workspace:*",
     "@hive/common": "workspace:*",
     "rxjs": "^7.8.1",

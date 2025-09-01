@@ -53,10 +53,10 @@ export class AmenitiesService {
     };
   }
 
-  async getById(query: GetAmenityDto) {
+  async getById(id: string, query: GetAmenityDto) {
     const data = await this.prismaService.amenity.findUnique({
       where: {
-        id: query.id,
+        id: id,
       },
       ...this.representationService.buildCustomRepresentationQuery(query.v),
     });
@@ -92,8 +92,8 @@ export class AmenitiesService {
       metadata: {},
     };
   }
-  async delete(query: DeleteAmenityDto) {
-    const { v, purge, id } = query;
+  async delete(id: string, query: DeleteAmenityDto) {
+    const { v, purge } = query;
     let data: Amenity;
     if (purge) {
       data = await this.prismaService.amenity.delete({

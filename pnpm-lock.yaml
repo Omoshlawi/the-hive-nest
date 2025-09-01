@@ -47,6 +47,9 @@ importers:
       '@hive/identity':
         specifier: workspace:*
         version: link:../../packages/identity
+      '@hive/property':
+        specifier: workspace:*
+        version: link:../../packages/property
       '@hive/registry':
         specifier: workspace:*
         version: link:../../packages/registry
@@ -760,6 +763,9 @@ importers:
       '@hive/common':
         specifier: workspace:*
         version: link:../common
+      '@hive/registry':
+        specifier: workspace:*
+        version: link:../registry
       '@hive/utils':
         specifier: workspace:*
         version: link:../utils

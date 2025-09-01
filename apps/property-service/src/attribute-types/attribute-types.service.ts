@@ -53,10 +53,10 @@ export class AttributeTypesService {
     };
   }
 
-  async getById(query: GetAttributeTypeDto) {
+  async getById(id: string, query: GetAttributeTypeDto) {
     const data = await this.prismaService.attributeType.findUnique({
       where: {
-        id: query.id,
+        id: id,
       },
       ...this.representationService.buildCustomRepresentationQuery(query.v),
     });
@@ -92,8 +92,8 @@ export class AttributeTypesService {
       metadata: {},
     };
   }
-  async delete(query: DeleteAttributeTypeDto) {
-    const { v, purge, id } = query;
+  async delete(id: string, query: DeleteAttributeTypeDto) {
+    const { v, purge } = query;
     let data: AttributeType;
     if (purge) {
       data = await this.prismaService.attributeType.delete({
