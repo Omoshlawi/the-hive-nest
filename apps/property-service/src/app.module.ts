@@ -20,6 +20,7 @@ import { AppService } from './app.service';
 import { AttributeTypesModule } from './attribute-types/attribute-types.module';
 import { CategoriesModule } from './categories/categories.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     CategoriesModule,
     AttributeTypesModule,
+    RelationshipTypesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

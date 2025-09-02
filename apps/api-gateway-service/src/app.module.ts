@@ -14,6 +14,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { IdentityModule } from './identity/identity.module';
 import { auth } from './lib/auth';
 import { RegistryModule } from './registry/registry.module';
+import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { RegistryModule } from './registry/registry.module';
     AmenitiesModule,
     CategoriesModule,
     AttributeTypesModule,
+    RelationshipTypesModule,
   ],
   controllers: [AppController],
   providers: [
