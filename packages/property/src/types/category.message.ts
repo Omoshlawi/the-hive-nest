@@ -6,19 +6,9 @@
 
 /* eslint-disable */
 import { Icon, QueryBuilder } from "./common.message";
+import { Category } from "./property.models";
 
 export const protobufPackage = "";
-
-export interface Category {
-  id: string;
-  name: string;
-  organizationId?: string | undefined;
-  icon: Icon | undefined;
-  voided: boolean;
-  createdAt: string;
-  /** repeated PropertyCategory properties = 8; // TODO: define */
-  updatedAt: string;
-}
 
 export interface QueryCategoryRequest {
   queryBuilder: QueryBuilder | undefined;

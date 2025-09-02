@@ -4,6 +4,8 @@ import "amenity.message.proto";
 import "property.message.proto";
 import "category.message.proto";
 import "attribute-type.message.proto";
+import "relationship-type.message.proto";
+
 
 package hive.property.v1;
 
@@ -36,5 +38,53 @@ service Property {
     rpc updateProperty(UpdatePropertyRequest) returns (GetPropertyResponse){};
     rpc deleteProperty(DeletePropertyRequest) returns (GetPropertyResponse){};
 
+    // Relationship type
+    rpc queryRelationshipType(QueryRelationshipTypeRequest) returns (QueryRelationshipTypeResponse){};
+    rpc getRelationshipType(GetRelationshipTypeRequest) returns (GetRelationshipTypeResponse){};
+    rpc createRelationshipType(CreateRelationshipTypeRequest) returns (GetRelationshipTypeResponse){};
+    rpc updateRelationshipType(UpdateRelationshipTypeRequest) returns (GetRelationshipTypeResponse){};
+    rpc deleteRelationshipType(DeleteRelationshipTypeRequest) returns (GetRelationshipTypeResponse){};
+
+
+    // Relationship
+    rpc queryRelationship(QueryRelationshipRequest) returns (QueryRelationshipResponse){};
+    rpc getRelationship(GetRelationshipRequest) returns (GetRelationshipResponse){};
+    rpc createRelationship(CreateRelationshipRequest) returns (GetRelationshipResponse){};
+    rpc updateRelationship(UpdateRelationshipRequest) returns (GetRelationshipResponse){};
+    rpc deleteRelationship(DeleteRelationshipRequest) returns (GetRelationshipResponse){};
+
+    // Property status
+    rpc queryPropertyStatusHistory(QueryPropertyStatusHistoryRequest) returns (QueryPropertyStatusHistoryResponse){};
+    rpc getPropertyStatusHistory(GetPropertyStatusHistoryRequest) returns (GetPropertyStatusHistoryResponse){};
+    rpc createPropertyStatusHistory(CreatePropertyStatusHistoryRequest) returns (GetPropertyStatusHistoryResponse){};
+    rpc deletePropertyStatusHistory(DeletePropertyStatusHistoryRequest) returns (GetPropertyStatusHistoryResponse){};
+
+    // Property media
+    rpc queryPropertyMedia(QueryPropertyMediaRequest) returns (QueryPropertyMediaResponse){};
+    rpc getPropertyMedia(GetPropertyMediaRequest) returns (GetPropertyMediaResponse){};
+    rpc createPropertyMedia(CreatePropertyMediaRequest) returns (GetPropertyMediaResponse){};
+    rpc updatePropertyMedia(UpdatePropertyMediaRequest) returns (GetPropertyMediaResponse){};
+    rpc deletePropertyMedia(DeletePropertyMediaRequest) returns (GetPropertyMediaResponse){};
+
+    // Property attribute
+    rpc queryPropertyAttribute(QueryPropertyAttributeRequest) returns (QueryPropertyAttributeResponse){};
+    rpc getPropertyAttribute(GetPropertyAttributeRequest) returns (GetPropertyAttributeResponse){};
+    rpc createPropertyAttribute(CreatePropertyAttributeRequest) returns (GetPropertyAttributeResponse){};
+    rpc updatePropertyAttribute(UpdatePropertyAttributeRequest) returns (GetPropertyAttributeResponse){};
+    rpc deletePropertyAttribute(DeletePropertyAttributeRequest) returns (GetPropertyAttributeResponse){};
+
+    // Property amenity
+    rpc queryPropertyAmenity(QueryPropertyAmenityRequest) returns (QueryPropertyAmenityResponse){};
+    rpc getPropertyAmenity(GetPropertyAmenityRequest) returns (GetPropertyAmenityResponse){};
+    rpc createPropertyAmenity(CreatePropertyAmenityRequest) returns (GetPropertyAmenityResponse){};
+    rpc updatePropertyAmenity(UpdatePropertyAmenityRequest) returns (GetPropertyAmenityResponse){};
+    rpc deletePropertyAmenity(DeletePropertyAmenityRequest) returns (GetPropertyAmenityResponse){};
+    
+    // Property category
+    rpc queryPropertyCategory(QueryPropertyCategoryRequest) returns (QueryPropertyCategoryResponse){};
+    rpc getPropertyCategory(GetPropertyCategoryRequest) returns (GetPropertyCategoryResponse){};
+    rpc createPropertyCategory(CreatePropertyCategoryRequest) returns (GetPropertyCategoryResponse){};
+    rpc updatePropertyCategory(UpdatePropertyCategoryRequest) returns (GetPropertyCategoryResponse){};
+    rpc deletePropertyCategory(DeletePropertyCategoryRequest) returns (GetPropertyCategoryResponse){};
 
 }

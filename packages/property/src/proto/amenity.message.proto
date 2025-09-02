@@ -1,18 +1,8 @@
 syntax = 'proto3';
 
 import "common.message.proto";
+import "property.models.proto";
 
-
-message Amenity {
-    string id = 1;
-    string name = 2;
-    optional string organizationId = 3;
-    Icon icon = 4;
-    bool voided = 5;
-    string createdAt = 6;
-    string updatedAt = 7;
-    // repeated PropertyAttribute assignedProperties = 8; // TODO: define
-}
 
 message QueryAmenityRequest {
     QueryBuilder queryBuilder = 1;

@@ -35,14 +35,64 @@ import {
   UpdateCategoryRequest,
 } from "./category.message";
 import {
+  CreatePropertyAmenityRequest,
+  CreatePropertyAttributeRequest,
+  CreatePropertyCategoryRequest,
+  CreatePropertyMediaRequest,
   CreatePropertyRequest,
+  CreatePropertyStatusHistoryRequest,
+  CreateRelationshipRequest,
+  DeletePropertyAmenityRequest,
+  DeletePropertyAttributeRequest,
+  DeletePropertyCategoryRequest,
+  DeletePropertyMediaRequest,
   DeletePropertyRequest,
+  DeletePropertyStatusHistoryRequest,
+  DeleteRelationshipRequest,
+  GetPropertyAmenityRequest,
+  GetPropertyAmenityResponse,
+  GetPropertyAttributeRequest,
+  GetPropertyAttributeResponse,
+  GetPropertyCategoryRequest,
+  GetPropertyCategoryResponse,
+  GetPropertyMediaRequest,
+  GetPropertyMediaResponse,
   GetPropertyRequest,
   GetPropertyResponse,
+  GetPropertyStatusHistoryRequest,
+  GetPropertyStatusHistoryResponse,
+  GetRelationshipRequest,
+  GetRelationshipResponse,
+  QueryPropertyAmenityRequest,
+  QueryPropertyAmenityResponse,
+  QueryPropertyAttributeRequest,
+  QueryPropertyAttributeResponse,
+  QueryPropertyCategoryRequest,
+  QueryPropertyCategoryResponse,
+  QueryPropertyMediaRequest,
+  QueryPropertyMediaResponse,
   QueryPropertyRequest,
   QueryPropertyResponse,
+  QueryPropertyStatusHistoryRequest,
+  QueryPropertyStatusHistoryResponse,
+  QueryRelationshipRequest,
+  QueryRelationshipResponse,
+  UpdatePropertyAmenityRequest,
+  UpdatePropertyAttributeRequest,
+  UpdatePropertyCategoryRequest,
+  UpdatePropertyMediaRequest,
   UpdatePropertyRequest,
+  UpdateRelationshipRequest,
 } from "./property.message";
+import {
+  CreateRelationshipTypeRequest,
+  DeleteRelationshipTypeRequest,
+  GetRelationshipTypeRequest,
+  GetRelationshipTypeResponse,
+  QueryRelationshipTypeRequest,
+  QueryRelationshipTypeResponse,
+  UpdateRelationshipTypeRequest,
+} from "./relationship-type.message";
 
 export const protobufPackage = "hive.property.v1";
 
@@ -96,6 +146,94 @@ export interface PropertyClient {
   updateProperty(request: UpdatePropertyRequest): Observable<GetPropertyResponse>;
 
   deleteProperty(request: DeletePropertyRequest): Observable<GetPropertyResponse>;
+
+  /** Relationship type */
+
+  queryRelationshipType(request: QueryRelationshipTypeRequest): Observable<QueryRelationshipTypeResponse>;
+
+  getRelationshipType(request: GetRelationshipTypeRequest): Observable<GetRelationshipTypeResponse>;
+
+  createRelationshipType(request: CreateRelationshipTypeRequest): Observable<GetRelationshipTypeResponse>;
+
+  updateRelationshipType(request: UpdateRelationshipTypeRequest): Observable<GetRelationshipTypeResponse>;
+
+  deleteRelationshipType(request: DeleteRelationshipTypeRequest): Observable<GetRelationshipTypeResponse>;
+
+  /** Relationship */
+
+  queryRelationship(request: QueryRelationshipRequest): Observable<QueryRelationshipResponse>;
+
+  getRelationship(request: GetRelationshipRequest): Observable<GetRelationshipResponse>;
+
+  createRelationship(request: CreateRelationshipRequest): Observable<GetRelationshipResponse>;
+
+  updateRelationship(request: UpdateRelationshipRequest): Observable<GetRelationshipResponse>;
+
+  deleteRelationship(request: DeleteRelationshipRequest): Observable<GetRelationshipResponse>;
+
+  /** Property status */
+
+  queryPropertyStatusHistory(
+    request: QueryPropertyStatusHistoryRequest,
+  ): Observable<QueryPropertyStatusHistoryResponse>;
+
+  getPropertyStatusHistory(request: GetPropertyStatusHistoryRequest): Observable<GetPropertyStatusHistoryResponse>;
+
+  createPropertyStatusHistory(
+    request: CreatePropertyStatusHistoryRequest,
+  ): Observable<GetPropertyStatusHistoryResponse>;
+
+  deletePropertyStatusHistory(
+    request: DeletePropertyStatusHistoryRequest,
+  ): Observable<GetPropertyStatusHistoryResponse>;
+
+  /** Property media */
+
+  queryPropertyMedia(request: QueryPropertyMediaRequest): Observable<QueryPropertyMediaResponse>;
+
+  getPropertyMedia(request: GetPropertyMediaRequest): Observable<GetPropertyMediaResponse>;
+
+  createPropertyMedia(request: CreatePropertyMediaRequest): Observable<GetPropertyMediaResponse>;
+
+  updatePropertyMedia(request: UpdatePropertyMediaRequest): Observable<GetPropertyMediaResponse>;
+
+  deletePropertyMedia(request: DeletePropertyMediaRequest): Observable<GetPropertyMediaResponse>;
+
+  /** Property attribute */
+
+  queryPropertyAttribute(request: QueryPropertyAttributeRequest): Observable<QueryPropertyAttributeResponse>;
+
+  getPropertyAttribute(request: GetPropertyAttributeRequest): Observable<GetPropertyAttributeResponse>;
+
+  createPropertyAttribute(request: CreatePropertyAttributeRequest): Observable<GetPropertyAttributeResponse>;
+
+  updatePropertyAttribute(request: UpdatePropertyAttributeRequest): Observable<GetPropertyAttributeResponse>;
+
+  deletePropertyAttribute(request: DeletePropertyAttributeRequest): Observable<GetPropertyAttributeResponse>;
+
+  /** Property amenity */
+
+  queryPropertyAmenity(request: QueryPropertyAmenityRequest): Observable<QueryPropertyAmenityResponse>;
+
+  getPropertyAmenity(request: GetPropertyAmenityRequest): Observable<GetPropertyAmenityResponse>;
+
+  createPropertyAmenity(request: CreatePropertyAmenityRequest): Observable<GetPropertyAmenityResponse>;
+
+  updatePropertyAmenity(request: UpdatePropertyAmenityRequest): Observable<GetPropertyAmenityResponse>;
+
+  deletePropertyAmenity(request: DeletePropertyAmenityRequest): Observable<GetPropertyAmenityResponse>;
+
+  /** Property category */
+
+  queryPropertyCategory(request: QueryPropertyCategoryRequest): Observable<QueryPropertyCategoryResponse>;
+
+  getPropertyCategory(request: GetPropertyCategoryRequest): Observable<GetPropertyCategoryResponse>;
+
+  createPropertyCategory(request: CreatePropertyCategoryRequest): Observable<GetPropertyCategoryResponse>;
+
+  updatePropertyCategory(request: UpdatePropertyCategoryRequest): Observable<GetPropertyCategoryResponse>;
+
+  deletePropertyCategory(request: DeletePropertyCategoryRequest): Observable<GetPropertyCategoryResponse>;
 }
 
 export interface PropertyController {
@@ -186,6 +324,171 @@ export interface PropertyController {
   deleteProperty(
     request: DeletePropertyRequest,
   ): Promise<GetPropertyResponse> | Observable<GetPropertyResponse> | GetPropertyResponse;
+
+  /** Relationship type */
+
+  queryRelationshipType(
+    request: QueryRelationshipTypeRequest,
+  ): Promise<QueryRelationshipTypeResponse> | Observable<QueryRelationshipTypeResponse> | QueryRelationshipTypeResponse;
+
+  getRelationshipType(
+    request: GetRelationshipTypeRequest,
+  ): Promise<GetRelationshipTypeResponse> | Observable<GetRelationshipTypeResponse> | GetRelationshipTypeResponse;
+
+  createRelationshipType(
+    request: CreateRelationshipTypeRequest,
+  ): Promise<GetRelationshipTypeResponse> | Observable<GetRelationshipTypeResponse> | GetRelationshipTypeResponse;
+
+  updateRelationshipType(
+    request: UpdateRelationshipTypeRequest,
+  ): Promise<GetRelationshipTypeResponse> | Observable<GetRelationshipTypeResponse> | GetRelationshipTypeResponse;
+
+  deleteRelationshipType(
+    request: DeleteRelationshipTypeRequest,
+  ): Promise<GetRelationshipTypeResponse> | Observable<GetRelationshipTypeResponse> | GetRelationshipTypeResponse;
+
+  /** Relationship */
+
+  queryRelationship(
+    request: QueryRelationshipRequest,
+  ): Promise<QueryRelationshipResponse> | Observable<QueryRelationshipResponse> | QueryRelationshipResponse;
+
+  getRelationship(
+    request: GetRelationshipRequest,
+  ): Promise<GetRelationshipResponse> | Observable<GetRelationshipResponse> | GetRelationshipResponse;
+
+  createRelationship(
+    request: CreateRelationshipRequest,
+  ): Promise<GetRelationshipResponse> | Observable<GetRelationshipResponse> | GetRelationshipResponse;
+
+  updateRelationship(
+    request: UpdateRelationshipRequest,
+  ): Promise<GetRelationshipResponse> | Observable<GetRelationshipResponse> | GetRelationshipResponse;
+
+  deleteRelationship(
+    request: DeleteRelationshipRequest,
+  ): Promise<GetRelationshipResponse> | Observable<GetRelationshipResponse> | GetRelationshipResponse;
+
+  /** Property status */
+
+  queryPropertyStatusHistory(
+    request: QueryPropertyStatusHistoryRequest,
+  ):
+    | Promise<QueryPropertyStatusHistoryResponse>
+    | Observable<QueryPropertyStatusHistoryResponse>
+    | QueryPropertyStatusHistoryResponse;
+
+  getPropertyStatusHistory(
+    request: GetPropertyStatusHistoryRequest,
+  ):
+    | Promise<GetPropertyStatusHistoryResponse>
+    | Observable<GetPropertyStatusHistoryResponse>
+    | GetPropertyStatusHistoryResponse;
+
+  createPropertyStatusHistory(
+    request: CreatePropertyStatusHistoryRequest,
+  ):
+    | Promise<GetPropertyStatusHistoryResponse>
+    | Observable<GetPropertyStatusHistoryResponse>
+    | GetPropertyStatusHistoryResponse;
+
+  deletePropertyStatusHistory(
+    request: DeletePropertyStatusHistoryRequest,
+  ):
+    | Promise<GetPropertyStatusHistoryResponse>
+    | Observable<GetPropertyStatusHistoryResponse>
+    | GetPropertyStatusHistoryResponse;
+
+  /** Property media */
+
+  queryPropertyMedia(
+    request: QueryPropertyMediaRequest,
+  ): Promise<QueryPropertyMediaResponse> | Observable<QueryPropertyMediaResponse> | QueryPropertyMediaResponse;
+
+  getPropertyMedia(
+    request: GetPropertyMediaRequest,
+  ): Promise<GetPropertyMediaResponse> | Observable<GetPropertyMediaResponse> | GetPropertyMediaResponse;
+
+  createPropertyMedia(
+    request: CreatePropertyMediaRequest,
+  ): Promise<GetPropertyMediaResponse> | Observable<GetPropertyMediaResponse> | GetPropertyMediaResponse;
+
+  updatePropertyMedia(
+    request: UpdatePropertyMediaRequest,
+  ): Promise<GetPropertyMediaResponse> | Observable<GetPropertyMediaResponse> | GetPropertyMediaResponse;
+
+  deletePropertyMedia(
+    request: DeletePropertyMediaRequest,
+  ): Promise<GetPropertyMediaResponse> | Observable<GetPropertyMediaResponse> | GetPropertyMediaResponse;
+
+  /** Property attribute */
+
+  queryPropertyAttribute(
+    request: QueryPropertyAttributeRequest,
+  ):
+    | Promise<QueryPropertyAttributeResponse>
+    | Observable<QueryPropertyAttributeResponse>
+    | QueryPropertyAttributeResponse;
+
+  getPropertyAttribute(
+    request: GetPropertyAttributeRequest,
+  ): Promise<GetPropertyAttributeResponse> | Observable<GetPropertyAttributeResponse> | GetPropertyAttributeResponse;
+
+  createPropertyAttribute(
+    request: CreatePropertyAttributeRequest,
+  ): Promise<GetPropertyAttributeResponse> | Observable<GetPropertyAttributeResponse> | GetPropertyAttributeResponse;
+
+  updatePropertyAttribute(
+    request: UpdatePropertyAttributeRequest,
+  ): Promise<GetPropertyAttributeResponse> | Observable<GetPropertyAttributeResponse> | GetPropertyAttributeResponse;
+
+  deletePropertyAttribute(
+    request: DeletePropertyAttributeRequest,
+  ): Promise<GetPropertyAttributeResponse> | Observable<GetPropertyAttributeResponse> | GetPropertyAttributeResponse;
+
+  /** Property amenity */
+
+  queryPropertyAmenity(
+    request: QueryPropertyAmenityRequest,
+  ): Promise<QueryPropertyAmenityResponse> | Observable<QueryPropertyAmenityResponse> | QueryPropertyAmenityResponse;
+
+  getPropertyAmenity(
+    request: GetPropertyAmenityRequest,
+  ): Promise<GetPropertyAmenityResponse> | Observable<GetPropertyAmenityResponse> | GetPropertyAmenityResponse;
+
+  createPropertyAmenity(
+    request: CreatePropertyAmenityRequest,
+  ): Promise<GetPropertyAmenityResponse> | Observable<GetPropertyAmenityResponse> | GetPropertyAmenityResponse;
+
+  updatePropertyAmenity(
+    request: UpdatePropertyAmenityRequest,
+  ): Promise<GetPropertyAmenityResponse> | Observable<GetPropertyAmenityResponse> | GetPropertyAmenityResponse;
+
+  deletePropertyAmenity(
+    request: DeletePropertyAmenityRequest,
+  ): Promise<GetPropertyAmenityResponse> | Observable<GetPropertyAmenityResponse> | GetPropertyAmenityResponse;
+
+  /** Property category */
+
+  queryPropertyCategory(
+    request: QueryPropertyCategoryRequest,
+  ): Promise<QueryPropertyCategoryResponse> | Observable<QueryPropertyCategoryResponse> | QueryPropertyCategoryResponse;
+
+  getPropertyCategory(
+    request: GetPropertyCategoryRequest,
+  ): Promise<GetPropertyCategoryResponse> | Observable<GetPropertyCategoryResponse> | GetPropertyCategoryResponse;
+
+  createPropertyCategory(
+    request: CreatePropertyCategoryRequest,
+  ): Promise<GetPropertyCategoryResponse> | Observable<GetPropertyCategoryResponse> | GetPropertyCategoryResponse;
+
+  updatePropertyCategory(
+    request: UpdatePropertyCategoryRequest,
+  ): Promise<GetPropertyCategoryResponse> | Observable<GetPropertyCategoryResponse> | GetPropertyCategoryResponse;
+
+  deletePropertyCategory(
+    request: DeletePropertyCategoryRequest,
+  ): Promise<GetPropertyCategoryResponse> | Observable<GetPropertyCategoryResponse> | GetPropertyCategoryResponse;
 }
 
 export function PropertyControllerMethods() {
@@ -211,6 +514,40 @@ export function PropertyControllerMethods() {
       "createProperty",
       "updateProperty",
       "deleteProperty",
+      "queryRelationshipType",
+      "getRelationshipType",
+      "createRelationshipType",
+      "updateRelationshipType",
+      "deleteRelationshipType",
+      "queryRelationship",
+      "getRelationship",
+      "createRelationship",
+      "updateRelationship",
+      "deleteRelationship",
+      "queryPropertyStatusHistory",
+      "getPropertyStatusHistory",
+      "createPropertyStatusHistory",
+      "deletePropertyStatusHistory",
+      "queryPropertyMedia",
+      "getPropertyMedia",
+      "createPropertyMedia",
+      "updatePropertyMedia",
+      "deletePropertyMedia",
+      "queryPropertyAttribute",
+      "getPropertyAttribute",
+      "createPropertyAttribute",
+      "updatePropertyAttribute",
+      "deletePropertyAttribute",
+      "queryPropertyAmenity",
+      "getPropertyAmenity",
+      "createPropertyAmenity",
+      "updatePropertyAmenity",
+      "deletePropertyAmenity",
+      "queryPropertyCategory",
+      "getPropertyCategory",
+      "createPropertyCategory",
+      "updatePropertyCategory",
+      "deletePropertyCategory",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

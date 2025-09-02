@@ -1,0 +1,44 @@
+syntax = 'proto3';
+
+
+import "common.message.proto";
+import "property.models.proto";
+
+message QueryRelationshipTypeRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string search = 2;
+    optional bool includeVoided = 4;
+}
+
+message QueryRelationshipTypeResponse {
+    repeated RelationshipType data = 1;
+    map<string, string> metadata = 2; 
+}
+
+message CreateRelationshipTypeRequest {
+    QueryBuilder queryBuilder = 1;
+    string description = 2;
+    string aIsToB = 3;
+    string bIsToA = 4;
+}
+message UpdateRelationshipTypeRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string description = 2;
+    optional string aIsToB = 3;
+    optional string bIsToA = 4;
+    string id = 5;
+
+}
+message GetRelationshipTypeRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+}
+message GetRelationshipTypeResponse {
+    RelationshipType data = 1;
+    map<string, string> metadata = 2; 
+}
+message DeleteRelationshipTypeRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+    optional bool purge = 3;
+}

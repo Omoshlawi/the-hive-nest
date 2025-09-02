@@ -1,18 +1,7 @@
 syntax = 'proto3';
 
 import "common.message.proto";
-
-
-message Category {
-    string id = 1;
-    string name = 2;
-    optional string organizationId = 3;
-    Icon icon = 4;
-    bool voided = 5;
-    string createdAt = 6;
-    string updatedAt = 7;
-    // repeated PropertyCategory properties = 8; // TODO: define
-}
+import "property.models.proto";
 
 message QueryCategoryRequest {
     QueryBuilder queryBuilder = 1;

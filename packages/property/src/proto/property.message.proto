@@ -1,42 +1,298 @@
 syntax = 'proto3';
 
 import "common.message.proto";
+import "property.models.proto";
 
 
-message Property {
-    string id = 1;
-    string name = 2;
-    optional string organizationId = 3;
-    Icon icon = 4;
-    bool voided = 5;
-    string createdAt = 6;
-    string updatedAt = 7;
-    // repeated PropertyAttribute assignedProperties = 8; // TODO: define
+
+message QueryRelationshipRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string search = 2;
+    optional string propertyAId = 3;
+    optional string propertyBId = 4;
+    optional string typeId = 5;
+    optional bool includeVoided = 6;
+    optional string startDate = 7;
+    optional string endDate = 8;
+}
+message QueryRelationshipResponse {
+    repeated Relationship data = 1;
+    map<string, string> metadata = 2; 
+}
+message CreateRelationshipRequest {
+    QueryBuilder queryBuilder = 1;
+    string propertyAId = 2;
+    string propertyBId = 3;
+    string startDate = 4;
+    optional string endDate = 5;
+    string typeId = 6;
+}
+message UpdateRelationshipRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string propertyAId = 2;
+    optional string propertyBId = 3;
+    optional string startDate = 4;
+    optional string endDate = 5;
+    optional string typeId = 6;
+    string id = 7;
+}
+message GetRelationshipRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+}
+message GetRelationshipResponse {
+    Relationship data = 1;
+    map<string, string> metadata = 2; 
+}
+message DeleteRelationshipRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+    optional bool purge = 3;
+}
+// Property status history
+message QueryPropertyStatusHistoryRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string search = 2;
+    optional string propertyId = 3;
+    optional string changedBy = 4;
+    optional string previousStatus = 5;
+    optional string newStatus = 6;
 }
 
+message QueryPropertyStatusHistoryResponse {
+    repeated PropertyStatusHistory data = 1;
+    map<string, string> metadata = 2; 
+}
+
+message CreatePropertyStatusHistoryRequest {
+    QueryBuilder queryBuilder = 1;
+    string propertyId = 2;
+    optional string changedBy = 3;
+    string reason = 4;
+    string previousStatus = 5;
+    string newStatus = 6;
+}
+
+message GetPropertyStatusHistoryRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+}
+message GetPropertyStatusHistoryResponse {
+    PropertyStatusHistory data = 1;
+    map<string, string> metadata = 2; 
+}
+message DeletePropertyStatusHistoryRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+    optional bool purge = 3;
+}
+
+// Property media
+message QueryPropertyMediaRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string search = 2;
+    optional string propertyId = 3;
+    optional string type = 4;
+    optional int32 size = 5;
+    optional string mimeType = 6;
+    optional bool includeVoided = 7;
+}
+message QueryPropertyMediaResponse {
+    repeated PropertyMedia data = 1;
+    map<string, string> metadata = 2; 
+}
+
+message CreatePropertyMediaRequest {
+    QueryBuilder queryBuilder = 1;
+    string propertyId = 2;
+    string type = 3;
+    string url = 4;
+    optional string title = 5;
+    optional string description = 6;
+    map<string, string> metadata = 7; // size ,memeType,id,e.t.c
+    int32 order = 8;
+}
+
+message UpdatePropertyMediaRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string propertyId = 2;
+    optional string type = 3;
+    optional string url = 4;
+    optional string title = 5;
+    optional string description = 6;
+    map<string, string> metadata = 7; 
+    optional int32 order = 8;
+    string id = 9;
+}
+message GetPropertyMediaRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+}
+message GetPropertyMediaResponse {
+    PropertyMedia data = 1;
+    map<string, string> metadata = 2; 
+}
+message DeletePropertyMediaRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+    optional bool purge = 3;
+}
+// Property attribute
+message QueryPropertyAttributeRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string search = 2;
+    optional string propertyId = 3;
+    optional string attributeId = 4;
+    optional bool includeVoided = 5;
+}
+
+message QueryPropertyAttributeResponse {
+    repeated PropertyAttribute data = 1;
+    map<string, string> metadata = 2; 
+}
+
+message CreatePropertyAttributeRequest {
+    QueryBuilder queryBuilder = 1;
+    string propertyId = 2;
+    string attributeId = 3;
+    string value = 4;
+}
+message UpdatePropertyAttributeRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string propertyId = 2;
+    optional string attributeId = 3;
+    optional string value = 4;
+    string id = 5;
+}
+message GetPropertyAttributeRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+}
+message GetPropertyAttributeResponse {
+    PropertyAttribute data = 1;
+    map<string, string> metadata = 2; 
+}
+message DeletePropertyAttributeRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+    optional bool purge = 3;
+}
+// Property Amenity
+message QueryPropertyAmenityRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string propertyId = 2;
+    optional string amenityId = 3;
+    optional bool includeVoided = 4;
+}
+
+message QueryPropertyAmenityResponse {
+    repeated PropertyAmenity data = 1;
+    map<string, string> metadata = 2; 
+}
+message CreatePropertyAmenityRequest {
+    QueryBuilder queryBuilder = 1;
+    string propertyId = 2;
+    string amenityId = 3;
+}
+message UpdatePropertyAmenityRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string propertyId = 2;
+    optional string amenityId = 3;
+    string id = 4;
+}
+message GetPropertyAmenityRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+}
+message GetPropertyAmenityResponse {
+    PropertyAmenity data = 1;
+    map<string, string> metadata = 2; 
+}
+message DeletePropertyAmenityRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+    optional bool purge = 3;
+}
+// Property category
+message QueryPropertyCategoryRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string propertyId = 2;
+    optional string categoryId = 3;
+    optional bool includeVoided = 4;
+}
+message QueryPropertyCategoryResponse {
+    repeated PropertyCategory data = 1;
+    map<string, string> metadata = 2; 
+}
+message CreatePropertyCategoryRequest {
+    QueryBuilder queryBuilder = 1;
+    string propertyId = 2;
+    string categoryId = 3;
+}
+message UpdatePropertyCategoryRequest {
+    QueryBuilder queryBuilder = 1;
+    optional string propertyId = 2;
+    optional string categoryId = 3;
+    string id = 4;
+}
+message GetPropertyCategoryRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+}
+message GetPropertyCategoryResponse {
+    PropertyCategory data = 1;
+    map<string, string> metadata = 2; 
+}
+message DeletePropertyCategoryRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+    optional bool purge = 3;
+}
+// Property
 message QueryPropertyRequest {
     QueryBuilder queryBuilder = 1;
     optional string search = 2;
     optional string organizationId = 3;
     optional bool includeVoided = 4;
+    optional string status = 5;
+    optional string addressId = 6;
+    optional bool isVirtual = 7;
+    repeated string attributeIds = 8;
+    repeated string amenityIds = 9;
+    repeated string categoryIds = 10;
 }
-
 message QueryPropertyResponse {
     repeated Property data = 1;
     map<string, string> metadata = 2; 
 }
-
 message CreatePropertyRequest {
     QueryBuilder queryBuilder = 1;
     string name = 2;
-    optional string organizationId = 3;
-    Icon icon = 4;
+    string organizationId = 3;
+    string addressId = 4;
+    string createdBy = 5;
+    string status = 6;
+    optional string description = 7;
+    optional string thumbnail = 8;
+    bool isVirtual = 9;
+    string attributes = 10; // json string
+    repeated string amenityIds = 11;
+    repeated string categoryIds = 12;
 }
 message UpdatePropertyRequest {
     QueryBuilder queryBuilder = 1;
     optional string name = 2;
-    optional Icon icon = 3;
-    string id = 4;
+    optional string organizationId = 3;
+    optional string addressId = 4;
+    optional string createdBy = 5;
+    optional string status = 6;
+    optional string description = 7;
+    optional string thumbnail = 8;
+    optional bool isVirtual = 9;
+    optional string attributes = 10; // json string
+    repeated string amenityIds = 11;
+    repeated string categoryIds = 12;
+    string id = 13;
 
 }
 message GetPropertyRequest {

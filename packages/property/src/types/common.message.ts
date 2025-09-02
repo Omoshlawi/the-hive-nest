@@ -30,4 +30,15 @@ export interface QueryBuilder {
   v?: string | undefined;
 }
 
+export interface GetRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+}
+
+export interface DeleteRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+  purge?: boolean | undefined;
+}
+
 export const _PACKAGE_NAME = "";

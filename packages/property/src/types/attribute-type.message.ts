@@ -6,19 +6,9 @@
 
 /* eslint-disable */
 import { Icon, QueryBuilder } from "./common.message";
+import { AttributeType } from "./property.models";
 
 export const protobufPackage = "";
-
-export interface AttributeType {
-  id: string;
-  name: string;
-  organizationId?: string | undefined;
-  icon: Icon | undefined;
-  voided: boolean;
-  createdAt: string;
-  /** repeated PropertyAttribute assignedProperties = 8; // TODO: define */
-  updatedAt: string;
-}
 
 export interface QueryAttributeTypeRequest {
   queryBuilder: QueryBuilder | undefined;

@@ -19,3 +19,15 @@ message QueryBuilder {
     // Custome rep queries
     optional string v = 4;
 }
+
+message GetRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+}
+
+message DeleteRequest {
+    QueryBuilder queryBuilder = 1;
+    string id = 2;
+    optional bool purge = 3;
+}
+

@@ -5,26 +5,379 @@
 // source: property.message.proto
 
 /* eslint-disable */
-import { Icon, QueryBuilder } from "./common.message";
+import { QueryBuilder } from "./common.message";
+import {
+  Property,
+  PropertyAmenity,
+  PropertyAttribute,
+  PropertyCategory,
+  PropertyMedia,
+  PropertyStatusHistory,
+  Relationship,
+} from "./property.models";
 
 export const protobufPackage = "";
 
-export interface Property {
-  id: string;
-  name: string;
-  organizationId?: string | undefined;
-  icon: Icon | undefined;
-  voided: boolean;
-  createdAt: string;
-  /** repeated PropertyAttribute assignedProperties = 8; // TODO: define */
-  updatedAt: string;
+export interface QueryRelationshipRequest {
+  queryBuilder: QueryBuilder | undefined;
+  search?: string | undefined;
+  propertyAId?: string | undefined;
+  propertyBId?: string | undefined;
+  typeId?: string | undefined;
+  includeVoided?: boolean | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
 }
 
+export interface QueryRelationshipResponse {
+  data: Relationship[];
+  metadata: { [key: string]: string };
+}
+
+export interface QueryRelationshipResponse_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface CreateRelationshipRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyAId: string;
+  propertyBId: string;
+  startDate: string;
+  endDate?: string | undefined;
+  typeId: string;
+}
+
+export interface UpdateRelationshipRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyAId?: string | undefined;
+  propertyBId?: string | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+  typeId?: string | undefined;
+  id: string;
+}
+
+export interface GetRelationshipRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+}
+
+export interface GetRelationshipResponse {
+  data: Relationship | undefined;
+  metadata: { [key: string]: string };
+}
+
+export interface GetRelationshipResponse_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface DeleteRelationshipRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+  purge?: boolean | undefined;
+}
+
+/** Property status history */
+export interface QueryPropertyStatusHistoryRequest {
+  queryBuilder: QueryBuilder | undefined;
+  search?: string | undefined;
+  propertyId?: string | undefined;
+  changedBy?: string | undefined;
+  previousStatus?: string | undefined;
+  newStatus?: string | undefined;
+}
+
+export interface QueryPropertyStatusHistoryResponse {
+  data: PropertyStatusHistory[];
+  metadata: { [key: string]: string };
+}
+
+export interface QueryPropertyStatusHistoryResponse_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface CreatePropertyStatusHistoryRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyId: string;
+  changedBy?: string | undefined;
+  reason: string;
+  previousStatus: string;
+  newStatus: string;
+}
+
+export interface GetPropertyStatusHistoryRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+}
+
+export interface GetPropertyStatusHistoryResponse {
+  data: PropertyStatusHistory | undefined;
+  metadata: { [key: string]: string };
+}
+
+export interface GetPropertyStatusHistoryResponse_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface DeletePropertyStatusHistoryRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+  purge?: boolean | undefined;
+}
+
+/** Property media */
+export interface QueryPropertyMediaRequest {
+  queryBuilder: QueryBuilder | undefined;
+  search?: string | undefined;
+  propertyId?: string | undefined;
+  type?: string | undefined;
+  size?: number | undefined;
+  mimeType?: string | undefined;
+  includeVoided?: boolean | undefined;
+}
+
+export interface QueryPropertyMediaResponse {
+  data: PropertyMedia[];
+  metadata: { [key: string]: string };
+}
+
+export interface QueryPropertyMediaResponse_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface CreatePropertyMediaRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyId: string;
+  type: string;
+  url: string;
+  title?: string | undefined;
+  description?:
+    | string
+    | undefined;
+  /** size ,memeType,id,e.t.c */
+  metadata: { [key: string]: string };
+  order: number;
+}
+
+export interface CreatePropertyMediaRequest_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface UpdatePropertyMediaRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyId?: string | undefined;
+  type?: string | undefined;
+  url?: string | undefined;
+  title?: string | undefined;
+  description?: string | undefined;
+  metadata: { [key: string]: string };
+  order?: number | undefined;
+  id: string;
+}
+
+export interface UpdatePropertyMediaRequest_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface GetPropertyMediaRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+}
+
+export interface GetPropertyMediaResponse {
+  data: PropertyMedia | undefined;
+  metadata: { [key: string]: string };
+}
+
+export interface GetPropertyMediaResponse_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface DeletePropertyMediaRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+  purge?: boolean | undefined;
+}
+
+/** Property attribute */
+export interface QueryPropertyAttributeRequest {
+  queryBuilder: QueryBuilder | undefined;
+  search?: string | undefined;
+  propertyId?: string | undefined;
+  attributeId?: string | undefined;
+  includeVoided?: boolean | undefined;
+}
+
+export interface QueryPropertyAttributeResponse {
+  data: PropertyAttribute[];
+  metadata: { [key: string]: string };
+}
+
+export interface QueryPropertyAttributeResponse_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface CreatePropertyAttributeRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyId: string;
+  attributeId: string;
+  value: string;
+}
+
+export interface UpdatePropertyAttributeRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyId?: string | undefined;
+  attributeId?: string | undefined;
+  value?: string | undefined;
+  id: string;
+}
+
+export interface GetPropertyAttributeRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+}
+
+export interface GetPropertyAttributeResponse {
+  data: PropertyAttribute | undefined;
+  metadata: { [key: string]: string };
+}
+
+export interface GetPropertyAttributeResponse_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface DeletePropertyAttributeRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+  purge?: boolean | undefined;
+}
+
+/** Property Amenity */
+export interface QueryPropertyAmenityRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyId?: string | undefined;
+  amenityId?: string | undefined;
+  includeVoided?: boolean | undefined;
+}
+
+export interface QueryPropertyAmenityResponse {
+  data: PropertyAmenity[];
+  metadata: { [key: string]: string };
+}
+
+export interface QueryPropertyAmenityResponse_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface CreatePropertyAmenityRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyId: string;
+  amenityId: string;
+}
+
+export interface UpdatePropertyAmenityRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyId?: string | undefined;
+  amenityId?: string | undefined;
+  id: string;
+}
+
+export interface GetPropertyAmenityRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+}
+
+export interface GetPropertyAmenityResponse {
+  data: PropertyAmenity | undefined;
+  metadata: { [key: string]: string };
+}
+
+export interface GetPropertyAmenityResponse_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface DeletePropertyAmenityRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+  purge?: boolean | undefined;
+}
+
+/** Property category */
+export interface QueryPropertyCategoryRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyId?: string | undefined;
+  categoryId?: string | undefined;
+  includeVoided?: boolean | undefined;
+}
+
+export interface QueryPropertyCategoryResponse {
+  data: PropertyCategory[];
+  metadata: { [key: string]: string };
+}
+
+export interface QueryPropertyCategoryResponse_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface CreatePropertyCategoryRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyId: string;
+  categoryId: string;
+}
+
+export interface UpdatePropertyCategoryRequest {
+  queryBuilder: QueryBuilder | undefined;
+  propertyId?: string | undefined;
+  categoryId?: string | undefined;
+  id: string;
+}
+
+export interface GetPropertyCategoryRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+}
+
+export interface GetPropertyCategoryResponse {
+  data: PropertyCategory | undefined;
+  metadata: { [key: string]: string };
+}
+
+export interface GetPropertyCategoryResponse_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface DeletePropertyCategoryRequest {
+  queryBuilder: QueryBuilder | undefined;
+  id: string;
+  purge?: boolean | undefined;
+}
+
+/** Property */
 export interface QueryPropertyRequest {
   queryBuilder: QueryBuilder | undefined;
   search?: string | undefined;
   organizationId?: string | undefined;
   includeVoided?: boolean | undefined;
+  status?: string | undefined;
+  addressId?: string | undefined;
+  isVirtual?: boolean | undefined;
+  attributeIds: string[];
+  amenityIds: string[];
+  categoryIds: string[];
 }
 
 export interface QueryPropertyResponse {
@@ -40,14 +393,35 @@ export interface QueryPropertyResponse_MetadataEntry {
 export interface CreatePropertyRequest {
   queryBuilder: QueryBuilder | undefined;
   name: string;
-  organizationId?: string | undefined;
-  icon: Icon | undefined;
+  organizationId: string;
+  addressId: string;
+  createdBy: string;
+  status: string;
+  description?: string | undefined;
+  thumbnail?: string | undefined;
+  isVirtual: boolean;
+  /** json string */
+  attributes: string;
+  amenityIds: string[];
+  categoryIds: string[];
 }
 
 export interface UpdatePropertyRequest {
   queryBuilder: QueryBuilder | undefined;
   name?: string | undefined;
-  icon?: Icon | undefined;
+  organizationId?: string | undefined;
+  addressId?: string | undefined;
+  createdBy?: string | undefined;
+  status?: string | undefined;
+  description?: string | undefined;
+  thumbnail?: string | undefined;
+  isVirtual?:
+    | boolean
+    | undefined;
+  /** json string */
+  attributes?: string | undefined;
+  amenityIds: string[];
+  categoryIds: string[];
   id: string;
 }
 

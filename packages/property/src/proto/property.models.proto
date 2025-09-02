@@ -1,0 +1,156 @@
+syntax = 'proto3';
+
+import "common.message.proto";
+
+message Amenity {
+    string id = 1;
+    string name = 2;
+    optional string organizationId = 3;
+    Icon icon = 4;
+    bool voided = 5;
+    string createdAt = 6;
+    string updatedAt = 7;
+    repeated PropertyAmenity assignedProperties = 8; 
+}
+
+message AttributeType {
+    string id = 1;
+    string name = 2;
+    optional string organizationId = 3;
+    Icon icon = 4;
+    bool voided = 5;
+    string createdAt = 6;
+    string updatedAt = 7;
+    repeated PropertyAttribute assignedProperties = 8; 
+}
+
+
+message Category {
+    string id = 1;
+    string name = 2;
+    optional string organizationId = 3;
+    Icon icon = 4;
+    bool voided = 5;
+    string createdAt = 6;
+    string updatedAt = 7;
+    repeated PropertyCategory properties = 8; 
+}
+
+
+message RelationshipType {
+    string id = 1;
+    optional string description = 2;
+    string aIsToB = 3;
+    string bIsToA = 4;
+    bool voided = 5;
+    string createdAt = 6;
+    string updatedAt = 8;
+    repeated Relationship relationships = 9;
+}
+
+message Relationship {
+    string id = 1;
+    string propertyAId = 2;
+    string propertyBId = 3;
+    string startDate = 4;
+    optional string endDate = 5;
+    string typeId = 6;
+    bool voided = 7;
+    string createdAt = 8;
+    string updatedAt = 9;
+
+    optional RelationshipType type = 10;
+    optional Property propertyA = 11;
+    optional Property propertyB = 12;
+}
+
+message PropertyStatusHistory {
+    string id = 1;
+    string propertyId = 2;
+    optional Property property = 3;
+    string createdAt = 4;
+    string updatedAt = 5;
+    optional string changedBy = 6;
+    string reason = 7;
+    string previousStatus = 8;
+    string newStatus = 9;
+}
+
+message PropertyMedia {
+    string id = 1;
+    string propertyId = 2;
+    optional Property property = 3;
+    string type = 4;
+    string url = 5;
+    optional string title = 6;
+    optional string description = 7;
+    map<string, string> metadata = 8;
+    int32 order = 9;
+    string createdAt = 10;
+    string updatedAt = 11;
+    bool voided = 12;
+}
+
+message PropertyAttribute {
+    string id = 1;
+    string propertyId = 2;
+    string attributeId = 3;
+    string value = 4;
+    optional Property property = 5;
+    optional AttributeType attribute = 6;
+    bool voided = 7;
+    string createdAt = 8;
+    string updatedAt = 9;
+}
+
+message PropertyAmenity {
+    string id = 1;
+    string propertyId = 2;
+    string amenityId = 3;
+    optional Property property = 4;
+    optional Amenity amenity = 5;
+    bool voided = 6;
+    string createdAt = 7;
+    string updatedAt = 8;
+}
+
+message PropertyCategory {
+    string id = 1;
+    string propertyId = 2;
+    string categoryId = 3;
+    optional Property property = 4;
+    optional Category category = 5;
+    bool voided = 6;
+    string createdAt = 7;
+    string updatedAt = 8;
+}
+
+message Property {
+    string id = 1;
+    string propertyNumber = 2;
+    string name = 3;
+    string organizationId = 4;
+    Icon icon = 5;
+    bool voided = 6;
+    string createdAt = 7;
+    string updatedAt = 8;
+    string status = 9;
+    optional string description = 10;
+    optional string thumbnail = 11;
+    bool isVirtual = 12;
+    repeated PropertyAttribute attributes = 13;
+    repeated PropertyMedia media = 14;
+    repeated PropertyAmenity amenities = 15;
+    repeated PropertyCategory categories = 16;
+    repeated Relationship relationshipsAsA = 17;
+    repeated Relationship relationshipsAsB = 18;
+    string addressId = 19;
+    optional Address address = 20;
+    optional Organization organization = 21;
+    string createdBy = 22;
+    repeated PropertyStatusHistory statusHistory = 23;
+}
+
+message Address {}
+
+message Organization {}
