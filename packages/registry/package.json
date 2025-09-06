@@ -39,6 +39,7 @@
   },
   "scripts": {
     "dev": "pnpm build --watch",
+    "postinstall": "pnpm gen",
     "copy-assets": "node scripts/copy-assets.js",
     "gen": "node scripts/generate-types.js && pnpm run copy-assets",
     "build": "tsc -b -v",
