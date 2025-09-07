@@ -14,17 +14,95 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model HiveFile {
-  id        String   @id @default(uuid()) @db.Uuid
-  path      String   @unique
-  bytesSize Decimal?
-  memeType  String?
+model File {
+  id           String  @id @default(uuid()) @db.Uuid
+  filename     String
+  originalName String
+  mimeType     String
+  size         BigInt // In bytes
+  hash         String? // For deduplication
 
-  organizationId String? @db.Uuid
-  organization   Json?
+  // Ownership and Context
+  uploadedById   String // Better auth user uses no uuid for id fields
+  organizationId String? // NULL for personal files
+  contextType    FileContext  @default(PERSONAL)
+  category       FileCategory @default(DOCUMENT)
 
-  uploadedBy String   @db.Uuid
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  voided     Boolean  @default(false)
+  // Metadata
+  metadata Json? // Flexible JSON for file-specific data
+  tags     String[] // For categorization and search
+
+  // Relationships
+  uploadedBy   Json? // Minimal cached user details
+  organization Json? // Minimal cached organization details
+  // access       FileAccess[]
+
+  // Timestamps
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  lastAccessedAt DateTime?
+  expiresAt      DateTime? // For temporary files
+  voided         Boolean       @default(false)
+  storages       FileStorage[]
+
+  // Indexes for performance
+  @@index([uploadedById])
+  @@index([organizationId])
+  @@index([contextType])
+  @@index([createdAt])
+  @@index([hash]) // For deduplication queries
+  @@map("files")
 }
+
+// TODO: handle after thinking through application rbac
+// TODO Think of simple perfomant model for access controll, something that simple marks file as public or aceesible to people within the organization with given priviledges
+// model FileAccess {
+//   id          String          @id @default(cuid())
+//   fileId      String @db.Uuid
+//   expiresAt   DateTime?
+//   grantedById String
+//   createdAt   DateTime        @default(now())
+
+//   file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+// }
+
+// multi-provider storage (e.g., store a file in S3 + R2 for redundancy)
+model FileStorage {
+  id          String          @id @default(uuid()) @db.Uuid
+  fileId      String          @db.Uuid
+  provider    StorageProvider
+  storagePath String
+  storageUrl  String? // CDN/public URL
+  createdAt   DateTime        @default(now())
+
+  file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@map("file_storage")
+}
+
+enum FileContext {
+  PERSONAL // Personal user files (avatars, etc.)
+  ORGANIZATION // Business files within org context
+  SHARED // Shared/public files
+  TEMPORARY // Temporary uploads
+}
+
+enum FileCategory {
+  AVATAR // Profile pictures (always free)
+  DOCUMENT // Business documents
+  IMAGE // General images
+  VIDEO // Video files
+  AUDIO // Audio files
+  ARCHIVE // Zip, tar, etc.
+  CODE // Source code files
+  OTHER // Miscellaneous
+}
+
+enum StorageProvider {
+  LOCAL
+  AWS_S3
+  GOOGLE_CLOUD
+  AZURE_BLOB
+  CLOUDFLARE_R2
+}
+
