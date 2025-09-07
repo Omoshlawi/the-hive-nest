@@ -126,6 +126,85 @@ importers:
       '@types/lodash':
         specifier: ^4.17.20
         version: 4.17.20
+      '@types/multer':
+        specifier: ^2.0.0
+        version: 2.0.0
+      '@types/supertest':
+        specifier: ^6.0.2
+        version: 6.0.3
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@22.18.1)(ts-node@10.9.2)
+      prisma:
+        specifier: ^6.14.0
+        version: 6.15.0(typescript@5.9.2)
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+      supertest:
+        specifier: ^7.0.0
+        version: 7.1.4
+      ts-jest:
+        specifier: ^29.2.5
+        version: 29.4.1(@babel/core@7.28.4)(jest@29.7.0)(typescript@5.9.2)
+      ts-loader:
+        specifier: ^9.5.2
+        version: 9.5.4(typescript@5.9.2)(webpack@5.101.3)
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@swc/core@1.13.5)(@types/node@22.18.1)(typescript@5.9.2)
+      tsconfig-paths:
+        specifier: ^4.2.0
+        version: 4.2.0
+
+  apps/file-service:
+    dependencies:
+      '@hive/files':
+        specifier: workspace:*
+        version: link:../../packages/files
+      '@nestjs/common':
+        specifier: ^11.0.1
+        version: 11.1.6(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^11.0.1
+        version: 11.1.6(@nestjs/common@11.1.6)(@nestjs/microservices@11.1.6)(@nestjs/platform-express@11.1.6)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/platform-express':
+        specifier: ^11.0.1
+        version: 11.1.6(@nestjs/common@11.1.6)(@nestjs/core@11.1.6)
+      '@prisma/client':
+        specifier: ^6.14.0
+        version: 6.15.0(prisma@6.15.0)(typescript@5.9.2)
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.2
+    devDependencies:
+      '@nestjs/cli':
+        specifier: ^11.0.0
+        version: 11.0.10(@swc/cli@0.6.0)(@swc/core@1.13.5)(@types/node@22.18.1)
+      '@nestjs/schematics':
+        specifier: ^11.0.0
+        version: 11.0.7(typescript@5.9.2)
+      '@nestjs/testing':
+        specifier: ^11.0.1
+        version: 11.1.6(@nestjs/common@11.1.6)(@nestjs/core@11.1.6)(@nestjs/microservices@11.1.6)(@nestjs/platform-express@11.1.6)
+      '@swc/cli':
+        specifier: ^0.6.0
+        version: 0.6.0(@swc/core@1.13.5)
+      '@swc/core':
+        specifier: ^1.10.7
+        version: 1.13.5
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.3
+      '@types/lodash':
+        specifier: ^4.17.20
+        version: 4.17.20
       '@types/supertest':
         specifier: ^6.0.2
         version: 6.0.3
@@ -690,6 +769,28 @@ importers:
       typescript-eslint:
         specifier: ^8.20.0
         version: 8.42.0(eslint@9.35.0)(typescript@5.9.2)
+
+  packages/files:
+    dependencies:
+      '@nestjs/mapped-types':
+        specifier: '*'
+        version: 2.1.0(@nestjs/common@11.1.6)(class-validator@0.14.2)(reflect-metadata@0.2.2)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.7
+        version: 22.18.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@22.18.1)(ts-node@10.9.2)
+      ts-jest:
+        specifier: ^29.2.5
+        version: 29.4.1(@babel/core@7.28.4)(jest@29.7.0)(typescript@5.9.2)
+      ts-proto:
+        specifier: ^2.7.7
+        version: 2.7.7
+      ts-protoc-gen:
+        specifier: ^0.15.0
+        version: 0.15.0
 
   packages/identity:
     dependencies:
@@ -3702,7 +3803,13 @@ packages:
     resolution: {integrity: sha512-zmPitbQ8+6zNutpwgcQuLcsEpn/Cj54Kbn7L5pX0Os5kdWplB7xPgEh/g+SWOB/qmows2gpuCaPyduq8ZZRnxA==}
     deprecated: This is a stub types definition. minimatch provides its own type definitions, so you do not need this installed.
     dependencies:
-      minimatch: 9.0.5
+      minimatch: 10.0.3
+    dev: true
+
+  /@types/multer@2.0.0:
+    resolution: {integrity: sha512-C3Z9v9Evij2yST3RSBktxP9STm6OdMc5uR1xF1SGr98uv8dUlAL2hqwrZ3GVB3uyMyiegnscEK6PGtYvNrjTjw==}
+    dependencies:
+      '@types/express': 5.0.3
     dev: true
 
   /@types/node@22.18.1:

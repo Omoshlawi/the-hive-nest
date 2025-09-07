@@ -15,6 +15,7 @@ import { IdentityModule } from './identity/identity.module';
 import { auth } from './lib/auth';
 import { RegistryModule } from './registry/registry.module';
 import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { RelationshipTypesModule } from './relationship-types/relationship-types
     CategoriesModule,
     AttributeTypesModule,
     RelationshipTypesModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [
