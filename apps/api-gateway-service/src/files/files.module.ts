@@ -1,14 +1,9 @@
 import { Module } from '@nestjs/common';
 import { FilesController } from './files.controller';
-import { MulterModule } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer';
+import { S3Module } from '../s3/s3.module';
 
 @Module({
   controllers: [FilesController],
-  imports: [
-    MulterModule.register({
-      storage: memoryStorage(),
-    }),
-  ],
+  imports: [S3Module],
 })
 export class FilesModule {}

@@ -5,7 +5,148 @@
 // source: files.service.proto
 
 /* eslint-disable */
+import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
+import { Observable } from "rxjs";
 
 export const protobufPackage = "hive.files.v1";
 
+export interface QueryBuilder {
+  /** Pagination queries */
+  page?: number | undefined;
+  limit?:
+    | number
+    | undefined;
+  /** Sord queries */
+  orderBy?:
+    | string
+    | undefined;
+  /** Custome rep queries */
+  v?: string | undefined;
+}
+
+/** Common message for file metadata */
+export interface File {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  buffer: Uint8Array;
+  size: string;
+}
+
+export interface UploadedFile {
+}
+
+export interface UploadSingleFileRequest {
+  queryBuilder: QueryBuilder | undefined;
+  uploadTo: string;
+  file: File | undefined;
+  metadata: { [key: string]: string };
+}
+
+export interface UploadSingleFileRequest_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+export interface UploadMultipleFilesRequest {
+  queryBuilder: QueryBuilder | undefined;
+  uploadTo: string;
+  files: File[];
+  metadata: { [key: string]: string };
+}
+
+export interface UploadMultipleFilesRequest_MetadataEntry {
+  key: string;
+  value: string;
+}
+
+/** Response messages */
+export interface UploadSingleFileResponse {
+  file: UploadedFile | undefined;
+}
+
+export interface UploadMultipleFilesResponse {
+  files: UploadedFile[];
+}
+
+/** Additional utility messages */
+export interface DeleteFileRequest {
+  fileId: string;
+}
+
+export interface GetFileInfoRequest {
+  fileId: string;
+}
+
+export interface ListFilesRequest {
+}
+
 export const HIVE_FILES_V1_PACKAGE_NAME = "hive.files.v1";
+
+/** Service definition */
+
+export interface FileServiceClient {
+  /** Upload a single file */
+
+  uploadSingleFile(request: UploadSingleFileRequest): Observable<UploadSingleFileResponse>;
+
+  /** Upload multiple files with same field name */
+
+  uploadMultipleFiles(request: UploadMultipleFilesRequest): Observable<UploadMultipleFilesResponse>;
+
+  /** Additional utility methods */
+
+  deleteFile(request: DeleteFileRequest): Observable<UploadSingleFileResponse>;
+
+  getFileInfo(request: GetFileInfoRequest): Observable<UploadSingleFileResponse>;
+
+  listFiles(request: ListFilesRequest): Observable<UploadMultipleFilesResponse>;
+}
+
+/** Service definition */
+
+export interface FileServiceController {
+  /** Upload a single file */
+
+  uploadSingleFile(
+    request: UploadSingleFileRequest,
+  ): Promise<UploadSingleFileResponse> | Observable<UploadSingleFileResponse> | UploadSingleFileResponse;
+
+  /** Upload multiple files with same field name */
+
+  uploadMultipleFiles(
+    request: UploadMultipleFilesRequest,
+  ): Promise<UploadMultipleFilesResponse> | Observable<UploadMultipleFilesResponse> | UploadMultipleFilesResponse;
+
+  /** Additional utility methods */
+
+  deleteFile(
+    request: DeleteFileRequest,
+  ): Promise<UploadSingleFileResponse> | Observable<UploadSingleFileResponse> | UploadSingleFileResponse;
+
+  getFileInfo(
+    request: GetFileInfoRequest,
+  ): Promise<UploadSingleFileResponse> | Observable<UploadSingleFileResponse> | UploadSingleFileResponse;
+
+  listFiles(
+    request: ListFilesRequest,
+  ): Promise<UploadMultipleFilesResponse> | Observable<UploadMultipleFilesResponse> | UploadMultipleFilesResponse;
+}
+
+export function FileServiceControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = ["uploadSingleFile", "uploadMultipleFiles", "deleteFile", "getFileInfo", "listFiles"];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod("FileService", method)(constructor.prototype[method], method, descriptor);
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod("FileService", method)(constructor.prototype[method], method, descriptor);
+    }
+  };
+}
+
+export const FILE_SERVICE_NAME = "FileService";

@@ -1,3 +1,79 @@
 syntax = 'proto3';
 
 package hive.files.v1;
+
+message QueryBuilder {
+    // Pagination queries
+    optional int32 page = 1;
+    optional int32 limit = 2;
+    // Sord queries
+    optional string order_by = 3;
+    // Custome rep queries
+    optional string v = 4;
+}
+
+// Common message for file metadata
+message File{
+    string fieldname = 1;
+    string originalname = 2;
+    string encoding = 3;
+    string mimetype = 4;
+    bytes buffer = 5;
+    string size = 6;
+}
+
+message UploadedFile {
+
+}
+
+message UploadSingleFileRequest {
+    QueryBuilder query_builder = 1;
+    string upload_to = 2;
+    File file = 3;
+    map<string, string> metadata = 4;
+}
+
+message UploadMultipleFilesRequest {
+    QueryBuilder query_builder = 1;
+    string upload_to = 2;
+    repeated File files = 3;
+    map<string, string> metadata = 4;
+}
+
+// Response messages
+message UploadSingleFileResponse {
+  UploadedFile file = 1;
+}
+
+message UploadMultipleFilesResponse {
+    repeated UploadedFile files = 1;
+}
+
+// Service definition
+service FileService {
+  // Upload a single file
+  rpc UploadSingleFile(UploadSingleFileRequest) returns (UploadSingleFileResponse);
+  
+  // Upload multiple files with same field name
+  rpc UploadMultipleFiles(UploadMultipleFilesRequest) returns (UploadMultipleFilesResponse);
+    
+  // Additional utility methods
+  rpc DeleteFile(DeleteFileRequest) returns (UploadSingleFileResponse);
+  rpc GetFileInfo(GetFileInfoRequest) returns (UploadSingleFileResponse);
+  rpc ListFiles(ListFilesRequest) returns (UploadMultipleFilesResponse);
+}
+
+// Additional utility messages
+message DeleteFileRequest {
+  string file_id = 1;
+}
+
+
+message GetFileInfoRequest {
+  string file_id = 1;
+}
+
+message ListFilesRequest {
+
+}
+

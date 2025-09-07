@@ -7,6 +7,12 @@ import {
 import {
   Body,
   Controller,
+  FileTypeValidator,
+  HttpException,
+  HttpStatus,
+  Logger,
+  MaxFileSizeValidator,
+  ParseFilePipeBuilder,
   Post,
   Query,
   UploadedFile,
@@ -19,28 +25,91 @@ import {
   FilesInterceptor,
 } from '@nestjs/platform-express';
 import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { S3Service } from '../s3/s3.service';
 
 @Controller('files')
 export class FilesController {
+  private readonly logger = new Logger(FilesController.name);
+  constructor(private readonly s3Service: S3Service) {}
+
+  private formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
-    description: 'Upload single file',
+    summary: 'Upload single file',
+    description: 'Upload a single file to the specified location',
   })
   @Post('upload/single')
-  uploadSingleFile(
-    @UploadedFile('file') file: Express.Multer.File,
+  async uploadSingleFile(
+    @UploadedFile(
+      'file',
+      new ParseFilePipeBuilder()
+        .addValidator(new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 })) // 10MB
+        // .addValidator(
+        //   new FileTypeValidator({
+        //     fileType: /\.(jpg|jpeg|png|gif|pdf|doc|docx|txt)$/,
+        //   }),
+        // )
+        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
+    )
+    file: Express.Multer.File,
     @Query() query: CustomRepresentationQueryDto,
     @Body() uploadFileDto: UploadSingleFileDto,
   ) {
-    console.log(file);
-    console.log(uploadFileDto);
+    this.logger.log(
+      `S3 single file upload: ${file.originalname} (${this.formatFileSize(file.size)})`,
+    );
+    try {
+      const s3FileMetadata = await this.s3Service.uploadSingleFile(
+        file,
+        uploadFileDto.uploadTo,
+        uploadFileDto.isPublic,
+        uploadFileDto.metadata,
+      );
+      return s3FileMetadata;
+    } catch (error) {
+      this.logger.error(
+        `S3 upload failed for ${file.originalname}: ${error.message}`,
+        error.stack,
+      );
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        `Upload failed: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
   @Post('upload/multiple')
+  @ApiOperation({
+    summary: 'Upload multiple files',
+    description:
+      'Upload multiple files with the same field name to the specified location',
+  })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('files'))
   uploadMultipleFile(
-    @UploadedFiles() files: Array<Express.Multer.File>,
+    @UploadedFiles(
+      new ParseFilePipeBuilder()
+        .addValidator(new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 })) // 10MB per file
+        .addValidator(
+          new FileTypeValidator({
+            fileType: /\.(jpg|jpeg|png|gif|pdf|doc|docx|txt)$/,
+          }),
+        )
+        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
+    )
+    files: Array<Express.Multer.File>,
     @Query() query: CustomRepresentationQueryDto,
     @Body() uploadFileDto: UploadMutipleFilesDto,
   ) {
@@ -49,9 +118,27 @@ export class FilesController {
   }
   @Post('upload/multiple/fields')
   @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload files from multiple form fields',
+    description:
+      'Upload files from different form fields to the specified location',
+  })
   @UseInterceptors(AnyFilesInterceptor())
   uploadFiles(
-    @UploadedFiles() file: Array<Express.Multer.File>,
+    @UploadedFiles(
+      new ParseFilePipeBuilder()
+        .addValidator(new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 })) // 10MB per file
+        .addValidator(
+          new FileTypeValidator({
+            fileType: /\.(jpg|jpeg|png|gif|pdf|doc|docx|txt)$/,
+          }),
+        )
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+          fileIsRequired: false, // Allow empty uploads for this endpoint
+        }),
+    )
+    file: Array<Express.Multer.File>,
     @Query() query: CustomRepresentationQueryDto,
     @Body() uploadFileDto: UploadFilesDto,
   ) {
