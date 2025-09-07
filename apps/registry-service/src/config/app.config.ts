@@ -14,6 +14,6 @@ export class AppConfig {
   serviceName: string;
   @Value('version')
   serviceVersion: string;
-  @Value('SERVICE_TTL', { parse: z.coerce.number().parse, default: 30 }) // In seconds, set to zero to disable ttl
+  @Value('SERVICE_TTL', { parse: z.coerce.number().parse, default: 60 }) // In seconds, set to zero to disable ttl
   serviceTtl: number;
 }
