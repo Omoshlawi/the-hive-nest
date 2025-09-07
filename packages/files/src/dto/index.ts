@@ -1,1 +1,1 @@
-export const dto = '';
+export * from './file-upload.dto';

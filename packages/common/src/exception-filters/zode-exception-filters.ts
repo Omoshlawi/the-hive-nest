@@ -11,7 +11,6 @@ export class ZodValidationExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
     const error = exception.getZodError();
-    console.log('**************', error);
 
     this.logger.error(
       'Validation error on ' + request.originalUrl + ': ',

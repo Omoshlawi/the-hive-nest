@@ -36,7 +36,24 @@
     "test:cov": "jest --coverage"
   },
   "dependencies": {
-    "@nestjs/mapped-types": "*"
+    "@nestjs/mapped-types": "*",
+    "@grpc/grpc-js": "^1.13.4",
+    "@grpc/proto-loader": "^0.8.0",
+    "@hive/registry": "workspace:*",
+    "@hive/utils": "workspace:*",
+    "@hive/common": "workspace:*",
+    "@itgorillaz/configify": "^4.0.1",
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/microservices": "^11.1.6",
+    "reflect-metadata": "^0.2.2",
+    "@nestjs/swagger": "^11.2.0",
+    "@nestjs/schedule": "^6.0.0",
+    "nestjs-zod": "5.0.0-beta.20250806T023752",
+    "rxjs": "^7.8.1",
+    "lodash": "^4.17.21",
+    "zod": "^4.0.15"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
@@ -44,6 +61,17 @@
     "ts-jest": "^29.2.5",
     "ts-proto": "^2.7.7",
     "ts-protoc-gen": "^0.15.0"
+  },
+  "peerDependencies": {
+    "@nestjs/microservices": "^11.1.6",
+    "@nestjs/common": "^11.0.1",
+    "@hive/registry": "workspace:*",
+    "@nestjs/swagger": "^11.2.0",
+    "nestjs-zod": "5.0.0-beta.20250806T023752",
+    "@itgorillaz/configify": "^4.0.1",
+    "@hive/utils": "workspace:*",
+    "rxjs": "^7.8.1",
+    "zod": "^4.0.15"
   },
   "jest": {
     "moduleFileExtensions": [
