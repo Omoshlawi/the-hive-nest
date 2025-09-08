@@ -35,7 +35,6 @@ model File {
   // Relationships
   uploadedBy   Json? // Minimal cached user details
   organization Json? // Minimal cached organization details
-  // access       FileAccess[]
 
   // Timestamps
   createdAt      DateTime      @default(now())
@@ -53,18 +52,6 @@ model File {
   @@index([hash]) // For deduplication queries
   @@map("files")
 }
-
-// TODO: handle after thinking through application rbac
-// TODO Think of simple perfomant model for access controll, something that simple marks file as public or aceesible to people within the organization with given priviledges
-// model FileAccess {
-//   id          String          @id @default(cuid())
-//   fileId      String @db.Uuid
-//   expiresAt   DateTime?
-//   grantedById String
-//   createdAt   DateTime        @default(now())
-
-//   file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
-// }
 
 // multi-provider storage (e.g., store a file in S3 + R2 for redundancy)
 model FileStorage {

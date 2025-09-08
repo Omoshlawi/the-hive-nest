@@ -24,129 +24,112 @@ export interface QueryBuilder {
   v?: string | undefined;
 }
 
-/** Common message for file metadata */
-export interface File {
-  fieldname: string;
-  originalname: string;
-  encoding: string;
-  mimetype: string;
-  buffer: Uint8Array;
-  size: string;
-}
-
-export interface UploadedFile {
-}
-
-export interface UploadSingleFileRequest {
-  queryBuilder: QueryBuilder | undefined;
+export interface FileMetadata {
+  id: string;
+  /** S3 object key */
+  key: string;
+  bucket: string;
+  filename: string;
+  originalName: string;
+  contentType: string;
+  size: number;
   uploadTo: string;
-  file: File | undefined;
-  metadata: { [key: string]: string };
+  isPublic: boolean;
+  etag: string;
+  url: string;
+  signedUrl: string;
+  uploadedAt: string;
+  customMetadata: { [key: string]: string };
 }
 
-export interface UploadSingleFileRequest_MetadataEntry {
+export interface FileMetadata_CustomMetadataEntry {
   key: string;
   value: string;
 }
 
-export interface UploadMultipleFilesRequest {
+export interface RegisterFileRequest {
   queryBuilder: QueryBuilder | undefined;
-  uploadTo: string;
-  files: File[];
-  metadata: { [key: string]: string };
+  fileMetadata: FileMetadata[];
+  uploadedBy: string;
+  ordarnizationId: string;
+  contextType: string;
+  category: string;
+  provider: RegisterFileRequest_StorageProvider;
 }
 
-export interface UploadMultipleFilesRequest_MetadataEntry {
-  key: string;
-  value: string;
+export enum RegisterFileRequest_StorageProvider {
+  LOCAL = 0,
+  AWS_S3 = 1,
+  GOOGLE_CLOUD = 2,
+  AZURE_BLOB = 3,
+  CLOUDFLARE_R2 = 4,
+  UNRECOGNIZED = -1,
 }
 
-/** Response messages */
-export interface UploadSingleFileResponse {
-  file: UploadedFile | undefined;
+export interface RegisteredFile {
+  id: string;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  hash: string;
+  uploadedById: string;
+  organizationId: string;
+  contextType: string;
+  category: string;
+  /** JSON as string */
+  metadata: string;
+  tags: string[];
+  /** JSON as string */
+  uploadedBy: string;
+  /** JSON as string */
+  organization: string;
+  createdAt: string;
+  updatedAt: string;
+  lastAccessedAt: string;
+  expiresAt: string;
+  voided: boolean;
+  storages: FileStorage[];
 }
 
-export interface UploadMultipleFilesResponse {
-  files: UploadedFile[];
-}
-
-/** Additional utility messages */
-export interface DeleteFileRequest {
+export interface FileStorage {
+  id: string;
   fileId: string;
+  provider: string;
+  storagePath: string;
+  storageUrl: string;
+  createdAt: string;
 }
 
-export interface GetFileInfoRequest {
-  fileId: string;
-}
-
-export interface ListFilesRequest {
+export interface RegisterFileResponse {
+  data: RegisteredFile[];
 }
 
 export const HIVE_FILES_V1_PACKAGE_NAME = "hive.files.v1";
 
-/** Service definition */
-
-export interface FileServiceClient {
-  /** Upload a single file */
-
-  uploadSingleFile(request: UploadSingleFileRequest): Observable<UploadSingleFileResponse>;
-
-  /** Upload multiple files with same field name */
-
-  uploadMultipleFiles(request: UploadMultipleFilesRequest): Observable<UploadMultipleFilesResponse>;
-
-  /** Additional utility methods */
-
-  deleteFile(request: DeleteFileRequest): Observable<UploadSingleFileResponse>;
-
-  getFileInfo(request: GetFileInfoRequest): Observable<UploadSingleFileResponse>;
-
-  listFiles(request: ListFilesRequest): Observable<UploadMultipleFilesResponse>;
+export interface FilesClient {
+  registerFiles(request: RegisterFileRequest): Observable<RegisterFileResponse>;
 }
 
-/** Service definition */
-
-export interface FileServiceController {
-  /** Upload a single file */
-
-  uploadSingleFile(
-    request: UploadSingleFileRequest,
-  ): Promise<UploadSingleFileResponse> | Observable<UploadSingleFileResponse> | UploadSingleFileResponse;
-
-  /** Upload multiple files with same field name */
-
-  uploadMultipleFiles(
-    request: UploadMultipleFilesRequest,
-  ): Promise<UploadMultipleFilesResponse> | Observable<UploadMultipleFilesResponse> | UploadMultipleFilesResponse;
-
-  /** Additional utility methods */
-
-  deleteFile(
-    request: DeleteFileRequest,
-  ): Promise<UploadSingleFileResponse> | Observable<UploadSingleFileResponse> | UploadSingleFileResponse;
-
-  getFileInfo(
-    request: GetFileInfoRequest,
-  ): Promise<UploadSingleFileResponse> | Observable<UploadSingleFileResponse> | UploadSingleFileResponse;
-
-  listFiles(
-    request: ListFilesRequest,
-  ): Promise<UploadMultipleFilesResponse> | Observable<UploadMultipleFilesResponse> | UploadMultipleFilesResponse;
+export interface FilesController {
+  registerFiles(
+    request: RegisterFileRequest,
+  ): Promise<RegisterFileResponse> | Observable<RegisterFileResponse> | RegisterFileResponse;
 }
 
-export function FileServiceControllerMethods() {
+export function FilesControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["uploadSingleFile", "uploadMultipleFiles", "deleteFile", "getFileInfo", "listFiles"];
+    const grpcMethods: string[] = ["registerFiles"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("FileService", method)(constructor.prototype[method], method, descriptor);
+      GrpcMethod("Files", method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("FileService", method)(constructor.prototype[method], method, descriptor);
+      GrpcStreamMethod("Files", method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
 
-export const FILE_SERVICE_NAME = "FileService";
+export const FILES_SERVICE_NAME = "Files";

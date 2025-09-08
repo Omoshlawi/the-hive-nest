@@ -12,68 +12,78 @@ message QueryBuilder {
     optional string v = 4;
 }
 
-// Common message for file metadata
-message File{
-    string fieldname = 1;
-    string originalname = 2;
-    string encoding = 3;
-    string mimetype = 4;
-    bytes buffer = 5;
-    string size = 6;
+message FileMetadata {
+    string id = 1;
+    string key = 2; // S3 object key
+    string bucket = 3;
+    string filename = 4;
+    string original_name = 5;
+    string content_type = 6;
+    int64 size = 7;
+    string upload_to = 8;
+    bool is_public = 9;
+    string etag = 10;
+    string url = 11;
+    string signed_url = 12;
+    string uploaded_at = 13;
+    map<string, string> custom_metadata = 14;
 }
 
-message UploadedFile {
+message RegisterFileRequest {
+  QueryBuilder query_builder = 1;
+  repeated FileMetadata file_metadata = 2;
+  string uploaded_by = 3;
+  string ordarnization_id = 4;
+  string context_type = 5;
+  string category = 6;
+  enum StorageProvider {
+    LOCAL = 0;
+    AWS_S3 = 1;
+    GOOGLE_CLOUD = 2;
+    AZURE_BLOB = 3;
+    CLOUDFLARE_R2 = 4;
+  }
+  StorageProvider provider = 7;
+}
+
+message RegisteredFile {
+  string id = 1;
+  string filename = 2;
+  string original_name = 3;
+  string mime_type = 4;
+  int64 size = 5;
+  string hash = 6;
+  string uploaded_by_id = 7;
+  string organization_id = 8;
+  string context_type = 9;
+  string category = 10;
+  string metadata = 11; // JSON as string
+  repeated string tags = 12;
+  string uploaded_by = 13; // JSON as string
+  string organization = 14; // JSON as string
+  string created_at = 15;
+  string updated_at = 16;
+  string last_accessed_at = 17;
+  string expires_at = 18;
+  bool voided = 19;
+  repeated FileStorage storages = 20;
+}
+
+message FileStorage {
+  string id = 1;
+  string file_id = 2;
+  string provider = 3;
+  string storage_path = 4;
+  string storage_url = 5;
+  string created_at = 6;
+}
+
+
+message RegisterFileResponse {
+  repeated RegisteredFile data = 1;
 
 }
 
-message UploadSingleFileRequest {
-    QueryBuilder query_builder = 1;
-    string upload_to = 2;
-    File file = 3;
-    map<string, string> metadata = 4;
+service Files {
+  rpc RegisterFiles(RegisterFileRequest) returns (RegisterFileResponse)  {};
 }
-
-message UploadMultipleFilesRequest {
-    QueryBuilder query_builder = 1;
-    string upload_to = 2;
-    repeated File files = 3;
-    map<string, string> metadata = 4;
-}
-
-// Response messages
-message UploadSingleFileResponse {
-  UploadedFile file = 1;
-}
-
-message UploadMultipleFilesResponse {
-    repeated UploadedFile files = 1;
-}
-
-// Service definition
-service FileService {
-  // Upload a single file
-  rpc UploadSingleFile(UploadSingleFileRequest) returns (UploadSingleFileResponse);
-  
-  // Upload multiple files with same field name
-  rpc UploadMultipleFiles(UploadMultipleFilesRequest) returns (UploadMultipleFilesResponse);
-    
-  // Additional utility methods
-  rpc DeleteFile(DeleteFileRequest) returns (UploadSingleFileResponse);
-  rpc GetFileInfo(GetFileInfoRequest) returns (UploadSingleFileResponse);
-  rpc ListFiles(ListFilesRequest) returns (UploadMultipleFilesResponse);
-}
-
-// Additional utility messages
-message DeleteFileRequest {
-  string file_id = 1;
-}
-
-
-message GetFileInfoRequest {
-  string file_id = 1;
-}
-
-message ListFilesRequest {
-
-}
-
