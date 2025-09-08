@@ -11,80 +11,80 @@ package hive.property.v1;
 
 service Property {
     // amenities
-    rpc queryAmenities(QueryAmenityRequest) returns (QueryAmenityResponse){};
-    rpc getAmenity(GetAmenityRequest) returns (GetAmenityResponse){};
-    rpc createAmenity(CreateAmenityRequest) returns (GetAmenityResponse){};
-    rpc updateAmenity(UpdateAmenityRequest) returns (GetAmenityResponse){};
-    rpc deleteAmenity(DeleteAmenityRequest) returns (GetAmenityResponse){};
+    rpc QueryAmenities(QueryAmenityRequest) returns (QueryAmenityResponse){};
+    rpc GetAmenity(GetAmenityRequest) returns (GetAmenityResponse){};
+    rpc CreateAmenity(CreateAmenityRequest) returns (GetAmenityResponse){};
+    rpc UpdateAmenity(UpdateAmenityRequest) returns (GetAmenityResponse){};
+    rpc DeleteAmenity(DeleteAmenityRequest) returns (GetAmenityResponse){};
 
     // categories
-    rpc queryCategories(QueryCategoryRequest) returns (QueryCategoryResponse){};
-    rpc getCategory(GetCategoryRequest) returns (GetCategoryResponse){};
-    rpc createCategory(CreateCategoryRequest) returns (GetCategoryResponse){};
-    rpc updateCategory(UpdateCategoryRequest) returns (GetCategoryResponse){};
-    rpc deleteCategory(DeleteCategoryRequest) returns (GetCategoryResponse){};
+    rpc QueryCategories(QueryCategoryRequest) returns (QueryCategoryResponse){};
+    rpc GetCategory(GetCategoryRequest) returns (GetCategoryResponse){};
+    rpc CreateCategory(CreateCategoryRequest) returns (GetCategoryResponse){};
+    rpc UpdateCategory(UpdateCategoryRequest) returns (GetCategoryResponse){};
+    rpc DeleteCategory(DeleteCategoryRequest) returns (GetCategoryResponse){};
 
     // attribute types
-    rpc queryAttributeTypes(QueryAttributeTypeRequest) returns (QueryAttributeTypeResponse){};
-    rpc getAttributeType(GetAttributeTypeRequest) returns (GetAttributeTypeResponse){};
-    rpc createAttributeType(CreateAttributeTypeRequest) returns (GetAttributeTypeResponse){};
-    rpc updateAttributeType(UpdateAttributeTypeRequest) returns (GetAttributeTypeResponse){};
-    rpc deleteAttributeType(DeleteAttributeTypeRequest) returns (GetAttributeTypeResponse){};
+    rpc QueryAttributeTypes(QueryAttributeTypeRequest) returns (QueryAttributeTypeResponse){};
+    rpc GetAttributeType(GetAttributeTypeRequest) returns (GetAttributeTypeResponse){};
+    rpc CreateAttributeType(CreateAttributeTypeRequest) returns (GetAttributeTypeResponse){};
+    rpc UpdateAttributeType(UpdateAttributeTypeRequest) returns (GetAttributeTypeResponse){};
+    rpc DeleteAttributeType(DeleteAttributeTypeRequest) returns (GetAttributeTypeResponse){};
 
     // Property
-    rpc queryProperties(QueryPropertyRequest) returns (QueryPropertyResponse){};
-    rpc getProperty(GetPropertyRequest) returns (GetPropertyResponse){};
-    rpc createProperty(CreatePropertyRequest) returns (GetPropertyResponse){};
-    rpc updateProperty(UpdatePropertyRequest) returns (GetPropertyResponse){};
-    rpc deleteProperty(DeletePropertyRequest) returns (GetPropertyResponse){};
+    rpc QueryProperties(QueryPropertyRequest) returns (QueryPropertyResponse){};
+    rpc GetProperty(GetPropertyRequest) returns (GetPropertyResponse){};
+    rpc CreateProperty(CreatePropertyRequest) returns (GetPropertyResponse){};
+    rpc UpdateProperty(UpdatePropertyRequest) returns (GetPropertyResponse){};
+    rpc DeleteProperty(DeletePropertyRequest) returns (GetPropertyResponse){};
 
     // Relationship type
-    rpc queryRelationshipType(QueryRelationshipTypeRequest) returns (QueryRelationshipTypeResponse){};
-    rpc getRelationshipType(GetRelationshipTypeRequest) returns (GetRelationshipTypeResponse){};
-    rpc createRelationshipType(CreateRelationshipTypeRequest) returns (GetRelationshipTypeResponse){};
-    rpc updateRelationshipType(UpdateRelationshipTypeRequest) returns (GetRelationshipTypeResponse){};
-    rpc deleteRelationshipType(DeleteRelationshipTypeRequest) returns (GetRelationshipTypeResponse){};
+    rpc QueryRelationshipType(QueryRelationshipTypeRequest) returns (QueryRelationshipTypeResponse){};
+    rpc GetRelationshipType(GetRelationshipTypeRequest) returns (GetRelationshipTypeResponse){};
+    rpc CreateRelationshipType(CreateRelationshipTypeRequest) returns (GetRelationshipTypeResponse){};
+    rpc UpdateRelationshipType(UpdateRelationshipTypeRequest) returns (GetRelationshipTypeResponse){};
+    rpc DeleteRelationshipType(DeleteRelationshipTypeRequest) returns (GetRelationshipTypeResponse){};
 
 
     // Relationship
-    rpc queryRelationship(QueryRelationshipRequest) returns (QueryRelationshipResponse){};
-    rpc getRelationship(GetRelationshipRequest) returns (GetRelationshipResponse){};
-    rpc createRelationship(CreateRelationshipRequest) returns (GetRelationshipResponse){};
-    rpc updateRelationship(UpdateRelationshipRequest) returns (GetRelationshipResponse){};
-    rpc deleteRelationship(DeleteRelationshipRequest) returns (GetRelationshipResponse){};
+    rpc QueryRelationship(QueryRelationshipRequest) returns (QueryRelationshipResponse){};
+    rpc GetRelationship(GetRelationshipRequest) returns (GetRelationshipResponse){};
+    rpc CreateRelationship(CreateRelationshipRequest) returns (GetRelationshipResponse){};
+    rpc UpdateRelationship(UpdateRelationshipRequest) returns (GetRelationshipResponse){};
+    rpc DeleteRelationship(DeleteRelationshipRequest) returns (GetRelationshipResponse){};
 
     // Property status
-    rpc queryPropertyStatusHistory(QueryPropertyStatusHistoryRequest) returns (QueryPropertyStatusHistoryResponse){};
-    rpc getPropertyStatusHistory(GetPropertyStatusHistoryRequest) returns (GetPropertyStatusHistoryResponse){};
-    rpc createPropertyStatusHistory(CreatePropertyStatusHistoryRequest) returns (GetPropertyStatusHistoryResponse){};
-    rpc deletePropertyStatusHistory(DeletePropertyStatusHistoryRequest) returns (GetPropertyStatusHistoryResponse){};
+    rpc QueryPropertyStatusHistory(QueryPropertyStatusHistoryRequest) returns (QueryPropertyStatusHistoryResponse){};
+    rpc GetPropertyStatusHistory(GetPropertyStatusHistoryRequest) returns (GetPropertyStatusHistoryResponse){};
+    rpc CreatePropertyStatusHistory(CreatePropertyStatusHistoryRequest) returns (GetPropertyStatusHistoryResponse){};
+    rpc DeletePropertyStatusHistory(DeletePropertyStatusHistoryRequest) returns (GetPropertyStatusHistoryResponse){};
 
     // Property media
-    rpc queryPropertyMedia(QueryPropertyMediaRequest) returns (QueryPropertyMediaResponse){};
-    rpc getPropertyMedia(GetPropertyMediaRequest) returns (GetPropertyMediaResponse){};
-    rpc createPropertyMedia(CreatePropertyMediaRequest) returns (GetPropertyMediaResponse){};
-    rpc updatePropertyMedia(UpdatePropertyMediaRequest) returns (GetPropertyMediaResponse){};
-    rpc deletePropertyMedia(DeletePropertyMediaRequest) returns (GetPropertyMediaResponse){};
+    rpc QueryPropertyMedia(QueryPropertyMediaRequest) returns (QueryPropertyMediaResponse){};
+    rpc GetPropertyMedia(GetPropertyMediaRequest) returns (GetPropertyMediaResponse){};
+    rpc CreatePropertyMedia(CreatePropertyMediaRequest) returns (GetPropertyMediaResponse){};
+    rpc UpdatePropertyMedia(UpdatePropertyMediaRequest) returns (GetPropertyMediaResponse){};
+    rpc DeletePropertyMedia(DeletePropertyMediaRequest) returns (GetPropertyMediaResponse){};
 
     // Property attribute
-    rpc queryPropertyAttribute(QueryPropertyAttributeRequest) returns (QueryPropertyAttributeResponse){};
-    rpc getPropertyAttribute(GetPropertyAttributeRequest) returns (GetPropertyAttributeResponse){};
-    rpc createPropertyAttribute(CreatePropertyAttributeRequest) returns (GetPropertyAttributeResponse){};
-    rpc updatePropertyAttribute(UpdatePropertyAttributeRequest) returns (GetPropertyAttributeResponse){};
-    rpc deletePropertyAttribute(DeletePropertyAttributeRequest) returns (GetPropertyAttributeResponse){};
+    rpc QueryPropertyAttribute(QueryPropertyAttributeRequest) returns (QueryPropertyAttributeResponse){};
+    rpc GetPropertyAttribute(GetPropertyAttributeRequest) returns (GetPropertyAttributeResponse){};
+    rpc CreatePropertyAttribute(CreatePropertyAttributeRequest) returns (GetPropertyAttributeResponse){};
+    rpc UpdatePropertyAttribute(UpdatePropertyAttributeRequest) returns (GetPropertyAttributeResponse){};
+    rpc DeletePropertyAttribute(DeletePropertyAttributeRequest) returns (GetPropertyAttributeResponse){};
 
     // Property amenity
-    rpc queryPropertyAmenity(QueryPropertyAmenityRequest) returns (QueryPropertyAmenityResponse){};
-    rpc getPropertyAmenity(GetPropertyAmenityRequest) returns (GetPropertyAmenityResponse){};
-    rpc createPropertyAmenity(CreatePropertyAmenityRequest) returns (GetPropertyAmenityResponse){};
-    rpc updatePropertyAmenity(UpdatePropertyAmenityRequest) returns (GetPropertyAmenityResponse){};
-    rpc deletePropertyAmenity(DeletePropertyAmenityRequest) returns (GetPropertyAmenityResponse){};
+    rpc QueryPropertyAmenity(QueryPropertyAmenityRequest) returns (QueryPropertyAmenityResponse){};
+    rpc GetPropertyAmenity(GetPropertyAmenityRequest) returns (GetPropertyAmenityResponse){};
+    rpc CreatePropertyAmenity(CreatePropertyAmenityRequest) returns (GetPropertyAmenityResponse){};
+    rpc UpdatePropertyAmenity(UpdatePropertyAmenityRequest) returns (GetPropertyAmenityResponse){};
+    rpc DeletePropertyAmenity(DeletePropertyAmenityRequest) returns (GetPropertyAmenityResponse){};
     
     // Property category
-    rpc queryPropertyCategory(QueryPropertyCategoryRequest) returns (QueryPropertyCategoryResponse){};
-    rpc getPropertyCategory(GetPropertyCategoryRequest) returns (GetPropertyCategoryResponse){};
-    rpc createPropertyCategory(CreatePropertyCategoryRequest) returns (GetPropertyCategoryResponse){};
-    rpc updatePropertyCategory(UpdatePropertyCategoryRequest) returns (GetPropertyCategoryResponse){};
-    rpc deletePropertyCategory(DeletePropertyCategoryRequest) returns (GetPropertyCategoryResponse){};
+    rpc QueryPropertyCategory(QueryPropertyCategoryRequest) returns (QueryPropertyCategoryResponse){};
+    rpc GetPropertyCategory(GetPropertyCategoryRequest) returns (GetPropertyCategoryResponse){};
+    rpc CreatePropertyCategory(CreatePropertyCategoryRequest) returns (GetPropertyCategoryResponse){};
+    rpc UpdatePropertyCategory(UpdatePropertyCategoryRequest) returns (GetPropertyCategoryResponse){};
+    rpc DeletePropertyCategory(DeletePropertyCategoryRequest) returns (GetPropertyCategoryResponse){};
 
 }

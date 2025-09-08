@@ -4,10 +4,10 @@ import "common.message.proto";
 import "property.models.proto";
 
 message QueryCategoryRequest {
-    QueryBuilder queryBuilder = 1;
+    QueryBuilder query_builder = 1;
     optional string search = 2;
-    optional string organizationId = 3;
-    optional bool includeVoided = 4;
+    optional string organization_id = 3;
+    optional bool include_voided = 4;
 }
 
 message QueryCategoryResponse {
@@ -16,19 +16,19 @@ message QueryCategoryResponse {
 }
 
 message CreateCategoryRequest {
-    QueryBuilder queryBuilder = 1;
+    QueryBuilder query_builder = 1;
     string name = 2;
-    optional string organizationId = 3;
+    optional string organization_id = 3;
     Icon icon = 4;
 }
 message UpdateCategoryRequest {
-    QueryBuilder queryBuilder = 1;
+    QueryBuilder query_builder = 1;
     optional string name = 2;
     optional Icon icon = 3;
     string id = 4;
 }
 message GetCategoryRequest {
-    QueryBuilder queryBuilder = 1;
+    QueryBuilder query_builder = 1;
     string id = 2;
 }
 message GetCategoryResponse {
@@ -36,7 +36,7 @@ message GetCategoryResponse {
     map<string, string> metadata = 2; 
 }
 message DeleteCategoryRequest {
-    QueryBuilder queryBuilder = 1;
+    QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
 }

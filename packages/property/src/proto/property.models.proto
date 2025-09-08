@@ -5,80 +5,78 @@ import "common.message.proto";
 message Amenity {
     string id = 1;
     string name = 2;
-    optional string organizationId = 3;
+    optional string organization_id = 3;
     Icon icon = 4;
     bool voided = 5;
-    string createdAt = 6;
-    string updatedAt = 7;
-    repeated PropertyAmenity assignedProperties = 8; 
+    string created_at = 6;
+    string updated_at = 7;
+    repeated PropertyAmenity assigned_properties = 8; 
 }
 
 message AttributeType {
     string id = 1;
     string name = 2;
-    optional string organizationId = 3;
+    optional string organization_id = 3;
     Icon icon = 4;
     bool voided = 5;
-    string createdAt = 6;
-    string updatedAt = 7;
-    repeated PropertyAttribute assignedProperties = 8; 
+    string created_at = 6;
+    string updated_at = 7;
+    repeated PropertyAttribute assigned_properties = 8; 
 }
-
 
 message Category {
     string id = 1;
     string name = 2;
-    optional string organizationId = 3;
+    optional string organization_id = 3;
     Icon icon = 4;
     bool voided = 5;
-    string createdAt = 6;
-    string updatedAt = 7;
+    string created_at = 6;
+    string updated_at = 7;
     repeated PropertyCategory properties = 8; 
 }
-
 
 message RelationshipType {
     string id = 1;
     optional string description = 2;
-    string aIsToB = 3;
-    string bIsToA = 4;
+    string a_is_to_b = 3;
+    string b_is_to_a = 4;
     bool voided = 5;
-    string createdAt = 6;
-    string updatedAt = 8;
+    string created_at = 6;
+    string updated_at = 8;
     repeated Relationship relationships = 9;
 }
 
 message Relationship {
     string id = 1;
-    string propertyAId = 2;
-    string propertyBId = 3;
-    string startDate = 4;
-    optional string endDate = 5;
-    string typeId = 6;
+    string property_a_id = 2;
+    string property_b_id = 3;
+    string start_date = 4;
+    optional string end_date = 5;
+    string type_id = 6;
     bool voided = 7;
-    string createdAt = 8;
-    string updatedAt = 9;
+    string created_at = 8;
+    string updated_at = 9;
 
     optional RelationshipType type = 10;
-    optional Property propertyA = 11;
-    optional Property propertyB = 12;
+    optional Property property_a = 11;
+    optional Property property_b = 12;
 }
 
 message PropertyStatusHistory {
     string id = 1;
-    string propertyId = 2;
+    string property_id = 2;
     optional Property property = 3;
-    string createdAt = 4;
-    string updatedAt = 5;
-    optional string changedBy = 6;
+    string created_at = 4;
+    string updated_at = 5;
+    optional string changed_by = 6;
     string reason = 7;
-    string previousStatus = 8;
-    string newStatus = 9;
+    string previous_status = 8;
+    string new_status = 9;
 }
 
 message PropertyMedia {
     string id = 1;
-    string propertyId = 2;
+    string property_id = 2;
     optional Property property = 3;
     string type = 4;
     string url = 5;
@@ -86,69 +84,69 @@ message PropertyMedia {
     optional string description = 7;
     map<string, string> metadata = 8;
     int32 order = 9;
-    string createdAt = 10;
-    string updatedAt = 11;
+    string created_at = 10;
+    string updated_at = 11;
     bool voided = 12;
 }
 
 message PropertyAttribute {
     string id = 1;
-    string propertyId = 2;
-    string attributeId = 3;
+    string property_id = 2;
+    string attribute_id = 3;
     string value = 4;
     optional Property property = 5;
     optional AttributeType attribute = 6;
     bool voided = 7;
-    string createdAt = 8;
-    string updatedAt = 9;
+    string created_at = 8;
+    string updated_at = 9;
 }
 
 message PropertyAmenity {
     string id = 1;
-    string propertyId = 2;
-    string amenityId = 3;
+    string property_id = 2;
+    string amenity_id = 3;
     optional Property property = 4;
     optional Amenity amenity = 5;
     bool voided = 6;
-    string createdAt = 7;
-    string updatedAt = 8;
+    string created_at = 7;
+    string updated_at = 8;
 }
 
 message PropertyCategory {
     string id = 1;
-    string propertyId = 2;
-    string categoryId = 3;
+    string property_id = 2;
+    string category_id = 3;
     optional Property property = 4;
     optional Category category = 5;
     bool voided = 6;
-    string createdAt = 7;
-    string updatedAt = 8;
+    string created_at = 7;
+    string updated_at = 8;
 }
 
 message Property {
     string id = 1;
-    string propertyNumber = 2;
+    string property_number = 2;
     string name = 3;
-    string organizationId = 4;
+    string organization_id = 4;
     Icon icon = 5;
     bool voided = 6;
-    string createdAt = 7;
-    string updatedAt = 8;
+    string created_at = 7;
+    string updated_at = 8;
     string status = 9;
     optional string description = 10;
     optional string thumbnail = 11;
-    bool isVirtual = 12;
+    bool is_virtual = 12;
     repeated PropertyAttribute attributes = 13;
     repeated PropertyMedia media = 14;
     repeated PropertyAmenity amenities = 15;
     repeated PropertyCategory categories = 16;
-    repeated Relationship relationshipsAsA = 17;
-    repeated Relationship relationshipsAsB = 18;
-    string addressId = 19;
+    repeated Relationship relationships_as_a = 17;
+    repeated Relationship relationships_as_b = 18;
+    string address_id = 19;
     optional Address address = 20;
     optional Organization organization = 21;
-    string createdBy = 22;
-    repeated PropertyStatusHistory statusHistory = 23;
+    string created_by = 22;
+    repeated PropertyStatusHistory status_history = 23;
 }
 
 message Address {}

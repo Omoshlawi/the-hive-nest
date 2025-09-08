@@ -15,19 +15,18 @@ message QueryBuilder {
     optional int32 page = 1;
     optional int32 limit = 2;
     // Sord queries
-    optional string orderBy = 3;
+    optional string order_by = 3;
     // Custome rep queries
     optional string v = 4;
 }
 
 message GetRequest {
-    QueryBuilder queryBuilder = 1;
+    QueryBuilder query_builder = 1;
     string id = 2;
 }
 
 message DeleteRequest {
-    QueryBuilder queryBuilder = 1;
+    QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
 }
-

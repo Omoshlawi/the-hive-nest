@@ -5,10 +5,10 @@ import "property.models.proto";
 
 
 message QueryAmenityRequest {
-    QueryBuilder queryBuilder = 1;
+    QueryBuilder query_builder = 1;
     optional string search = 2;
-    optional string organizationId = 3;
-    optional bool includeVoided = 4;
+    optional string organization_id = 3;
+    optional bool include_voided = 4;
 }
 
 message QueryAmenityResponse {
@@ -17,20 +17,19 @@ message QueryAmenityResponse {
 }
 
 message CreateAmenityRequest {
-    QueryBuilder queryBuilder = 1;
+    QueryBuilder query_builder = 1;
     string name = 2;
-    optional string organizationId = 3;
+    optional string organization_id = 3;
     Icon icon = 4;
 }
 message UpdateAmenityRequest {
-    QueryBuilder queryBuilder = 1;
+    QueryBuilder query_builder = 1;
     optional string name = 2;
     optional Icon icon = 3;
     string id = 4;
-
 }
 message GetAmenityRequest {
-    QueryBuilder queryBuilder = 1;
+    QueryBuilder query_builder = 1;
     string id = 2;
 }
 message GetAmenityResponse {
@@ -38,7 +37,7 @@ message GetAmenityResponse {
     map<string, string> metadata = 2; 
 }
 message DeleteAmenityRequest {
-    QueryBuilder queryBuilder = 1;
+    QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
 }
