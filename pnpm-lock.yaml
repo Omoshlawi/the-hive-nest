@@ -177,30 +177,63 @@ importers:
 
   apps/file-service:
     dependencies:
+      '@grpc/grpc-js':
+        specifier: ^1.13.4
+        version: 1.13.4
+      '@grpc/proto-loader':
+        specifier: ^0.8.0
+        version: 0.8.0
+      '@hive/common':
+        specifier: workspace:*
+        version: link:../../packages/common
       '@hive/files':
         specifier: workspace:*
         version: link:../../packages/files
+      '@hive/registry':
+        specifier: workspace:*
+        version: link:../../packages/registry
+      '@hive/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      '@itgorillaz/configify':
+        specifier: ^4.0.1
+        version: 4.0.1(@nestjs/common@11.1.6)(@nestjs/core@11.1.6)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/common':
         specifier: ^11.0.1
         version: 11.1.6(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core':
         specifier: ^11.0.1
         version: 11.1.6(@nestjs/common@11.1.6)(@nestjs/microservices@11.1.6)(@nestjs/platform-express@11.1.6)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/microservices':
+        specifier: ^11.1.6
+        version: 11.1.6(@grpc/grpc-js@1.13.4)(@nestjs/common@11.1.6)(@nestjs/core@11.1.6)(ioredis@5.7.0)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/platform-express':
         specifier: ^11.0.1
         version: 11.1.6(@nestjs/common@11.1.6)(@nestjs/core@11.1.6)
+      '@nestjs/schedule':
+        specifier: ^6.0.0
+        version: 6.0.0(@nestjs/common@11.1.6)(@nestjs/core@11.1.6)
+      '@nestjs/swagger':
+        specifier: ^11.2.0
+        version: 11.2.0(@nestjs/common@11.1.6)(@nestjs/core@11.1.6)(class-validator@0.14.2)(reflect-metadata@0.2.2)
       '@prisma/client':
         specifier: ^6.14.0
         version: 6.15.0(prisma@6.15.0)(typescript@5.9.2)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      nestjs-zod:
+        specifier: 5.0.0-beta.20250806T023752
+        version: 5.0.0-beta.20250806T023752(@nestjs/common@11.1.6)(@nestjs/swagger@11.2.0)(zod@4.1.5)
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
+      zod:
+        specifier: ^4.0.15
+        version: 4.1.5
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.0
