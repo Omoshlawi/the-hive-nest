@@ -5,19 +5,19 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { InjectS3, S3 } from 'nestjs-s3';
-import { S3Config } from '../config/s3.config';
-import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { S3Config } from '../config/s3.config';
 
 import {
-  PutObjectCommandInput,
-  PutObjectCommand,
-  PutObjectCommandOutput,
-  HeadObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  PutObjectCommandInput,
 } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export interface S3FileMetadata {
   id: string;
@@ -54,18 +54,72 @@ export class S3Service implements OnModuleInit {
     this.initializeBucket();
   }
 
+  private getBucket(isPublic: boolean = true) {
+    return isPublic ? this.config.publicBucket : this.config.privateBucket;
+  }
+
   private async initializeBucket(): Promise<void> {
     try {
       // Check if bucket exists, create if not
       await this.s3.send(
         new HeadObjectCommand({
-          Bucket: this.config.bucket,
+          Bucket: this.config.publicBucket,
+          Key: '.bucket-check',
+        }),
+      );
+      await this.s3.send(
+        new HeadObjectCommand({
+          Bucket: this.config.privateBucket,
           Key: '.bucket-check',
         }),
       );
     } catch (error) {
-      this.logger.log(`Initializing S3 bucket: ${this.config.bucket}`);
+      this.logger.log(
+        `Initializing S3 bucket: ${this.config.publicBucket}, ${this.config.privateBucket}`,
+      );
       // Bucket initialization would be handled by your infrastructure
+    }
+  }
+
+  async getFileMetadata(
+    key: string,
+    bucket: string,
+  ): Promise<S3FileMetadata | null> {
+    try {
+      const result = await this.s3.send(
+        new HeadObjectCommand({
+          Bucket: bucket,
+          Key: key,
+        }),
+      );
+
+      const isPublic = result.Metadata?.['x-amz-acl'] === 'public-read';
+      const publicUrl = this.generatePublicUrl(key);
+      const signedUrl = isPublic
+        ? undefined
+        : await this.generateDwnloadSignedUrl(key);
+
+      return {
+        id: result.Metadata?.['upload-id'] || '',
+        key,
+        bucket: bucket,
+        filename: key.split('/').pop() || '',
+        originalName: result.Metadata?.['original-name'] || '',
+        contentType: result.ContentType || 'application/octet-stream',
+        size: result.ContentLength || 0,
+        uploadTo: result.Metadata?.['upload-to'] || '',
+        isPublic,
+        etag: result.ETag?.replace(/"/g, '') || '',
+        url: isPublic ? publicUrl : signedUrl!,
+        signedUrl: isPublic ? undefined : signedUrl,
+        uploadedAt: new Date(result.LastModified || Date.now()),
+        customMetadata: this.extractCustomMetadata(result.Metadata || {}),
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to get file metadata for ${key}: ${error.message}`,
+      );
+      return null;
     }
   }
 
@@ -85,7 +139,7 @@ export class S3Service implements OnModuleInit {
     try {
       // Create upload stream
       const uploadParams: PutObjectCommandInput = {
-        Bucket: this.config.bucket,
+        Bucket: this.getBucket(isPublic),
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
@@ -123,12 +177,12 @@ export class S3Service implements OnModuleInit {
       const publicUrl = this.generatePublicUrl(key);
       const signedUrl = isPublic
         ? undefined
-        : await this.generateSignedUrl(key);
+        : await this.generateDwnloadSignedUrl(key);
 
       const fileMetadata: S3FileMetadata = {
         id: fileId,
         key,
-        bucket: this.config.bucket,
+        bucket: this.getBucket(isPublic),
         filename,
         originalName: file.originalname,
         contentType: file.mimetype,
@@ -140,7 +194,6 @@ export class S3Service implements OnModuleInit {
         signedUrl: isPublic ? undefined : signedUrl,
         uploadedAt: new Date(),
         customMetadata,
-        
       };
 
       this.logger.log(
@@ -204,11 +257,11 @@ export class S3Service implements OnModuleInit {
     return result;
   }
 
-  async deleteFile(key: string): Promise<boolean> {
+  async deleteFile(key: string, bucket: string): Promise<boolean> {
     try {
       await this.s3.send(
         new DeleteObjectCommand({
-          Bucket: this.config.bucket,
+          Bucket: bucket,
           Key: key,
         }),
       );
@@ -221,48 +274,26 @@ export class S3Service implements OnModuleInit {
     }
   }
 
-  async getFileMetadata(key: string): Promise<S3FileMetadata | null> {
-    try {
-      const result = await this.s3.send(
-        new HeadObjectCommand({
-          Bucket: this.config.bucket,
-          Key: key,
-        }),
-      );
-
-      const isPublic = result.Metadata?.['x-amz-acl'] === 'public-read';
-      const publicUrl = this.generatePublicUrl(key);
-      const signedUrl = isPublic
-        ? undefined
-        : await this.generateSignedUrl(key);
-
-      return {
-        id: result.Metadata?.['upload-id'] || '',
-        key,
-        bucket: this.config.bucket,
-        filename: key.split('/').pop() || '',
-        originalName: result.Metadata?.['original-name'] || '',
-        contentType: result.ContentType || 'application/octet-stream',
-        size: result.ContentLength || 0,
-        uploadTo: result.Metadata?.['upload-to'] || '',
-        isPublic,
-        etag: result.ETag?.replace(/"/g, '') || '',
-        url: isPublic ? publicUrl : signedUrl!,
-        signedUrl: isPublic ? undefined : signedUrl,
-        uploadedAt: new Date(result.LastModified || Date.now()),
-        customMetadata: this.extractCustomMetadata(result.Metadata || {}),
-      };
-    } catch (error) {
-      this.logger.error(
-        `Failed to get file metadata for ${key}: ${error.message}`,
-      );
-      return null;
-    }
-  }
-
-  async generateSignedUrl(key: string, expiresIn = 3600): Promise<string> {
+  async generateUploadSignedUrl(
+    key: string,
+    expiresIn = 3600,
+  ): Promise<string> {
+    // Default URL valid for 1 hour (in seconds)
     const command = new PutObjectCommand({
-      Bucket: this.config.bucket,
+      Bucket: this.config.privateBucket,
+      Key: key,
+    });
+
+    return await getSignedUrl(this.s3, command, { expiresIn });
+  }
+  async generateDwnloadSignedUrl(
+    key: string,
+    expiresIn = 3600,
+  ): Promise<string> {
+    // Default URL valid for 1 hour (in seconds)
+
+    const command = new GetObjectCommand({
+      Bucket: this.config.privateBucket,
       Key: key,
     });
 
@@ -275,7 +306,7 @@ export class S3Service implements OnModuleInit {
   }
 
   private generatePublicUrl(key: string): string {
-    return `${this.config.endpoint}/${this.config.bucket}/${key}`;
+    return `${this.config.endpoint}/${this.config.publicBucket}/${key}`;
   }
 
   private extractCustomMetadata(
@@ -312,41 +343,5 @@ export class S3Service implements OnModuleInit {
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
-
-  // Health check method
-  async checkS3Health(): Promise<{
-    status: 'healthy' | 'unhealthy';
-    endpoint: string;
-    bucket: string;
-    accessible: boolean;
-    error?: string;
-  }> {
-    try {
-      // Try to list objects to check connectivity
-      await this.s3.send(
-        new HeadObjectCommand({
-          Bucket: this.config.bucket,
-          Key: 'health-check-key', // This will likely 404, but that's fine - we just want to test connectivity
-        }),
-      );
-
-      return {
-        status: 'healthy',
-        endpoint: this.config.endpoint,
-        bucket: this.config.bucket,
-        accessible: true,
-      };
-    } catch (error: any) {
-      const isConnectionError = error.name !== 'NotFound';
-
-      return {
-        status: isConnectionError ? 'unhealthy' : 'healthy',
-        endpoint: this.config.endpoint,
-        bucket: this.config.bucket,
-        accessible: !isConnectionError,
-        error: isConnectionError ? error.message : undefined,
-      };
-    }
   }
 }

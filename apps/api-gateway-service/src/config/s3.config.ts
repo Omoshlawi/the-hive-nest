@@ -12,8 +12,16 @@ export class S3Config {
     default: 'http://localhost:9000',
   })
   endpoint: string;
-  @Value('S3_BUCKET', { parse: z.string().parse, default: 'hive-files' })
-  bucket: string;
+  @Value('S3_BUCKET_PUBLIC', {
+    parse: z.string().parse,
+    default: 'hive-files-public',
+  })
+  publicBucket: string;
+  @Value('S3_BUCKET_PRIVATE', {
+    parse: z.string().parse,
+    default: 'hive-files-private',
+  })
+  privateBucket: string;
 
   @Value('ALLOWED_MIME_TYPES', {
     default: [

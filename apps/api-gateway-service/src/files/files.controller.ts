@@ -79,7 +79,6 @@ export class FilesController {
         `S3 upload failed for ${file.originalname}: ${error.message}`,
         error.stack,
       );
-
       if (error instanceof HttpException) {
         throw error;
       }
