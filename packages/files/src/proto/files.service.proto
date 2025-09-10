@@ -19,21 +19,21 @@ message FileMetadata {
     string filename = 4;
     string original_name = 5;
     string content_type = 6;
-    int64 size = 7;
-    string upload_to = 8;
+    string size = 7;
     bool is_public = 9;
     string etag = 10;
     string url = 11;
     string signed_url = 12;
     string uploaded_at = 13;
     map<string, string> custom_metadata = 14;
+    string hash = 15;
 }
 
 message RegisterFileRequest {
   QueryBuilder query_builder = 1;
   repeated FileMetadata file_metadata = 2;
-  string uploaded_by = 3;
-  string ordarnization_id = 4;
+  string uploaded_by_id = 3;
+  string orgarnization_id = 4;
   string context_type = 5;
   string category = 6;
   enum StorageProvider {
@@ -44,6 +44,9 @@ message RegisterFileRequest {
     CLOUDFLARE_R2 = 4;
   }
   StorageProvider provider = 7;
+  repeated string tags = 8;
+  string upload_to = 9;
+
 }
 
 message RegisteredFile {
@@ -51,20 +54,20 @@ message RegisteredFile {
   string filename = 2;
   string original_name = 3;
   string mime_type = 4;
-  int64 size = 5;
+  string size = 5;
   string hash = 6;
   string uploaded_by_id = 7;
-  string organization_id = 8;
+  optional string organization_id = 8;
   string context_type = 9;
   string category = 10;
   string metadata = 11; // JSON as string
   repeated string tags = 12;
-  string uploaded_by = 13; // JSON as string
-  string organization = 14; // JSON as string
+  optional string uploaded_by = 13; // JSON as string
+  optional string organization = 14; // JSON as string
   string created_at = 15;
   string updated_at = 16;
-  string last_accessed_at = 17;
-  string expires_at = 18;
+  optional string last_accessed_at = 17;
+  optional string expires_at = 18;
   bool voided = 19;
   repeated FileStorage storages = 20;
 }
@@ -81,7 +84,7 @@ message FileStorage {
 
 message RegisterFileResponse {
   repeated RegisteredFile data = 1;
-
+  map<string, string> metadata = 2;
 }
 
 service Files {

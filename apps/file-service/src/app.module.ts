@@ -15,6 +15,8 @@ import {
   FileRPCServerConfigProvider,
 } from '@hive/files';
 import { ScheduleModule } from '@nestjs/schedule';
+import { PrismaModule } from './prisma/prisma.module';
+import { QueryBuilderModule } from '@hive/common';
 
 @Module({
   imports: [
@@ -71,6 +73,8 @@ import { ScheduleModule } from '@nestjs/schedule';
         providers: [FileHTTPServerConfigProvider, FileRPCServerConfigProvider],
       },
     }),
+    PrismaModule,
+    QueryBuilderModule.register(),
   ],
   controllers: [AppController],
   providers: [AppService],

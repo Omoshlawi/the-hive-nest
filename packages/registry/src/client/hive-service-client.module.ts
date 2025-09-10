@@ -19,8 +19,10 @@ export interface HiveServiceModuleOptions {
   enableHeartbeat?: boolean;
 }
 
-// TODO: document that for heartbeat to work, you must import ScheduleModule in the consumer module
-// one service can only have one heartbeat
+// TODO: 
+// document that for heartbeat to work, you must import ScheduleModule in the consumer module
+// one service can only have one heartbeat service
+// Make global using for root (in root module) to share HiveDiscovery service and other service to the forFeature
 @Module({})
 export class HiveServiceModule {
   /**

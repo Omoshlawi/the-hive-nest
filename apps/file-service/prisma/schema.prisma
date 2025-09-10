@@ -20,7 +20,7 @@ model File {
   originalName String
   mimeType     String
   size         BigInt // In bytes
-  hash         String? // For deduplication
+  hash         String // For deduplication
 
   // Ownership and Context
   uploadedById   String // Better auth user uses no uuid for id fields

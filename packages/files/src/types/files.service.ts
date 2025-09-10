@@ -32,14 +32,14 @@ export interface FileMetadata {
   filename: string;
   originalName: string;
   contentType: string;
-  size: number;
-  uploadTo: string;
+  size: string;
   isPublic: boolean;
   etag: string;
   url: string;
   signedUrl: string;
   uploadedAt: string;
   customMetadata: { [key: string]: string };
+  hash: string;
 }
 
 export interface FileMetadata_CustomMetadataEntry {
@@ -50,11 +50,13 @@ export interface FileMetadata_CustomMetadataEntry {
 export interface RegisterFileRequest {
   queryBuilder: QueryBuilder | undefined;
   fileMetadata: FileMetadata[];
-  uploadedBy: string;
-  ordarnizationId: string;
+  uploadedById: string;
+  orgarnizationId: string;
   contextType: string;
   category: string;
   provider: RegisterFileRequest_StorageProvider;
+  tags: string[];
+  uploadTo: string;
 }
 
 export enum RegisterFileRequest_StorageProvider {
@@ -71,23 +73,25 @@ export interface RegisteredFile {
   filename: string;
   originalName: string;
   mimeType: string;
-  size: number;
+  size: string;
   hash: string;
   uploadedById: string;
-  organizationId: string;
+  organizationId?: string | undefined;
   contextType: string;
   category: string;
   /** JSON as string */
   metadata: string;
   tags: string[];
   /** JSON as string */
-  uploadedBy: string;
+  uploadedBy?:
+    | string
+    | undefined;
   /** JSON as string */
-  organization: string;
+  organization?: string | undefined;
   createdAt: string;
   updatedAt: string;
-  lastAccessedAt: string;
-  expiresAt: string;
+  lastAccessedAt?: string | undefined;
+  expiresAt?: string | undefined;
   voided: boolean;
   storages: FileStorage[];
 }
@@ -103,6 +107,12 @@ export interface FileStorage {
 
 export interface RegisterFileResponse {
   data: RegisteredFile[];
+  metadata: { [key: string]: string };
+}
+
+export interface RegisterFileResponse_MetadataEntry {
+  key: string;
+  value: string;
 }
 
 export const HIVE_FILES_V1_PACKAGE_NAME = "hive.files.v1";
