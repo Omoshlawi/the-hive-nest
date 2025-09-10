@@ -14,10 +14,12 @@ import {
   FileHTTPServerConfigProvider,
   FileRPCServerConfigProvider,
 } from '@hive/files';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
+    ScheduleModule.forRoot(),
     HiveServiceModule.forRoot({
       enableHeartbeat: true,
       services: [],

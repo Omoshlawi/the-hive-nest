@@ -21,10 +21,12 @@ import { AttributeTypesModule } from './attribute-types/attribute-types.module';
 import { CategoriesModule } from './categories/categories.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
+    ScheduleModule.forRoot(),
     HiveServiceModule.forRoot({
       enableHeartbeat: true,
       services: [HiveIdentityClientService],

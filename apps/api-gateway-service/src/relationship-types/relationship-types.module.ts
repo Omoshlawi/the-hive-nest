@@ -4,12 +4,7 @@ import { HiveServiceModule } from '@hive/registry';
 import { HivePropertyServiceClient } from '@hive/property';
 
 @Module({
-  imports: [
-    HiveServiceModule.forRoot({
-      enableHeartbeat: false,
-      services: [HivePropertyServiceClient],
-    }),
-  ],
+  imports: [HiveServiceModule.forFeature([HivePropertyServiceClient])],
   controllers: [RelationshipTypesController],
 })
 export class RelationshipTypesModule {}

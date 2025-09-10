@@ -10,7 +10,6 @@ import {
 import { HiveServiceConfig, RegistryClientAsyncOptions } from '../interfaces';
 import { HiveServiceClient } from './hive-service-client.service';
 import { HiveDiscoveryService } from './hive-discovery.service';
-import { ScheduleModule } from '@nestjs/schedule';
 import { HiveHeartbeatService } from './hive-heartbeat.service';
 
 export interface HiveServiceModuleOptions {
@@ -20,6 +19,8 @@ export interface HiveServiceModuleOptions {
   enableHeartbeat?: boolean;
 }
 
+// TODO: document that for heartbeat to work, you must import ScheduleModule in the consumer module
+// one service can only have one heartbeat
 @Module({})
 export class HiveServiceModule {
   /**
@@ -32,6 +33,7 @@ export class HiveServiceModule {
         'Client configuration is required when heartbeat is enabled',
       );
     }
+    const RegistryProxyModule = this.createRegistryClientProxy(options);
     const providers: Provider[] = [
       ...(options.client?.providers ?? []),
       HiveDiscoveryService,
@@ -45,42 +47,7 @@ export class HiveServiceModule {
 
     return {
       module: HiveServiceModule,
-      imports: [
-        ...(options.client?.imports ?? []),
-        ClientsModule.registerAsync([
-          {
-            name: REGISTRY_PACKAGE.V1.TOKEN,
-            useFactory: (config: RegistryClientConfig) => {
-              if (!config?.serverUrl) {
-                throw new Error('Registry server URL is required');
-              }
-
-              return {
-                transport: Transport.GRPC,
-                options: {
-                  package: REGISTRY_PACKAGE.V1.NAME,
-                  protoPath: REGISTRY_PACKAGE.V1.PROTO_PATH,
-                  url: config.serverUrl,
-                  // ADDITIONAL OPTIONS FOR ROBUSTNESS
-                  // loader: {
-                  //   keepCase: true,
-                  //   longs: String,
-                  //   enums: String,
-                  //   defaults: true,
-                  //   oneofs: true,
-                  // },
-                  // //  RETRY LOGIC
-                  // maxSendMessageLength: 4 * 1024 * 1024, // 4MB
-                  // maxReceiveMessageLength: 4 * 1024 * 1024, // 4MB
-                },
-              };
-            },
-            inject: [RegistryClientConfig],
-            imports: options.client?.imports ?? [],
-          },
-        ]),
-        ...(options.enableHeartbeat ? [ScheduleModule.forRoot()] : []),
-      ],
+      imports: [...(options.client?.imports ?? []), RegistryProxyModule],
       providers,
       exports: [
         HiveDiscoveryService,
@@ -144,6 +111,41 @@ export class HiveServiceModule {
       },
       inject: [HiveDiscoveryService, Reflector, RegistryClientConfig],
     }));
+  }
+
+  private static createRegistryClientProxy(options: HiveServiceModuleOptions) {
+    return ClientsModule.registerAsync([
+      {
+        name: REGISTRY_PACKAGE.V1.TOKEN,
+        useFactory: (config: RegistryClientConfig) => {
+          if (!config?.serverUrl) {
+            throw new Error('Registry server URL is required');
+          }
+
+          return {
+            transport: Transport.GRPC,
+            options: {
+              package: REGISTRY_PACKAGE.V1.NAME,
+              protoPath: REGISTRY_PACKAGE.V1.PROTO_PATH,
+              url: config.serverUrl,
+              // ADDITIONAL OPTIONS FOR ROBUSTNESS
+              // loader: {
+              //   keepCase: true,
+              //   longs: String,
+              //   enums: String,
+              //   defaults: true,
+              //   oneofs: true,
+              // },
+              // //  RETRY LOGIC
+              // maxSendMessageLength: 4 * 1024 * 1024, // 4MB
+              // maxReceiveMessageLength: 4 * 1024 * 1024, // 4MB
+            },
+          };
+        },
+        inject: [RegistryClientConfig],
+        imports: options.client?.imports ?? [],
+      },
+    ]);
   }
 
   private static createAsyncConfigProvider(

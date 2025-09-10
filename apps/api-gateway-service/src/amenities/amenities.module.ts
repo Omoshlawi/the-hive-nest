@@ -3,12 +3,7 @@ import { Module } from '@nestjs/common';
 import { HivePropertyServiceClient } from '@hive/property';
 import { AmenitiesController } from './amenities.controller';
 @Module({
-  imports: [
-    HiveServiceModule.forRoot({
-      enableHeartbeat: false,
-      services: [HivePropertyServiceClient],
-    }),
-  ],
+  imports: [HiveServiceModule.forFeature([HivePropertyServiceClient])],
   providers: [],
   controllers: [AmenitiesController],
 })

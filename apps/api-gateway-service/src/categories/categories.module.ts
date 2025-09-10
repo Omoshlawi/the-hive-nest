@@ -5,11 +5,6 @@ import { HivePropertyServiceClient } from '@hive/property';
 
 @Module({
   controllers: [CategoriesController],
-  imports: [
-    HiveServiceModule.forRoot({
-      enableHeartbeat: false,
-      services: [HivePropertyServiceClient],
-    }),
-  ],
+  imports: [HiveServiceModule.forFeature([HivePropertyServiceClient])],
 })
 export class CategoriesModule {}
