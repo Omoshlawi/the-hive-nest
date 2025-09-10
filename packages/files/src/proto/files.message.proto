@@ -16,7 +16,6 @@ message QueryFileResponse {
 }
 
 message CreateFileStorage {
-    string fileId = 1;
     enum StorageProviders {
         LOCAL = 0;
         AWS_S3 = 1;
@@ -24,10 +23,10 @@ message CreateFileStorage {
         AZURE_BLOB = 3;
         CLOUDFLARE_R2 = 4;
     }
-    StorageProviders provider = 2;
-    string remote_id = 3;
-    string storage_path = 4;
-    string storage_url = 5;
+    StorageProviders provider = 1;
+    string remote_id = 2;
+    string storage_path = 3;
+    string storage_url = 4;
 }
 
 message CreateFileRequest {

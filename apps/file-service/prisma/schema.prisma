@@ -29,7 +29,6 @@ model File {
   // Ownership and Context
   uploadedById   String // Better auth user uses no uuid for id fields
   organizationId String? // NULL for personal files
-  category       FileCategory @default(DOCUMENT)
 
   // Metadata
   metadata Json? // Flexible JSON for file-specific data
@@ -52,6 +51,7 @@ model File {
   @@index([organizationId])
   @@index([createdAt])
   @@index([hash]) // For deduplication queries
+  @@index([tags])
   @@map("files")
 }
 
@@ -91,16 +91,17 @@ model FileUsageRule {
   createdAt DateTime       @default(now())
 }
 
-enum FileCategory {
-  AVATAR // Profile pictures (always free)
-  DOCUMENT // Business documents
-  IMAGE // General images
-  VIDEO // Video files
-  AUDIO // Audio files
-  ARCHIVE // Zip, tar, etc.
-  CODE // Source code files
-  OTHER // Miscellaneous
-}
+// Handled by tags
+// enum FileCategory {
+//   AVATAR // Profile pictures (always free)
+//   DOCUMENT // Business documents
+//   IMAGE // General images
+//   VIDEO // Video files
+//   AUDIO // Audio files
+//   ARCHIVE // Zip, tar, etc.
+//   CODE // Source code files
+//   OTHER // Miscellaneous
+// }
 
 enum StorageProvider {
   LOCAL

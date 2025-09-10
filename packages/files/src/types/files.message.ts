@@ -28,7 +28,6 @@ export interface QueryFileResponse_MetadataEntry {
 }
 
 export interface CreateFileStorage {
-  fileId: string;
   provider: CreateFileStorage_StorageProviders;
   remoteId: string;
   storagePath: string;

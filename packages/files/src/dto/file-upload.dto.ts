@@ -1,6 +1,7 @@
 import z from 'zod';
 import { createZodDto } from 'nestjs-zod';
 import { ApiProperty } from '@nestjs/swagger';
+import { COMMA_SEPARATED_REGEX } from '@hive/utils';
 export const UploadFileSchema = z.object({
   uploadTo: z
     .string()
@@ -11,10 +12,19 @@ export const UploadFileSchema = z.object({
     .optional()
     .describe('Whether to make the file publicly accessible')
     .default(false),
-  metadata: z
-    .record(z.string(), z.string())
-    .optional()
-    .describe("'Custom metadata for the file'"),
+  relatedModelName: z
+    .string()
+    .nonempty()
+    .describe('Entity model the image is attached to'),
+  relatedModelId: z
+    .string()
+    .nonempty()
+    .describe('Actual entity instance the image is atttached to'),
+  purpose: z
+    .string()
+    .nonempty()
+    .describe('Purpose e.g avatar, thumbnail, e.t.c'),
+  tags: z.string().regex(COMMA_SEPARATED_REGEX),
 });
 
 export class UploadMutipleFilesDto extends createZodDto(UploadFileSchema) {

@@ -27,6 +27,8 @@ export const protobufPackage = "hive.files.v1";
 export const HIVE_FILES_V1_PACKAGE_NAME = "hive.files.v1";
 
 export interface FilesClient {
+  /** Files */
+
   queryFile(request: QueryFileRequest): Observable<QueryFileResponse>;
 
   getFile(request: GetRequest): Observable<GetFileResponse>;
@@ -34,36 +36,9 @@ export interface FilesClient {
   createFile(request: CreateFileRequest): Observable<GetFileResponse>;
 
   deleteFile(request: DeleteRequest): Observable<GetFileResponse>;
-}
 
-export interface FilesController {
-  queryFile(request: QueryFileRequest): Promise<QueryFileResponse> | Observable<QueryFileResponse> | QueryFileResponse;
+  /** Scope */
 
-  getFile(request: GetRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
-
-  createFile(request: CreateFileRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
-
-  deleteFile(request: DeleteRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
-}
-
-export function FilesControllerMethods() {
-  return function (constructor: Function) {
-    const grpcMethods: string[] = ["queryFile", "getFile", "createFile", "deleteFile"];
-    for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("Files", method)(constructor.prototype[method], method, descriptor);
-    }
-    const grpcStreamMethods: string[] = [];
-    for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("Files", method)(constructor.prototype[method], method, descriptor);
-    }
-  };
-}
-
-export const FILES_SERVICE_NAME = "Files";
-
-export interface FileUsageScopesClient {
   queryFileUsageScope(request: QueryFileUsageScopeRequest): Observable<QueryFileUsageScopeResponse>;
 
   getFileUsageScope(request: GetRequest): Observable<GetFileUsageScopeResponse>;
@@ -73,9 +48,33 @@ export interface FileUsageScopesClient {
   updateFileUsageScope(request: UpdateFileUsageScopeRequest): Observable<GetFileUsageScopeResponse>;
 
   deleteFileUsageScope(request: DeleteRequest): Observable<GetFileUsageScopeResponse>;
+
+  /** Rules */
+
+  queryFileUsageRule(request: QueryFileUsageRuleRequest): Observable<QueryFileUsageRuleResponse>;
+
+  getFileUsageRule(request: GetRequest): Observable<GetFileUsageRuleResponse>;
+
+  createFileUsageRule(request: CreateFileUsageRuleRequest): Observable<GetFileUsageRuleResponse>;
+
+  updateFileUsageRule(request: UpdateFileUsageRuleRequest): Observable<GetFileUsageRuleResponse>;
+
+  deleteFileUsageRule(request: DeleteRequest): Observable<GetFileUsageRuleResponse>;
 }
 
-export interface FileUsageScopesController {
+export interface FilesController {
+  /** Files */
+
+  queryFile(request: QueryFileRequest): Promise<QueryFileResponse> | Observable<QueryFileResponse> | QueryFileResponse;
+
+  getFile(request: GetRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
+
+  createFile(request: CreateFileRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
+
+  deleteFile(request: DeleteRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
+
+  /** Scope */
+
   queryFileUsageScope(
     request: QueryFileUsageScopeRequest,
   ): Promise<QueryFileUsageScopeResponse> | Observable<QueryFileUsageScopeResponse> | QueryFileUsageScopeResponse;
@@ -95,44 +94,9 @@ export interface FileUsageScopesController {
   deleteFileUsageScope(
     request: DeleteRequest,
   ): Promise<GetFileUsageScopeResponse> | Observable<GetFileUsageScopeResponse> | GetFileUsageScopeResponse;
-}
 
-export function FileUsageScopesControllerMethods() {
-  return function (constructor: Function) {
-    const grpcMethods: string[] = [
-      "queryFileUsageScope",
-      "getFileUsageScope",
-      "createFileUsageScope",
-      "updateFileUsageScope",
-      "deleteFileUsageScope",
-    ];
-    for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("FileUsageScopes", method)(constructor.prototype[method], method, descriptor);
-    }
-    const grpcStreamMethods: string[] = [];
-    for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("FileUsageScopes", method)(constructor.prototype[method], method, descriptor);
-    }
-  };
-}
+  /** Rules */
 
-export const FILE_USAGE_SCOPES_SERVICE_NAME = "FileUsageScopes";
-
-export interface FileUsageRulesClient {
-  queryFileUsageRule(request: QueryFileUsageRuleRequest): Observable<QueryFileUsageRuleResponse>;
-
-  getFileUsageRule(request: GetRequest): Observable<GetFileUsageRuleResponse>;
-
-  createFileUsageRule(request: CreateFileUsageRuleRequest): Observable<GetFileUsageRuleResponse>;
-
-  updateFileUsageRule(request: UpdateFileUsageRuleRequest): Observable<GetFileUsageRuleResponse>;
-
-  deleteFileUsageRule(request: DeleteRequest): Observable<GetFileUsageRuleResponse>;
-}
-
-export interface FileUsageRulesController {
   queryFileUsageRule(
     request: QueryFileUsageRuleRequest,
   ): Promise<QueryFileUsageRuleResponse> | Observable<QueryFileUsageRuleResponse> | QueryFileUsageRuleResponse;
@@ -154,9 +118,18 @@ export interface FileUsageRulesController {
   ): Promise<GetFileUsageRuleResponse> | Observable<GetFileUsageRuleResponse> | GetFileUsageRuleResponse;
 }
 
-export function FileUsageRulesControllerMethods() {
+export function FilesControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
+      "queryFile",
+      "getFile",
+      "createFile",
+      "deleteFile",
+      "queryFileUsageScope",
+      "getFileUsageScope",
+      "createFileUsageScope",
+      "updateFileUsageScope",
+      "deleteFileUsageScope",
       "queryFileUsageRule",
       "getFileUsageRule",
       "createFileUsageRule",
@@ -165,14 +138,14 @@ export function FileUsageRulesControllerMethods() {
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("FileUsageRules", method)(constructor.prototype[method], method, descriptor);
+      GrpcMethod("Files", method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("FileUsageRules", method)(constructor.prototype[method], method, descriptor);
+      GrpcStreamMethod("Files", method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
 
-export const FILE_USAGE_RULES_SERVICE_NAME = "FileUsageRules";
+export const FILES_SERVICE_NAME = "Files";

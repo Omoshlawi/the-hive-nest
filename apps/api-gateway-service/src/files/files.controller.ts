@@ -1,7 +1,7 @@
 import { CustomRepresentationQueryDto } from '@hive/common';
 import {
+  CreateFileStorage_StorageProviders,
   HiveFileServiceClient,
-  RegisterFileRequest_StorageProvider,
   UploadFilesDto,
   UploadMutipleFilesDto,
   UploadSingleFileDto,
@@ -85,36 +85,34 @@ export class FilesController {
         file,
         uploadFileDto.uploadTo,
         uploadFileDto.isPublic,
-        uploadFileDto.metadata,
+        {},
       );
       const files = await lastValueFrom(
-        this.fileService.registerFiles({
-          fileMetadata: [
+        this.fileService.files.createFile({
+          queryBuilder: query,
+          category: '',
+          filename: s3FileMetadata.filename,
+          hash: this.generateFileHash(file.buffer),
+          mimeType: s3FileMetadata.contentType,
+          originalName: s3FileMetadata.originalName,
+          purpose: uploadFileDto.purpose,
+          relatedModelId: uploadFileDto.relatedModelId,
+          relatedModelName: uploadFileDto.relatedModelName,
+          size: s3FileMetadata.size.toString(),
+          storages: [
             {
-              id: s3FileMetadata.id,
-              key: s3FileMetadata.key,
-              bucket: s3FileMetadata.bucket,
-              filename: s3FileMetadata.filename,
-              originalName: s3FileMetadata.originalName,
-              contentType: s3FileMetadata.contentType,
-              size: s3FileMetadata.size.toString(),
-              isPublic: s3FileMetadata.isPublic,
-              etag: s3FileMetadata.etag,
-              url: s3FileMetadata.url,
-              signedUrl: s3FileMetadata.signedUrl || s3FileMetadata.url,
-              uploadedAt: s3FileMetadata.uploadedAt.toISOString(),
-              customMetadata: s3FileMetadata.customMetadata ?? {},
-              hash: this.generateFileHash(file.buffer),
+              provider: CreateFileStorage_StorageProviders.LOCAL,
+              remoteId: s3FileMetadata.id,
+              storagePath: uploadFileDto.uploadTo,
+              storageUrl: s3FileMetadata.url ?? s3FileMetadata.signedUrl,
             },
           ],
-          category: 'From endpoint',
-          contextType: '',
-          orgarnizationId: '',
-          provider: RegisterFileRequest_StorageProvider.LOCAL,
-          queryBuilder: query,
+          tags: uploadFileDto.tags?.split(',')?.map((t) => t.trim()),
           uploadedById: '',
-          tags: ['From endpoint also'],
-          uploadTo: s3FileMetadata.uploadTo,
+          expiresAt: '',
+          lastAccessedAt: '',
+          metadata: JSON.stringify(s3FileMetadata.customMetadata ?? {}),
+          organizationId: '',
         }),
       );
       return files[0];

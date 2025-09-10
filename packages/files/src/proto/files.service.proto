@@ -7,21 +7,20 @@ import "common.message.proto";
 package hive.files.v1;
 
 service Files {
+  // Files
   rpc QueryFile(QueryFileRequest) returns (QueryFileResponse){};
   rpc GetFile(GetRequest) returns (GetFileResponse){};
   rpc CreateFile(CreateFileRequest) returns (GetFileResponse){};
   rpc DeleteFile(DeleteRequest) returns (GetFileResponse){};
-}
 
-service FileUsageScopes {
+  // Scope
   rpc QueryFileUsageScope(QueryFileUsageScopeRequest) returns (QueryFileUsageScopeResponse){};
   rpc GetFileUsageScope(GetRequest) returns (GetFileUsageScopeResponse){};
   rpc CreateFileUsageScope(CreateFileUsageScopeRequest) returns (GetFileUsageScopeResponse){};
   rpc UpdateFileUsageScope(UpdateFileUsageScopeRequest) returns (GetFileUsageScopeResponse){};
   rpc DeleteFileUsageScope(DeleteRequest) returns (GetFileUsageScopeResponse){};
-}
 
-service FileUsageRules {
+  // Rules
   rpc QueryFileUsageRule(QueryFileUsageRuleRequest) returns (QueryFileUsageRuleResponse){};
   rpc GetFileUsageRule(GetRequest) returns (GetFileUsageRuleResponse){};
   rpc CreateFileUsageRule(CreateFileUsageRuleRequest) returns (GetFileUsageRuleResponse){};
