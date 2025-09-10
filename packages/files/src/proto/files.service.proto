@@ -1,92 +1,30 @@
 syntax = 'proto3';
 
+import "files.message.proto";
+import "file-usage.message.proto";
+import "common.message.proto";
+
 package hive.files.v1;
 
-message QueryBuilder {
-    // Pagination queries
-    optional int32 page = 1;
-    optional int32 limit = 2;
-    // Sord queries
-    optional string order_by = 3;
-    // Custome rep queries
-    optional string v = 4;
-}
-
-message FileMetadata {
-    string id = 1;
-    string key = 2; // S3 object key
-    string bucket = 3;
-    string filename = 4;
-    string original_name = 5;
-    string content_type = 6;
-    string size = 7;
-    bool is_public = 9;
-    string etag = 10;
-    string url = 11;
-    string signed_url = 12;
-    string uploaded_at = 13;
-    map<string, string> custom_metadata = 14;
-    string hash = 15;
-}
-
-message RegisterFileRequest {
-  QueryBuilder query_builder = 1;
-  repeated FileMetadata file_metadata = 2;
-  string uploaded_by_id = 3;
-  string orgarnization_id = 4;
-  string context_type = 5;
-  string category = 6;
-  enum StorageProvider {
-    LOCAL = 0;
-    AWS_S3 = 1;
-    GOOGLE_CLOUD = 2;
-    AZURE_BLOB = 3;
-    CLOUDFLARE_R2 = 4;
-  }
-  StorageProvider provider = 7;
-  repeated string tags = 8;
-  string upload_to = 9;
-
-}
-
-message RegisteredFile {
-  string id = 1;
-  string filename = 2;
-  string original_name = 3;
-  string mime_type = 4;
-  string size = 5;
-  string hash = 6;
-  string uploaded_by_id = 7;
-  optional string organization_id = 8;
-  string context_type = 9;
-  string category = 10;
-  string metadata = 11; // JSON as string
-  repeated string tags = 12;
-  optional string uploaded_by = 13; // JSON as string
-  optional string organization = 14; // JSON as string
-  string created_at = 15;
-  string updated_at = 16;
-  optional string last_accessed_at = 17;
-  optional string expires_at = 18;
-  bool voided = 19;
-  repeated FileStorage storages = 20;
-}
-
-message FileStorage {
-  string id = 1;
-  string file_id = 2;
-  string provider = 3;
-  string storage_path = 4;
-  string storage_url = 5;
-  string created_at = 6;
-}
-
-
-message RegisterFileResponse {
-  repeated RegisteredFile data = 1;
-  map<string, string> metadata = 2;
-}
-
 service Files {
-  rpc RegisterFiles(RegisterFileRequest) returns (RegisterFileResponse)  {};
+  rpc QueryFile(QueryFileRequest) returns (QueryFileResponse){};
+  rpc GetFile(GetRequest) returns (GetFileResponse){};
+  rpc CreateFile(CreateFileRequest) returns (GetFileResponse){};
+  rpc DeleteFile(DeleteRequest) returns (GetFileResponse){};
+}
+
+service FileUsageScopes {
+  rpc QueryFileUsageScope(QueryFileUsageScopeRequest) returns (QueryFileUsageScopeResponse){};
+  rpc GetFileUsageScope(GetRequest) returns (GetFileUsageScopeResponse){};
+  rpc CreateFileUsageScope(CreateFileUsageScopeRequest) returns (GetFileUsageScopeResponse){};
+  rpc UpdateFileUsageScope(UpdateFileUsageScopeRequest) returns (GetFileUsageScopeResponse){};
+  rpc DeleteFileUsageScope(DeleteRequest) returns (GetFileUsageScopeResponse){};
+}
+
+service FileUsageRules {
+  rpc QueryFileUsageRule(QueryFileUsageRuleRequest) returns (QueryFileUsageRuleResponse){};
+  rpc GetFileUsageRule(GetRequest) returns (GetFileUsageRuleResponse){};
+  rpc CreateFileUsageRule(CreateFileUsageRuleRequest) returns (GetFileUsageRuleResponse){};
+  rpc UpdateFileUsageRule(UpdateFileUsageRuleRequest) returns (GetFileUsageRuleResponse){};
+  rpc DeleteFileUsageRule(DeleteRequest) returns (GetFileUsageRuleResponse){};
 }

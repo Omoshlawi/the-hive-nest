@@ -7,129 +7,48 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
+import { DeleteRequest, GetRequest } from "./common.message";
+import {
+  CreateFileUsageRuleRequest,
+  CreateFileUsageScopeRequest,
+  GetFileUsageRuleResponse,
+  GetFileUsageScopeResponse,
+  QueryFileUsageRuleRequest,
+  QueryFileUsageRuleResponse,
+  QueryFileUsageScopeRequest,
+  QueryFileUsageScopeResponse,
+  UpdateFileUsageRuleRequest,
+  UpdateFileUsageScopeRequest,
+} from "./file-usage.message";
+import { CreateFileRequest, GetFileResponse, QueryFileRequest, QueryFileResponse } from "./files.message";
 
 export const protobufPackage = "hive.files.v1";
-
-export interface QueryBuilder {
-  /** Pagination queries */
-  page?: number | undefined;
-  limit?:
-    | number
-    | undefined;
-  /** Sord queries */
-  orderBy?:
-    | string
-    | undefined;
-  /** Custome rep queries */
-  v?: string | undefined;
-}
-
-export interface FileMetadata {
-  id: string;
-  /** S3 object key */
-  key: string;
-  bucket: string;
-  filename: string;
-  originalName: string;
-  contentType: string;
-  size: string;
-  isPublic: boolean;
-  etag: string;
-  url: string;
-  signedUrl: string;
-  uploadedAt: string;
-  customMetadata: { [key: string]: string };
-  hash: string;
-}
-
-export interface FileMetadata_CustomMetadataEntry {
-  key: string;
-  value: string;
-}
-
-export interface RegisterFileRequest {
-  queryBuilder: QueryBuilder | undefined;
-  fileMetadata: FileMetadata[];
-  uploadedById: string;
-  orgarnizationId: string;
-  contextType: string;
-  category: string;
-  provider: RegisterFileRequest_StorageProvider;
-  tags: string[];
-  uploadTo: string;
-}
-
-export enum RegisterFileRequest_StorageProvider {
-  LOCAL = 0,
-  AWS_S3 = 1,
-  GOOGLE_CLOUD = 2,
-  AZURE_BLOB = 3,
-  CLOUDFLARE_R2 = 4,
-  UNRECOGNIZED = -1,
-}
-
-export interface RegisteredFile {
-  id: string;
-  filename: string;
-  originalName: string;
-  mimeType: string;
-  size: string;
-  hash: string;
-  uploadedById: string;
-  organizationId?: string | undefined;
-  contextType: string;
-  category: string;
-  /** JSON as string */
-  metadata: string;
-  tags: string[];
-  /** JSON as string */
-  uploadedBy?:
-    | string
-    | undefined;
-  /** JSON as string */
-  organization?: string | undefined;
-  createdAt: string;
-  updatedAt: string;
-  lastAccessedAt?: string | undefined;
-  expiresAt?: string | undefined;
-  voided: boolean;
-  storages: FileStorage[];
-}
-
-export interface FileStorage {
-  id: string;
-  fileId: string;
-  provider: string;
-  storagePath: string;
-  storageUrl: string;
-  createdAt: string;
-}
-
-export interface RegisterFileResponse {
-  data: RegisteredFile[];
-  metadata: { [key: string]: string };
-}
-
-export interface RegisterFileResponse_MetadataEntry {
-  key: string;
-  value: string;
-}
 
 export const HIVE_FILES_V1_PACKAGE_NAME = "hive.files.v1";
 
 export interface FilesClient {
-  registerFiles(request: RegisterFileRequest): Observable<RegisterFileResponse>;
+  queryFile(request: QueryFileRequest): Observable<QueryFileResponse>;
+
+  getFile(request: GetRequest): Observable<GetFileResponse>;
+
+  createFile(request: CreateFileRequest): Observable<GetFileResponse>;
+
+  deleteFile(request: DeleteRequest): Observable<GetFileResponse>;
 }
 
 export interface FilesController {
-  registerFiles(
-    request: RegisterFileRequest,
-  ): Promise<RegisterFileResponse> | Observable<RegisterFileResponse> | RegisterFileResponse;
+  queryFile(request: QueryFileRequest): Promise<QueryFileResponse> | Observable<QueryFileResponse> | QueryFileResponse;
+
+  getFile(request: GetRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
+
+  createFile(request: CreateFileRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
+
+  deleteFile(request: DeleteRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
 }
 
 export function FilesControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["registerFiles"];
+    const grpcMethods: string[] = ["queryFile", "getFile", "createFile", "deleteFile"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("Files", method)(constructor.prototype[method], method, descriptor);
@@ -143,3 +62,117 @@ export function FilesControllerMethods() {
 }
 
 export const FILES_SERVICE_NAME = "Files";
+
+export interface FileUsageScopesClient {
+  queryFileUsageScope(request: QueryFileUsageScopeRequest): Observable<QueryFileUsageScopeResponse>;
+
+  getFileUsageScope(request: GetRequest): Observable<GetFileUsageScopeResponse>;
+
+  createFileUsageScope(request: CreateFileUsageScopeRequest): Observable<GetFileUsageScopeResponse>;
+
+  updateFileUsageScope(request: UpdateFileUsageScopeRequest): Observable<GetFileUsageScopeResponse>;
+
+  deleteFileUsageScope(request: DeleteRequest): Observable<GetFileUsageScopeResponse>;
+}
+
+export interface FileUsageScopesController {
+  queryFileUsageScope(
+    request: QueryFileUsageScopeRequest,
+  ): Promise<QueryFileUsageScopeResponse> | Observable<QueryFileUsageScopeResponse> | QueryFileUsageScopeResponse;
+
+  getFileUsageScope(
+    request: GetRequest,
+  ): Promise<GetFileUsageScopeResponse> | Observable<GetFileUsageScopeResponse> | GetFileUsageScopeResponse;
+
+  createFileUsageScope(
+    request: CreateFileUsageScopeRequest,
+  ): Promise<GetFileUsageScopeResponse> | Observable<GetFileUsageScopeResponse> | GetFileUsageScopeResponse;
+
+  updateFileUsageScope(
+    request: UpdateFileUsageScopeRequest,
+  ): Promise<GetFileUsageScopeResponse> | Observable<GetFileUsageScopeResponse> | GetFileUsageScopeResponse;
+
+  deleteFileUsageScope(
+    request: DeleteRequest,
+  ): Promise<GetFileUsageScopeResponse> | Observable<GetFileUsageScopeResponse> | GetFileUsageScopeResponse;
+}
+
+export function FileUsageScopesControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = [
+      "queryFileUsageScope",
+      "getFileUsageScope",
+      "createFileUsageScope",
+      "updateFileUsageScope",
+      "deleteFileUsageScope",
+    ];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod("FileUsageScopes", method)(constructor.prototype[method], method, descriptor);
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod("FileUsageScopes", method)(constructor.prototype[method], method, descriptor);
+    }
+  };
+}
+
+export const FILE_USAGE_SCOPES_SERVICE_NAME = "FileUsageScopes";
+
+export interface FileUsageRulesClient {
+  queryFileUsageRule(request: QueryFileUsageRuleRequest): Observable<QueryFileUsageRuleResponse>;
+
+  getFileUsageRule(request: GetRequest): Observable<GetFileUsageRuleResponse>;
+
+  createFileUsageRule(request: CreateFileUsageRuleRequest): Observable<GetFileUsageRuleResponse>;
+
+  updateFileUsageRule(request: UpdateFileUsageRuleRequest): Observable<GetFileUsageRuleResponse>;
+
+  deleteFileUsageRule(request: DeleteRequest): Observable<GetFileUsageRuleResponse>;
+}
+
+export interface FileUsageRulesController {
+  queryFileUsageRule(
+    request: QueryFileUsageRuleRequest,
+  ): Promise<QueryFileUsageRuleResponse> | Observable<QueryFileUsageRuleResponse> | QueryFileUsageRuleResponse;
+
+  getFileUsageRule(
+    request: GetRequest,
+  ): Promise<GetFileUsageRuleResponse> | Observable<GetFileUsageRuleResponse> | GetFileUsageRuleResponse;
+
+  createFileUsageRule(
+    request: CreateFileUsageRuleRequest,
+  ): Promise<GetFileUsageRuleResponse> | Observable<GetFileUsageRuleResponse> | GetFileUsageRuleResponse;
+
+  updateFileUsageRule(
+    request: UpdateFileUsageRuleRequest,
+  ): Promise<GetFileUsageRuleResponse> | Observable<GetFileUsageRuleResponse> | GetFileUsageRuleResponse;
+
+  deleteFileUsageRule(
+    request: DeleteRequest,
+  ): Promise<GetFileUsageRuleResponse> | Observable<GetFileUsageRuleResponse> | GetFileUsageRuleResponse;
+}
+
+export function FileUsageRulesControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = [
+      "queryFileUsageRule",
+      "getFileUsageRule",
+      "createFileUsageRule",
+      "updateFileUsageRule",
+      "deleteFileUsageRule",
+    ];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod("FileUsageRules", method)(constructor.prototype[method], method, descriptor);
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod("FileUsageRules", method)(constructor.prototype[method], method, descriptor);
+    }
+  };
+}
+
+export const FILE_USAGE_RULES_SERVICE_NAME = "FileUsageRules";

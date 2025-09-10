@@ -4,12 +4,11 @@ import {
   SortService,
 } from '@hive/common';
 import {
-  FilesClient,
   RegisterFileRequest,
-  RegisterFileResponse,
+  RegisterFileResponse
 } from '@hive/files';
 import { Injectable } from '@nestjs/common';
-import { FileCategory, FileContext, Prisma } from '../generated/prisma';
+import { FileCategory, Prisma } from '../generated/prisma';
 import { PrismaService } from './prisma/prisma.service';
 
 @Injectable()
@@ -28,6 +27,9 @@ export class AppService {
     const ids = await this.prismaService.file.createManyAndReturn({
       select: { id: true },
       data: fileMetadata.map<Prisma.FileCreateManyInput>((meta) => ({
+        relatedModelName: '',
+        relatedModelId: '',
+        purpose: '',
         filename: meta.filename,
         mimeType: meta.contentType,
         originalName: meta.originalName,
@@ -44,7 +46,6 @@ export class AppService {
         organizationId: props.orgarnizationId,
         tags: props.tags,
         uploadedById: props.uploadedById,
-        contextType: props.contextType as unknown as FileContext,
         category: props.category as unknown as FileCategory,
         storages: {
           createMany: {
@@ -53,6 +54,7 @@ export class AppService {
               provider: props.provider,
               storagePath: props.uploadTo,
               storageUrl: meta.isPublic ? meta.url : meta.signedUrl,
+              remoteId: meta.id,
             },
           },
         },

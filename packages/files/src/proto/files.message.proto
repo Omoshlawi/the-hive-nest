@@ -1,0 +1,60 @@
+syntax = 'proto3';
+
+import "common.message.proto";
+import "files.model.proto";
+
+message QueryFileRequest {
+    QueryBuilder query_builder = 1;
+    optional string search = 2;
+    optional string organization_id = 3;
+    optional bool include_voided = 4;
+}
+
+message QueryFileResponse {
+    repeated File data = 1;
+    map<string, string> metadata = 2; 
+}
+
+message CreateFileStorage {
+    string fileId = 1;
+    enum StorageProviders {
+        LOCAL = 0;
+        AWS_S3 = 1;
+        GOOGLE_CLOUD = 2;
+        AZURE_BLOB = 3;
+        CLOUDFLARE_R2 = 4;
+    }
+    StorageProviders provider = 2;
+    string remote_id = 3;
+    string storage_path = 4;
+    string storage_url = 5;
+}
+
+message CreateFileRequest {
+    QueryBuilder query_builder = 1;
+    string filename = 2;
+    string original_name = 3;
+    string mime_type = 4;
+    string size = 5;
+    string hash = 6;
+
+    string related_model_id = 7;
+    string related_model_name = 8;
+    string purpose = 9;
+
+    string uploaded_by_id = 10;
+    optional string organization_id = 11;
+    string category = 12;
+
+    optional string metadata = 13; // JSON as string
+    repeated string tags = 14;
+
+    optional string last_accessed_at = 19;
+    optional string expires_at = 20;
+    repeated CreateFileStorage storages = 22;
+}
+
+message GetFileResponse {
+    File data = 1;
+    map<string, string> metadata = 2; 
+}

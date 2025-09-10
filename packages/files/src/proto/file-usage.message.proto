@@ -1,0 +1,66 @@
+syntax = 'proto3';
+
+import "common.message.proto";
+import "files.model.proto";
+
+// Scope
+message QueryFileUsageScopeRequest {
+    QueryBuilder query_builder = 1;
+    optional string search = 2;
+    optional string organization_id = 3;
+    optional bool include_voided = 4;
+}
+
+message QueryFileUsageScopeResponse {
+    repeated FileUsageScope data = 1;
+    map<string, string> metadata = 2; 
+}
+
+message CreateFileUsageScopeRequest {
+    QueryBuilder query_builder = 1;
+    string model_name = 2;
+    string purpose = 3;
+    optional string description = 4;
+}
+message UpdateFileUsageScopeRequest {
+    QueryBuilder query_builder = 1;
+    string id = 2;
+    optional string model_name = 3;
+    optional string purpose = 4;
+    optional string description = 5;
+}
+
+message GetFileUsageScopeResponse {
+    FileUsageScope data = 1;
+    map<string, string> metadata = 2; 
+}
+
+// Rule
+message QueryFileUsageRuleRequest {
+    QueryBuilder query_builder = 1;
+    optional string search = 2;
+    optional string organization_id = 3;
+    optional bool include_voided = 4;
+}
+
+message QueryFileUsageRuleResponse {
+    repeated FileUsageRule data = 1;
+    map<string, string> metadata = 2; 
+}
+
+message CreateFileUsageRuleRequest {
+    QueryBuilder query_builder = 1;
+    string scope_id = 2;
+    int32 max_files = 3;
+}
+message UpdateFileUsageRuleRequest {
+    QueryBuilder query_builder = 1;
+    string id = 2;
+    optional string scope_id = 3;
+    optional int32 max_files = 4;
+}
+
+message GetFileUsageRuleResponse {
+    FileUsageRule data = 1;
+    map<string, string> metadata = 2; 
+}

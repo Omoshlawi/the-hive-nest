@@ -1,6 +1,5 @@
 import { CustomRepresentationQueryDto } from '@hive/common';
 import {
-  FileMetadata,
   HiveFileServiceClient,
   RegisterFileRequest_StorageProvider,
   UploadFilesDto,
@@ -28,9 +27,9 @@ import {
   FilesInterceptor,
 } from '@nestjs/platform-express';
 import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
-import { S3Service } from '../s3/s3.service';
+import { createHash } from 'crypto';
 import { lastValueFrom } from 'rxjs';
-import {createHash} from 'crypto';
+import { S3Service } from '../s3/s3.service';
 
 @Controller('files')
 export class FilesController {
@@ -98,7 +97,7 @@ export class FilesController {
               filename: s3FileMetadata.filename,
               originalName: s3FileMetadata.originalName,
               contentType: s3FileMetadata.contentType,
-              size: s3FileMetadata.size,
+              size: s3FileMetadata.size.toString(),
               isPublic: s3FileMetadata.isPublic,
               etag: s3FileMetadata.etag,
               url: s3FileMetadata.url,

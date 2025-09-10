@@ -15,17 +15,20 @@ datasource db {
 }
 
 model File {
-  id           String  @id @default(uuid()) @db.Uuid
+  id           String @id @default(uuid()) @db.Uuid
   filename     String
   originalName String
   mimeType     String
   size         BigInt // In bytes
   hash         String // For deduplication
 
+  relatedModelId   String // The specific instance ID of the model
+  relatedModelName String // Which model/entity uses the file (e.g. User, Property, Listing)
+  purpose          String // Purpose of the file within that model (e.g. 'avatar', 'gallery', 'document')
+
   // Ownership and Context
   uploadedById   String // Better auth user uses no uuid for id fields
   organizationId String? // NULL for personal files
-  contextType    FileContext  @default(PERSONAL)
   category       FileCategory @default(DOCUMENT)
 
   // Metadata
@@ -47,7 +50,6 @@ model File {
   // Indexes for performance
   @@index([uploadedById])
   @@index([organizationId])
-  @@index([contextType])
   @@index([createdAt])
   @@index([hash]) // For deduplication queries
   @@map("files")
@@ -58,6 +60,7 @@ model FileStorage {
   id          String          @id @default(uuid()) @db.Uuid
   fileId      String          @db.Uuid
   provider    StorageProvider
+  remoteId    String          @unique
   storagePath String
   storageUrl  String? // CDN/public URL
   createdAt   DateTime        @default(now())
@@ -67,11 +70,25 @@ model FileStorage {
   @@map("file_storage")
 }
 
-enum FileContext {
-  PERSONAL // Personal user files (avatars, etc.)
-  ORGANIZATION // Business files within org context
-  SHARED // Shared/public files
-  TEMPORARY // Temporary uploads
+model FileUsageScope {
+  id          String  @id @default(uuid()) @db.Uuid
+  modelName   String // e.g User,Property,e.t.c
+  purpose     String // e.g. "avatar", "gallery"
+  description String?
+
+  createdAt DateTime        @default(now())
+  rules     FileUsageRule[]
+
+  @@unique([modelName, purpose])
+}
+
+model FileUsageRule {
+  id        String         @id @default(uuid()) @db.Uuid
+  scopeId   String         @db.Uuid
+  scope     FileUsageScope @relation(fields: [scopeId], references: [id], onDelete: Cascade)
+  // tier      String?
+  maxFiles  Int
+  createdAt DateTime       @default(now())
 }
 
 enum FileCategory {
@@ -92,4 +109,3 @@ enum StorageProvider {
   AZURE_BLOB
   CLOUDFLARE_R2
 }
-
