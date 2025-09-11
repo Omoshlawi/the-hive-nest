@@ -59,6 +59,8 @@ export interface QueryFileUsageRuleRequest {
   queryBuilder: QueryBuilder | undefined;
   search?: string | undefined;
   scopeId?: string | undefined;
+  modelName?: string | undefined;
+  purpose?: string | undefined;
   includeVoided?: boolean | undefined;
 }
 
