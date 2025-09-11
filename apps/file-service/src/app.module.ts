@@ -22,6 +22,7 @@ import { FileUsageRuleModule } from './file-usage-rule/file-usage-rule.module';
 
 @Module({
   imports: [
+    QueryBuilderModule.register({ global: true }),
     ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
     ScheduleModule.forRoot(),
     HiveServiceModule.forRoot({

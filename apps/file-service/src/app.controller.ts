@@ -5,10 +5,10 @@ import {
   GetFileResponse,
   GetRequest,
   QueryFileRequest,
-  QueryFileResponse
+  QueryFileResponse,
 } from '@hive/files';
-import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { Controller, NotFoundException } from '@nestjs/common';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { AppService } from './app.service';
 
@@ -16,30 +16,28 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
   @GrpcMethod(FILES_SERVICE_NAME)
-  queryFile(
-    request: QueryFileRequest,
-  ):
-    | Promise<QueryFileResponse>
-    | Observable<QueryFileResponse>
-    | QueryFileResponse {
-    throw new Error('Method not implemented.');
+  queryFile(request: QueryFileRequest): Promise<QueryFileResponse> {
+    return this.appService.getAll(
+      request,
+    ) as unknown as Promise<QueryFileResponse>;
   }
   @GrpcMethod(FILES_SERVICE_NAME)
-  getFile(
-    request: GetRequest,
-  ): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse {
-    throw new Error('Method not implemented.');
+  async getFile(request: GetRequest): Promise<GetFileResponse> {
+    const res = await this.appService.getById(request);
+    if (!res.data)
+      throw new RpcException(new NotFoundException('Amenity not found'));
+    return res as unknown as GetFileResponse;
   }
   @GrpcMethod(FILES_SERVICE_NAME)
-  createFile(
-    request: CreateFileRequest,
-  ): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse {
-    throw new Error('Method not implemented.');
+  createFile(request: CreateFileRequest): Promise<GetFileResponse> {
+    return this.appService.create(
+      request,
+    ) as unknown as Promise<GetFileResponse>;
   }
   @GrpcMethod(FILES_SERVICE_NAME)
-  deleteFile(
-    request: DeleteRequest,
-  ): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse {
-    throw new Error('Method not implemented.');
+  deleteFile(request: DeleteRequest): Promise<GetFileResponse> {
+    return this.appService.delete(
+      request,
+    ) as unknown as Promise<GetFileResponse>;
   }
 }

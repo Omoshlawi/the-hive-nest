@@ -8,10 +8,9 @@ import {
   QueryFileUsageRuleResponse,
   UpdateFileUsageRuleRequest,
 } from '@hive/files';
-import { Controller } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { Controller, NotFoundException } from '@nestjs/common';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { FileUsageRuleService } from './file-usage-rule.service';
-import { GrpcMethod } from '@nestjs/microservices';
 
 @Controller('file-usage-rule')
 export class FileUsageRuleController {
@@ -19,29 +18,44 @@ export class FileUsageRuleController {
   @GrpcMethod(FILES_SERVICE_NAME)
   queryFileUsageRule(
     request: QueryFileUsageRuleRequest,
-  ): Observable<QueryFileUsageRuleResponse> {
-    throw new Error('Method not implemented.');
+  ): Promise<QueryFileUsageRuleResponse> {
+    return this.fileUsageRuleService.getAll(
+      request,
+    ) as unknown as Promise<QueryFileUsageRuleResponse>;
   }
   @GrpcMethod(FILES_SERVICE_NAME)
-  getFileUsageRule(request: GetRequest): Observable<GetFileUsageRuleResponse> {
-    throw new Error('Method not implemented.');
+  async getFileUsageRule(
+    request: GetRequest,
+  ): Promise<GetFileUsageRuleResponse> {
+    const res = await this.fileUsageRuleService.getById(request);
+    if (!res.data)
+      throw new RpcException(
+        new NotFoundException('Resource Usage rule not found'),
+      );
+    return res as unknown as GetFileUsageRuleResponse;
   }
   @GrpcMethod(FILES_SERVICE_NAME)
   createFileUsageRule(
     request: CreateFileUsageRuleRequest,
-  ): Observable<GetFileUsageRuleResponse> {
-    throw new Error('Method not implemented.');
+  ): Promise<GetFileUsageRuleResponse> {
+    return this.fileUsageRuleService.create(
+      request,
+    ) as unknown as Promise<GetFileUsageRuleResponse>;
   }
   @GrpcMethod(FILES_SERVICE_NAME)
   updateFileUsageRule(
     request: UpdateFileUsageRuleRequest,
-  ): Observable<GetFileUsageRuleResponse> {
-    throw new Error('Method not implemented.');
+  ): Promise<GetFileUsageRuleResponse> {
+    return this.fileUsageRuleService.update(
+      request,
+    ) as unknown as Promise<GetFileUsageRuleResponse>;
   }
   @GrpcMethod(FILES_SERVICE_NAME)
   deleteFileUsageRule(
     request: DeleteRequest,
-  ): Observable<GetFileUsageRuleResponse> {
-    throw new Error('Method not implemented.');
+  ): Promise<GetFileUsageRuleResponse> {
+    return this.fileUsageRuleService.delete(
+      request,
+    ) as unknown as Promise<GetFileUsageRuleResponse>;
   }
 }
