@@ -76,6 +76,7 @@ model FileUsageScope {
   purpose     String // e.g. "avatar", "gallery"
   description String?
 
+  voided    Boolean         @default(false)
   createdAt DateTime        @default(now())
   rules     FileUsageRule[]
 
@@ -83,12 +84,13 @@ model FileUsageScope {
 }
 
 model FileUsageRule {
-  id        String         @id @default(uuid()) @db.Uuid
-  scopeId   String         @db.Uuid
-  scope     FileUsageScope @relation(fields: [scopeId], references: [id], onDelete: Cascade)
+  id       String         @id @default(uuid()) @db.Uuid
+  scopeId  String         @db.Uuid
+  scope    FileUsageScope @relation(fields: [scopeId], references: [id], onDelete: Cascade)
   // tier      String?
-  maxFiles  Int
-  createdAt DateTime       @default(now())
+  maxFiles Int
+  voided   Boolean        @default(false)
+  createdAt DateTime @default(now())
 }
 
 // Handled by tags

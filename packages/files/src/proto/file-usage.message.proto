@@ -7,8 +7,9 @@ import "files.model.proto";
 message QueryFileUsageScopeRequest {
     QueryBuilder query_builder = 1;
     optional string search = 2;
-    optional string organization_id = 3;
-    optional bool include_voided = 4;
+    optional string model_name = 3;
+    optional string purpose = 4;
+    optional bool include_voided = 5;
 }
 
 message QueryFileUsageScopeResponse {
@@ -39,7 +40,7 @@ message GetFileUsageScopeResponse {
 message QueryFileUsageRuleRequest {
     QueryBuilder query_builder = 1;
     optional string search = 2;
-    optional string organization_id = 3;
+    optional string scope_id = 3;
     optional bool include_voided = 4;
 }
 

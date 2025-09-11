@@ -17,6 +17,8 @@ import {
 import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from './prisma/prisma.module';
 import { QueryBuilderModule } from '@hive/common';
+import { FileUsageScopeModule } from './file-usage-scope/file-usage-scope.module';
+import { FileUsageRuleModule } from './file-usage-rule/file-usage-rule.module';
 
 @Module({
   imports: [
@@ -75,6 +77,8 @@ import { QueryBuilderModule } from '@hive/common';
     }),
     PrismaModule,
     QueryBuilderModule.register(),
+    FileUsageScopeModule,
+    FileUsageRuleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

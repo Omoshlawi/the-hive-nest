@@ -14,7 +14,8 @@ export const protobufPackage = "";
 export interface QueryFileUsageScopeRequest {
   queryBuilder: QueryBuilder | undefined;
   search?: string | undefined;
-  organizationId?: string | undefined;
+  modelName?: string | undefined;
+  purpose?: string | undefined;
   includeVoided?: boolean | undefined;
 }
 
@@ -57,7 +58,7 @@ export interface GetFileUsageScopeResponse_MetadataEntry {
 export interface QueryFileUsageRuleRequest {
   queryBuilder: QueryBuilder | undefined;
   search?: string | undefined;
-  organizationId?: string | undefined;
+  scopeId?: string | undefined;
   includeVoided?: boolean | undefined;
 }
 
