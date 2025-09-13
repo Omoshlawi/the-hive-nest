@@ -88,7 +88,7 @@ export class FilesController {
         {},
       );
       const files = await lastValueFrom(
-        this.fileService.files.createFile({
+        this.fileService.file.createFile({
           queryBuilder: query,
           category: '',
           filename: s3FileMetadata.filename,

@@ -59,7 +59,7 @@ export class HiveFileServiceClient implements OnModuleInit, OnModuleDestroy {
       this.loadBalance().deleteFileUsageScope(request),
   };
 
-  readonly fileUsageRules = {
+  readonly fileUsageRule = {
     queryFileUsageRule: (
       request: QueryFileUsageRuleRequest,
     ): Observable<QueryFileUsageRuleResponse> =>
@@ -86,7 +86,7 @@ export class HiveFileServiceClient implements OnModuleInit, OnModuleDestroy {
       this.loadBalance().deleteFileUsageRule(request),
   };
 
-  readonly files = {
+  readonly file = {
     queryFile: (request: QueryFileRequest): Observable<QueryFileResponse> =>
       this.loadBalance().queryFile(request),
     getFile: (request: GetRequest): Observable<GetFileResponse> =>

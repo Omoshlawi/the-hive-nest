@@ -225,7 +225,7 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
       );
       return null;
     }
-
+    this.logger.log('Load balancing ' + this.config.name + ' client proxies');
     // Simple round-robin load balancing
     const selectedIndex = Math.floor(Math.random() * healthyInstances.length);
     return healthyInstances[selectedIndex].instance;

@@ -77,7 +77,6 @@ import { FileUsageRuleModule } from './file-usage-rule/file-usage-rule.module';
       },
     }),
     PrismaModule,
-    QueryBuilderModule.register(),
     FileUsageScopeModule,
     FileUsageRuleModule,
   ],
