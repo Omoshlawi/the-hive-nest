@@ -54,8 +54,9 @@ export interface CreateFileRequest {
   relatedModelName: string;
   purpose: string;
   uploadedById: string;
-  organizationId?: string | undefined;
-  category: string;
+  organizationId?:
+    | string
+    | undefined;
   /** JSON as string */
   metadata?: string | undefined;
   tags: string[];

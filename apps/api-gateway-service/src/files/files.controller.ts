@@ -1,7 +1,8 @@
-import { CustomRepresentationQueryDto } from '@hive/common';
+import { CustomRepresentationQueryDto, DeleteQueryDto } from '@hive/common';
 import {
   CreateFileStorage_StorageProviders,
   HiveFileServiceClient,
+  QueryFileDto,
   UploadFilesDto,
   UploadMutipleFilesDto,
   UploadSingleFileDto,
@@ -9,16 +10,21 @@ import {
 import {
   Body,
   Controller,
+  Delete,
   FileTypeValidator,
+  Get,
   HttpException,
   HttpStatus,
   Logger,
   MaxFileSizeValidator,
+  Param,
   ParseFilePipeBuilder,
+  ParseUUIDPipe,
   Post,
   Query,
   UploadedFile,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -30,7 +36,11 @@ import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { createHash } from 'crypto';
 import { lastValueFrom } from 'rxjs';
 import { S3Service } from '../s3/s3.service';
+import { AuthGuard, Session, UserSession } from '@thallesp/nestjs-better-auth';
 
+// TODO: implement deduplication of files by generating file hash and cross checking on dab if exist then retuern reference
+
+@UseGuards(AuthGuard)
 @Controller('files')
 export class FilesController {
   private readonly logger = new Logger(FilesController.name);
@@ -54,6 +64,34 @@ export class FilesController {
     return hash.digest('hex');
   }
 
+  @Get('/')
+  @ApiOperation({ summary: 'Query File' })
+  queryFile(@Query() query: QueryFileDto) {
+    return this.fileService.file.queryFile({
+      queryBuilder: {
+        limit: query.limit,
+        orderBy: query.orderBy,
+        page: query.page,
+        v: query.v,
+      },
+      includeVoided: query.includeVoided,
+      organizationId: query.organizationId,
+      search: query.search,
+    });
+  }
+
+  @Get('/:id')
+  @ApiOperation({ summary: 'Get File usage Rule' })
+  getFileUsageRule(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: CustomRepresentationQueryDto,
+  ) {
+    return this.fileService.file.getFile({
+      id,
+      queryBuilder: query,
+    });
+  }
+
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
@@ -62,6 +100,7 @@ export class FilesController {
   })
   @Post('upload/single')
   async uploadSingleFile(
+    @Session() { session, user }: UserSession,
     @UploadedFile(
       'file',
       new ParseFilePipeBuilder()
@@ -80,6 +119,7 @@ export class FilesController {
     this.logger.log(
       `S3 single file upload: ${file.originalname} (${this.formatFileSize(file.size)})`,
     );
+
     try {
       const s3FileMetadata = await this.s3Service.uploadSingleFile(
         file,
@@ -90,7 +130,6 @@ export class FilesController {
       const files = await lastValueFrom(
         this.fileService.file.createFile({
           queryBuilder: query,
-          category: '',
           filename: s3FileMetadata.filename,
           hash: this.generateFileHash(file.buffer),
           mimeType: s3FileMetadata.contentType,
@@ -108,14 +147,14 @@ export class FilesController {
             },
           ],
           tags: uploadFileDto.tags?.split(',')?.map((t) => t.trim()),
-          uploadedById: '',
-          expiresAt: '',
-          lastAccessedAt: '',
+          uploadedById: user.id,
           metadata: JSON.stringify(s3FileMetadata.customMetadata ?? {}),
-          organizationId: '',
+          organizationId: undefined,
+          expiresAt: undefined, // TODO Future impl
+          lastAccessedAt: undefined, // TODO Future impl
         }),
       );
-      return files[0];
+      return files;
     } catch (error) {
       this.logger.error(
         `S3 upload failed for ${file.originalname}: ${error.message}`,
@@ -154,8 +193,10 @@ export class FilesController {
     @Query() query: CustomRepresentationQueryDto,
     @Body() uploadFileDto: UploadMutipleFilesDto,
   ) {
+    // TODO: implement
     console.log(files);
     console.log(uploadFileDto);
+    throw new Error('Methoid not Implemented');
   }
   @Post('upload/multiple/fields')
   @ApiConsumes('multipart/form-data')
@@ -179,11 +220,26 @@ export class FilesController {
           fileIsRequired: false, // Allow empty uploads for this endpoint
         }),
     )
-    file: Array<Express.Multer.File>,
+    files: Array<Express.Multer.File>,
     @Query() query: CustomRepresentationQueryDto,
     @Body() uploadFileDto: UploadFilesDto,
   ) {
-    console.log(file);
+    // TODO: implement
+    console.log(files);
     console.log(uploadFileDto);
+    throw new Error('Methoid not Implemented');
+  }
+
+  @Delete('/:id')
+  @ApiOperation({ summary: 'Delete File usage Rule' })
+  deleteFileUsageRule(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: DeleteQueryDto,
+  ) {
+    return this.fileService.file.deleteFile({
+      id,
+      queryBuilder: { v: query.v },
+      purge: query.purge,
+    });
   }
 }

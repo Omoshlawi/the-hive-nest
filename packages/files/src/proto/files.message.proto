@@ -43,14 +43,13 @@ message CreateFileRequest {
 
     string uploaded_by_id = 10;
     optional string organization_id = 11;
-    string category = 12;
 
-    optional string metadata = 13; // JSON as string
-    repeated string tags = 14;
+    optional string metadata = 12; // JSON as string
+    repeated string tags = 13;
 
-    optional string last_accessed_at = 19;
-    optional string expires_at = 20;
-    repeated CreateFileStorage storages = 22;
+    optional string last_accessed_at = 14;
+    optional string expires_at = 15;
+    repeated CreateFileStorage storages = 16;
 }
 
 message GetFileResponse {

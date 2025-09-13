@@ -20,7 +20,7 @@ model File {
   originalName String
   mimeType     String
   size         BigInt // In bytes
-  hash         String // For deduplication
+  hash         String @unique // For deduplication 
 
   relatedModelId   String // The specific instance ID of the model
   relatedModelName String // Which model/entity uses the file (e.g. User, Property, Listing)
@@ -84,13 +84,13 @@ model FileUsageScope {
 }
 
 model FileUsageRule {
-  id       String         @id @default(uuid()) @db.Uuid
-  scopeId  String         @db.Uuid
-  scope    FileUsageScope @relation(fields: [scopeId], references: [id], onDelete: Cascade)
+  id        String         @id @default(uuid()) @db.Uuid
+  scopeId   String         @db.Uuid
+  scope     FileUsageScope @relation(fields: [scopeId], references: [id], onDelete: Cascade)
   // tier      String?
-  maxFiles Int
-  voided   Boolean        @default(false)
-  createdAt DateTime @default(now())
+  maxFiles  Int
+  voided    Boolean        @default(false)
+  createdAt DateTime       @default(now())
 }
 
 // Handled by tags
