@@ -23,7 +23,7 @@ export class CategoriesController {
   @Get('/')
   @ApiOperation({ summary: 'Query Categories' })
   queryCategory(@Query() query: QueryCategoryDto) {
-    return this.propertyservice.queryCategories({
+    return this.propertyservice.categories.queryCategories({
       queryBuilder: {
         limit: query.limit,
         orderBy: query.orderBy,
@@ -41,7 +41,7 @@ export class CategoriesController {
     @Body() createCategoryDto: CreatCategoryDto,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.createCategory({
+    return this.propertyservice.categories.createCategory({
       queryBuilder: {
         v: query.v,
       },
@@ -54,7 +54,10 @@ export class CategoriesController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.getCategory({ id, queryBuilder: query });
+    return this.propertyservice.categories.getCategory({
+      id,
+      queryBuilder: query,
+    });
   }
   @Patch('/:id')
   @ApiOperation({ summary: 'Update Category' })
@@ -63,7 +66,7 @@ export class CategoriesController {
     @Body() updateCategoryDto: UpdateCategoryDto,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.updateCategory({
+    return this.propertyservice.categories.updateCategory({
       id,
       queryBuilder: { v: query?.v },
       ...updateCategoryDto,
@@ -75,7 +78,7 @@ export class CategoriesController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,
   ) {
-    return this.propertyservice.deleteCategory({
+    return this.propertyservice.categories.deleteCategory({
       id,
       queryBuilder: { v: query.v },
       purge: query.purge,

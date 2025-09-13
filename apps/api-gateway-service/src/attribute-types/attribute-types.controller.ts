@@ -24,7 +24,7 @@ export class AttributeTypesController {
   @Get('/')
   @ApiOperation({ summary: 'Query attribute types' })
   queryAttributeType(@Query() query: QueryAttributeTypeDto) {
-    return this.propertyservice.queryAttributeTypes({
+    return this.propertyservice.attributeTypes.queryAttributeTypes({
       queryBuilder: {
         limit: query.limit,
         orderBy: query.orderBy,
@@ -42,7 +42,7 @@ export class AttributeTypesController {
     @Body() createAttributeTypeDto: CreatAttributeTypeDto,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.createAttributeType({
+    return this.propertyservice.attributeTypes.createAttributeType({
       queryBuilder: {
         v: query.v,
       },
@@ -55,7 +55,10 @@ export class AttributeTypesController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.getAttributeType({ id, queryBuilder: query });
+    return this.propertyservice.attributeTypes.getAttributeType({
+      id,
+      queryBuilder: query,
+    });
   }
   @Patch('/:id')
   @ApiOperation({ summary: 'Update AttributeType' })
@@ -64,7 +67,7 @@ export class AttributeTypesController {
     @Body() updateAttributeTypeDto: UpdateAttributeTypeDto,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.updateAttributeType({
+    return this.propertyservice.attributeTypes.updateAttributeType({
       id,
       queryBuilder: { v: query?.v },
       ...updateAttributeTypeDto,
@@ -76,7 +79,7 @@ export class AttributeTypesController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,
   ) {
-    return this.propertyservice.deleteAttributeType({
+    return this.propertyservice.attributeTypes.deleteAttributeType({
       id,
       queryBuilder: { v: query.v },
       purge: query.purge,

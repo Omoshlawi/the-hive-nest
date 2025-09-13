@@ -82,7 +82,7 @@ export class FilesController {
   }
 
   @Get('/:id')
-  @ApiOperation({ summary: 'Get File usage Rule' })
+  @ApiOperation({ summary: 'Get File' })
   getFileUsageRule(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
@@ -322,7 +322,7 @@ export class FilesController {
   }
 
   @Delete('/:id')
-  @ApiOperation({ summary: 'Delete File usage Rule' })
+  @ApiOperation({ summary: 'Delete File' })
   deleteFileUsageRule(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,

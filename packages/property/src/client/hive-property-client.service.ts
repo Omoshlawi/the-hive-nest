@@ -94,7 +94,7 @@ import {
   name: HIVE_PROPERTY_SERVICE_NAME,
 })
 export class HivePropertyServiceClient
-  implements OnModuleInit, OnModuleDestroy, PropertyClient
+  implements OnModuleInit, OnModuleDestroy
 {
   constructor(private client: HiveServiceClient) {}
   private loadBalance() {
@@ -102,319 +102,245 @@ export class HivePropertyServiceClient
     if (!property) throw new Error('No service instance');
     return property;
   }
-  queryRelationshipType(
-    request: QueryRelationshipTypeRequest,
-  ): Observable<QueryRelationshipTypeResponse> {
-    const property = this.loadBalance();
-    return property.queryRelationshipType(request);
-  }
-  getRelationshipType(
-    request: GetRelationshipTypeRequest,
-  ): Observable<GetRelationshipTypeResponse> {
-    const property = this.loadBalance();
-    return property.getRelationshipType(request);
-  }
-  createRelationshipType(
-    request: CreateRelationshipTypeRequest,
-  ): Observable<GetRelationshipTypeResponse> {
-    const property = this.loadBalance();
-    return property.createRelationshipType(request);
-  }
-  updateRelationshipType(
-    request: UpdateRelationshipTypeRequest,
-  ): Observable<GetRelationshipTypeResponse> {
-    const property = this.loadBalance();
-    return property.updateRelationshipType(request);
-  }
-  deleteRelationshipType(
-    request: DeleteRelationshipTypeRequest,
-  ): Observable<GetRelationshipTypeResponse> {
-    const property = this.loadBalance();
-    return property.deleteRelationshipType(request);
-  }
-  queryRelationship(
-    request: QueryRelationshipRequest,
-  ): Observable<QueryRelationshipResponse> {
-    const property = this.loadBalance();
-    return property.queryRelationship(request);
-  }
-  getRelationship(
-    request: GetRelationshipRequest,
-  ): Observable<GetRelationshipResponse> {
-    const property = this.loadBalance();
-    return property.getRelationship(request);
-  }
-  createRelationship(
-    request: CreateRelationshipRequest,
-  ): Observable<GetRelationshipResponse> {
-    const property = this.loadBalance();
-    return property.createRelationship(request);
-  }
-  updateRelationship(
-    request: UpdateRelationshipRequest,
-  ): Observable<GetRelationshipResponse> {
-    const property = this.loadBalance();
-    return property.updateRelationship(request);
-  }
-  deleteRelationship(
-    request: DeleteRelationshipRequest,
-  ): Observable<GetRelationshipResponse> {
-    const property = this.loadBalance();
-    return property.deleteRelationship(request);
-  }
-  queryPropertyStatusHistory(
-    request: QueryPropertyStatusHistoryRequest,
-  ): Observable<QueryPropertyStatusHistoryResponse> {
-    const property = this.loadBalance();
-    return property.queryPropertyStatusHistory(request);
-  }
-  getPropertyStatusHistory(
-    request: GetPropertyStatusHistoryRequest,
-  ): Observable<GetPropertyStatusHistoryResponse> {
-    const property = this.loadBalance();
-    return property.getPropertyStatusHistory(request);
-  }
-  createPropertyStatusHistory(
-    request: CreatePropertyStatusHistoryRequest,
-  ): Observable<GetPropertyStatusHistoryResponse> {
-    const property = this.loadBalance();
-    return property.createPropertyStatusHistory(request);
-  }
-  deletePropertyStatusHistory(
-    request: DeletePropertyStatusHistoryRequest,
-  ): Observable<GetPropertyStatusHistoryResponse> {
-    const property = this.loadBalance();
-    return property.deletePropertyStatusHistory(request);
-  }
-  queryPropertyMedia(
-    request: QueryPropertyMediaRequest,
-  ): Observable<QueryPropertyMediaResponse> {
-    const property = this.loadBalance();
-    return property.queryPropertyMedia(request);
-  }
-  getPropertyMedia(
-    request: GetPropertyMediaRequest,
-  ): Observable<GetPropertyMediaResponse> {
-    const property = this.loadBalance();
-    return property.getPropertyMedia(request);
-  }
-  createPropertyMedia(
-    request: CreatePropertyMediaRequest,
-  ): Observable<GetPropertyMediaResponse> {
-    const property = this.loadBalance();
-    return property.createPropertyMedia(request);
-  }
-  updatePropertyMedia(
-    request: UpdatePropertyMediaRequest,
-  ): Observable<GetPropertyMediaResponse> {
-    const property = this.loadBalance();
-    return property.updatePropertyMedia(request);
-  }
-  deletePropertyMedia(
-    request: DeletePropertyMediaRequest,
-  ): Observable<GetPropertyMediaResponse> {
-    const property = this.loadBalance();
-    return property.deletePropertyMedia(request);
-  }
-  queryPropertyAttribute(
-    request: QueryPropertyAttributeRequest,
-  ): Observable<QueryPropertyAttributeResponse> {
-    const property = this.loadBalance();
-    return property.queryPropertyAttribute(request);
-  }
-  getPropertyAttribute(
-    request: GetPropertyAttributeRequest,
-  ): Observable<GetPropertyAttributeResponse> {
-    const property = this.loadBalance();
-    return property.getPropertyAttribute(request);
-  }
-  createPropertyAttribute(
-    request: CreatePropertyAttributeRequest,
-  ): Observable<GetPropertyAttributeResponse> {
-    const property = this.loadBalance();
-    return property.createPropertyAttribute(request);
-  }
-  updatePropertyAttribute(
-    request: UpdatePropertyAttributeRequest,
-  ): Observable<GetPropertyAttributeResponse> {
-    const property = this.loadBalance();
-    return property.updatePropertyAttribute(request);
-  }
-  deletePropertyAttribute(
-    request: DeletePropertyAttributeRequest,
-  ): Observable<GetPropertyAttributeResponse> {
-    const property = this.loadBalance();
-    return property.deletePropertyAttribute(request);
-  }
-  queryPropertyAmenity(
-    request: QueryPropertyAmenityRequest,
-  ): Observable<QueryPropertyAmenityResponse> {
-    const property = this.loadBalance();
-    return property.queryPropertyAmenity(request);
-  }
-  getPropertyAmenity(
-    request: GetPropertyAmenityRequest,
-  ): Observable<GetPropertyAmenityResponse> {
-    const property = this.loadBalance();
-    return property.getPropertyAmenity(request);
-  }
-  createPropertyAmenity(
-    request: CreatePropertyAmenityRequest,
-  ): Observable<GetPropertyAmenityResponse> {
-    const property = this.loadBalance();
-    return property.createPropertyAmenity(request);
-  }
-  updatePropertyAmenity(
-    request: UpdatePropertyAmenityRequest,
-  ): Observable<GetPropertyAmenityResponse> {
-    const property = this.loadBalance();
-    return property.updatePropertyAmenity(request);
-  }
-  deletePropertyAmenity(
-    request: DeletePropertyAmenityRequest,
-  ): Observable<GetPropertyAmenityResponse> {
-    const property = this.loadBalance();
-    return property.deletePropertyAmenity(request);
-  }
-  queryPropertyCategory(
-    request: QueryPropertyCategoryRequest,
-  ): Observable<QueryPropertyCategoryResponse> {
-    const property = this.loadBalance();
-    return property.queryPropertyCategory(request);
-  }
-  getPropertyCategory(
-    request: GetPropertyCategoryRequest,
-  ): Observable<GetPropertyCategoryResponse> {
-    const property = this.loadBalance();
-    return property.getPropertyCategory(request);
-  }
-  createPropertyCategory(
-    request: CreatePropertyCategoryRequest,
-  ): Observable<GetPropertyCategoryResponse> {
-    const property = this.loadBalance();
-    return property.createPropertyCategory(request);
-  }
-  updatePropertyCategory(
-    request: UpdatePropertyCategoryRequest,
-  ): Observable<GetPropertyCategoryResponse> {
-    const property = this.loadBalance();
-    return property.updatePropertyCategory(request);
-  }
-  deletePropertyCategory(
-    request: DeletePropertyCategoryRequest,
-  ): Observable<GetPropertyCategoryResponse> {
-    const property = this.loadBalance();
-    return property.deletePropertyCategory(request);
-  }
+  readonly relationshipTypes = {
+    queryRelationshipType: (
+      request: QueryRelationshipTypeRequest,
+    ): Observable<QueryRelationshipTypeResponse> =>
+      this.loadBalance().queryRelationshipType(request),
+    getRelationshipType: (
+      request: GetRelationshipTypeRequest,
+    ): Observable<GetRelationshipTypeResponse> =>
+      this.loadBalance().getRelationshipType(request),
+    createRelationshipType: (
+      request: CreateRelationshipTypeRequest,
+    ): Observable<GetRelationshipTypeResponse> =>
+      this.loadBalance().createRelationshipType(request),
+    updateRelationshipType: (
+      request: UpdateRelationshipTypeRequest,
+    ): Observable<GetRelationshipTypeResponse> =>
+      this.loadBalance().updateRelationshipType(request),
+    deleteRelationshipType: (
+      request: DeleteRelationshipTypeRequest,
+    ): Observable<GetRelationshipTypeResponse> =>
+      this.loadBalance().deleteRelationshipType(request),
+  };
+  readonly relationships = {
+    queryRelationship: (
+      request: QueryRelationshipRequest,
+    ): Observable<QueryRelationshipResponse> =>
+      this.loadBalance().queryRelationship(request),
+    getRelationship: (
+      request: GetRelationshipRequest,
+    ): Observable<GetRelationshipResponse> =>
+      this.loadBalance().getRelationship(request),
+    createRelationship: (
+      request: CreateRelationshipRequest,
+    ): Observable<GetRelationshipResponse> =>
+      this.loadBalance().createRelationship(request),
+    updateRelationship: (
+      request: UpdateRelationshipRequest,
+    ): Observable<GetRelationshipResponse> =>
+      this.loadBalance().updateRelationship(request),
+    deleteRelationship: (
+      request: DeleteRelationshipRequest,
+    ): Observable<GetRelationshipResponse> =>
+      this.loadBalance().deleteRelationship(request),
+  };
+  readonly propertyStatusHistory = {
+    queryPropertyStatusHistory: (
+      request: QueryPropertyStatusHistoryRequest,
+    ): Observable<QueryPropertyStatusHistoryResponse> =>
+      this.loadBalance().queryPropertyStatusHistory(request),
+    getPropertyStatusHistory: (
+      request: GetPropertyStatusHistoryRequest,
+    ): Observable<GetPropertyStatusHistoryResponse> =>
+      this.loadBalance().getPropertyStatusHistory(request),
+    createPropertyStatusHistory: (
+      request: CreatePropertyStatusHistoryRequest,
+    ): Observable<GetPropertyStatusHistoryResponse> =>
+      this.loadBalance().createPropertyStatusHistory(request),
+    deletePropertyStatusHistory: (
+      request: DeletePropertyStatusHistoryRequest,
+    ): Observable<GetPropertyStatusHistoryResponse> =>
+      this.loadBalance().deletePropertyStatusHistory(request),
+  };
+  readonly propertyMedia = {
+    queryPropertyMedia: (
+      request: QueryPropertyMediaRequest,
+    ): Observable<QueryPropertyMediaResponse> =>
+      this.loadBalance().queryPropertyMedia(request),
+    getPropertyMedia: (
+      request: GetPropertyMediaRequest,
+    ): Observable<GetPropertyMediaResponse> =>
+      this.loadBalance().getPropertyMedia(request),
+    createPropertyMedia: (
+      request: CreatePropertyMediaRequest,
+    ): Observable<GetPropertyMediaResponse> =>
+      this.loadBalance().createPropertyMedia(request),
+    updatePropertyMedia: (
+      request: UpdatePropertyMediaRequest,
+    ): Observable<GetPropertyMediaResponse> =>
+      this.loadBalance().updatePropertyMedia(request),
+    deletePropertyMedia: (
+      request: DeletePropertyMediaRequest,
+    ): Observable<GetPropertyMediaResponse> =>
+      this.loadBalance().deletePropertyMedia(request),
+  };
+  readonly propertyAttributes = {
+    queryPropertyAttribute: (
+      request: QueryPropertyAttributeRequest,
+    ): Observable<QueryPropertyAttributeResponse> =>
+      this.loadBalance().queryPropertyAttribute(request),
+    getPropertyAttribute: (
+      request: GetPropertyAttributeRequest,
+    ): Observable<GetPropertyAttributeResponse> =>
+      this.loadBalance().getPropertyAttribute(request),
+    createPropertyAttribute: (
+      request: CreatePropertyAttributeRequest,
+    ): Observable<GetPropertyAttributeResponse> =>
+      this.loadBalance().createPropertyAttribute(request),
+    updatePropertyAttribute: (
+      request: UpdatePropertyAttributeRequest,
+    ): Observable<GetPropertyAttributeResponse> =>
+      this.loadBalance().updatePropertyAttribute(request),
+    deletePropertyAttribute: (
+      request: DeletePropertyAttributeRequest,
+    ): Observable<GetPropertyAttributeResponse> =>
+      this.loadBalance().deletePropertyAttribute(request),
+  };
+  readonly propertyAmenities = {
+    queryPropertyAmenity: (
+      request: QueryPropertyAmenityRequest,
+    ): Observable<QueryPropertyAmenityResponse> =>
+      this.loadBalance().queryPropertyAmenity(request),
+    getPropertyAmenity: (
+      request: GetPropertyAmenityRequest,
+    ): Observable<GetPropertyAmenityResponse> =>
+      this.loadBalance().getPropertyAmenity(request),
+    createPropertyAmenity: (
+      request: CreatePropertyAmenityRequest,
+    ): Observable<GetPropertyAmenityResponse> =>
+      this.loadBalance().createPropertyAmenity(request),
+    updatePropertyAmenity: (
+      request: UpdatePropertyAmenityRequest,
+    ): Observable<GetPropertyAmenityResponse> =>
+      this.loadBalance().updatePropertyAmenity(request),
+    deletePropertyAmenity: (
+      request: DeletePropertyAmenityRequest,
+    ): Observable<GetPropertyAmenityResponse> =>
+      this.loadBalance().deletePropertyAmenity(request),
+  };
+  readonly propertyCategories = {
+    queryPropertyCategory: (
+      request: QueryPropertyCategoryRequest,
+    ): Observable<QueryPropertyCategoryResponse> =>
+      this.loadBalance().queryPropertyCategory(request),
+    getPropertyCategory: (
+      request: GetPropertyCategoryRequest,
+    ): Observable<GetPropertyCategoryResponse> =>
+      this.loadBalance().getPropertyCategory(request),
+    createPropertyCategory: (
+      request: CreatePropertyCategoryRequest,
+    ): Observable<GetPropertyCategoryResponse> =>
+      this.loadBalance().createPropertyCategory(request),
+    updatePropertyCategory: (
+      request: UpdatePropertyCategoryRequest,
+    ): Observable<GetPropertyCategoryResponse> =>
+      this.loadBalance().updatePropertyCategory(request),
+    deletePropertyCategory: (
+      request: DeletePropertyCategoryRequest,
+    ): Observable<GetPropertyCategoryResponse> =>
+      this.loadBalance().deletePropertyCategory(request),
+  };
 
-  queryAmenities(
-    request: QueryAmenityRequest,
-  ): Observable<QueryAmenityResponse> {
-    const property = this.loadBalance();
-    return property.queryAmenities(request);
-  }
-  getAmenity(request: GetAmenityRequest): Observable<GetAmenityResponse> {
-    const property = this.loadBalance();
-    return property.getAmenity(request);
-  }
-  createAmenity(request: CreateAmenityRequest): Observable<GetAmenityResponse> {
-    const property = this.loadBalance();
-    return property.createAmenity(request);
-  }
-  updateAmenity(request: UpdateAmenityRequest): Observable<GetAmenityResponse> {
-    const property = this.loadBalance();
-    return property.updateAmenity(request);
-  }
-  deleteAmenity(request: DeleteAmenityRequest): Observable<GetAmenityResponse> {
-    const property = this.loadBalance();
-    return property.deleteAmenity(request);
-  }
-  queryCategories(
-    request: QueryCategoryRequest,
-  ): Observable<QueryCategoryResponse> {
-    const property = this.loadBalance();
-    return property.queryCategories(request);
-  }
-  getCategory(request: GetCategoryRequest): Observable<GetCategoryResponse> {
-    const property = this.loadBalance();
-    return property.getCategory(request);
-  }
-  createCategory(
-    request: CreateCategoryRequest,
-  ): Observable<GetCategoryResponse> {
-    const property = this.loadBalance();
-    return property.createCategory(request);
-  }
-  updateCategory(
-    request: UpdateCategoryRequest,
-  ): Observable<GetCategoryResponse> {
-    const property = this.loadBalance();
-    return property.updateCategory(request);
-  }
-  deleteCategory(
-    request: DeleteCategoryRequest,
-  ): Observable<GetCategoryResponse> {
-    const property = this.loadBalance();
-    return property.deleteCategory(request);
-  }
-  queryAttributeTypes(
-    request: QueryAttributeTypeRequest,
-  ): Observable<QueryAttributeTypeResponse> {
-    const property = this.loadBalance();
-    return property.queryAttributeTypes(request);
-  }
-  getAttributeType(
-    request: GetAttributeTypeRequest,
-  ): Observable<GetAttributeTypeResponse> {
-    const property = this.loadBalance();
-    return property.getAttributeType(request);
-  }
-  createAttributeType(
-    request: CreateAttributeTypeRequest,
-  ): Observable<GetAttributeTypeResponse> {
-    const property = this.loadBalance();
-    return property.createAttributeType(request);
-  }
-  updateAttributeType(
-    request: UpdateAttributeTypeRequest,
-  ): Observable<GetAttributeTypeResponse> {
-    const property = this.loadBalance();
-    return property.updateAttributeType(request);
-  }
-  deleteAttributeType(
-    request: DeleteAttributeTypeRequest,
-  ): Observable<GetAttributeTypeResponse> {
-    const property = this.loadBalance();
-    return property.deleteAttributeType(request);
-  }
-  queryProperties(
-    request: QueryPropertyRequest,
-  ): Observable<QueryPropertyResponse> {
-    const property = this.loadBalance();
-    return property.queryProperties(request);
-  }
-  getProperty(request: GetPropertyRequest): Observable<GetPropertyResponse> {
-    const property = this.loadBalance();
-    return property.getProperty(request);
-  }
-  createProperty(
-    request: CreatePropertyRequest,
-  ): Observable<GetPropertyResponse> {
-    const property = this.loadBalance();
-    return property.createProperty(request);
-  }
-  updateProperty(
-    request: UpdatePropertyRequest,
-  ): Observable<GetPropertyResponse> {
-    const property = this.loadBalance();
-    return property.updateProperty(request);
-  }
-  deleteProperty(
-    request: DeletePropertyRequest,
-  ): Observable<GetPropertyResponse> {
-    const property = this.loadBalance();
-    return property.deleteProperty(request);
-  }
+  readonly amenities = {
+    queryAmenities: (
+      request: QueryAmenityRequest,
+    ): Observable<QueryAmenityResponse> =>
+      this.loadBalance().queryAmenities(request),
+    getAmenity: (request: GetAmenityRequest): Observable<GetAmenityResponse> =>
+      this.loadBalance().getAmenity(request),
+    createAmenity: (
+      request: CreateAmenityRequest,
+    ): Observable<GetAmenityResponse> =>
+      this.loadBalance().createAmenity(request),
+    updateAmenity: (
+      request: UpdateAmenityRequest,
+    ): Observable<GetAmenityResponse> =>
+      this.loadBalance().updateAmenity(request),
+    deleteAmenity: (
+      request: DeleteAmenityRequest,
+    ): Observable<GetAmenityResponse> =>
+      this.loadBalance().deleteAmenity(request),
+  };
+  readonly categories = {
+    queryCategories: (
+      request: QueryCategoryRequest,
+    ): Observable<QueryCategoryResponse> =>
+      this.loadBalance().queryCategories(request),
+    getCategory: (
+      request: GetCategoryRequest,
+    ): Observable<GetCategoryResponse> =>
+      this.loadBalance().getCategory(request),
+    createCategory: (
+      request: CreateCategoryRequest,
+    ): Observable<GetCategoryResponse> =>
+      this.loadBalance().createCategory(request),
+    updateCategory: (
+      request: UpdateCategoryRequest,
+    ): Observable<GetCategoryResponse> =>
+      this.loadBalance().updateCategory(request),
+    deleteCategory: (
+      request: DeleteCategoryRequest,
+    ): Observable<GetCategoryResponse> =>
+      this.loadBalance().deleteCategory(request),
+  };
+  readonly attributeTypes = {
+    queryAttributeTypes: (
+      request: QueryAttributeTypeRequest,
+    ): Observable<QueryAttributeTypeResponse> =>
+      this.loadBalance().queryAttributeTypes(request),
+    getAttributeType: (
+      request: GetAttributeTypeRequest,
+    ): Observable<GetAttributeTypeResponse> =>
+      this.loadBalance().getAttributeType(request),
+    createAttributeType: (
+      request: CreateAttributeTypeRequest,
+    ): Observable<GetAttributeTypeResponse> =>
+      this.loadBalance().createAttributeType(request),
+    updateAttributeType: (
+      request: UpdateAttributeTypeRequest,
+    ): Observable<GetAttributeTypeResponse> =>
+      this.loadBalance().updateAttributeType(request),
+    deleteAttributeType: (
+      request: DeleteAttributeTypeRequest,
+    ): Observable<GetAttributeTypeResponse> =>
+      this.loadBalance().deleteAttributeType(request),
+  };
+
+  readonly properties = {
+    queryProperties: (
+      request: QueryPropertyRequest,
+    ): Observable<QueryPropertyResponse> =>
+      this.loadBalance().queryProperties(request),
+    getProperty: (
+      request: GetPropertyRequest,
+    ): Observable<GetPropertyResponse> =>
+      this.loadBalance().getProperty(request),
+    createProperty: (
+      request: CreatePropertyRequest,
+    ): Observable<GetPropertyResponse> =>
+      this.loadBalance().createProperty(request),
+    updateProperty: (
+      request: UpdatePropertyRequest,
+    ): Observable<GetPropertyResponse> =>
+      this.loadBalance().updateProperty(request),
+    deleteProperty: (
+      request: DeletePropertyRequest,
+    ): Observable<GetPropertyResponse> =>
+      this.loadBalance().deleteProperty(request),
+  };
+
   onModuleInit() {
     return this.client.onModuleInit();
   }

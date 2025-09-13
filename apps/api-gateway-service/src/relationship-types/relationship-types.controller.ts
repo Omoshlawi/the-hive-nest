@@ -23,7 +23,7 @@ export class RelationshipTypesController {
   @Get('/')
   @ApiOperation({ summary: 'Query Relationship types' })
   queryRelationshipType(@Query() query: QueryRelationshipTypeDto) {
-    return this.propertyservice.queryRelationshipType({
+    return this.propertyservice.relationshipTypes.queryRelationshipType({
       queryBuilder: {
         limit: query.limit,
         orderBy: query.orderBy,
@@ -41,7 +41,7 @@ export class RelationshipTypesController {
     @Body() createRelationshipTypeDto: CreatRelationshipTypeDto,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.createRelationshipType({
+    return this.propertyservice.relationshipTypes.createRelationshipType({
       queryBuilder: {
         v: query.v,
       },
@@ -54,7 +54,7 @@ export class RelationshipTypesController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.getRelationshipType({
+    return this.propertyservice.relationshipTypes.getRelationshipType({
       id,
       queryBuilder: query,
     });
@@ -66,7 +66,7 @@ export class RelationshipTypesController {
     @Body() updateRelationshipTypeDto: UpdateRelationshipTypeDto,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.updateRelationshipType({
+    return this.propertyservice.relationshipTypes.updateRelationshipType({
       id,
       queryBuilder: { v: query?.v },
       ...updateRelationshipTypeDto,
@@ -78,7 +78,7 @@ export class RelationshipTypesController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,
   ) {
-    return this.propertyservice.deleteRelationshipType({
+    return this.propertyservice.relationshipTypes.deleteRelationshipType({
       id,
       queryBuilder: { v: query.v },
       purge: query.purge,

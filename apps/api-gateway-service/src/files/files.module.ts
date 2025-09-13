@@ -8,9 +8,12 @@ import { FilesController } from './files.controller';
 
 @Module({
   controllers: [
-    FilesController,
+    // NB: FileUsageRuleController AND FileUsageScopeController must be registered before FilesController for
+    // priritization of routes in them before routes in FilesController since they share /files base url causing
+    // conflic when getting file (/files/some-uuid) and (/files/usage-rules) and (/files/usage-scope)
     FileUsageRuleController,
     FileUsageScopeController,
+    FilesController,
   ],
   imports: [S3Module, HiveServiceModule.forFeature([HiveFileServiceClient])],
 })

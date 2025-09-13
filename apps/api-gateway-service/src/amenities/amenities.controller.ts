@@ -24,7 +24,7 @@ export class AmenitiesController {
   @Get('/')
   @ApiOperation({ summary: 'Query Amenities' })
   queryAmenity(@Query() query: QueryAmenityDto) {
-    return this.propertyservice.queryAmenities({
+    return this.propertyservice.amenities.queryAmenities({
       queryBuilder: {
         limit: query.limit,
         orderBy: query.orderBy,
@@ -42,7 +42,7 @@ export class AmenitiesController {
     @Body() createAmenityDto: CreatAmenityDto,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.createAmenity({
+    return this.propertyservice.amenities.createAmenity({
       queryBuilder: {
         v: query.v,
       },
@@ -55,7 +55,10 @@ export class AmenitiesController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.getAmenity({ id, queryBuilder: query });
+    return this.propertyservice.amenities.getAmenity({
+      id,
+      queryBuilder: query,
+    });
   }
   @Patch('/:id')
   @ApiOperation({ summary: 'Update Amenity' })
@@ -64,7 +67,7 @@ export class AmenitiesController {
     @Body() updateAmenityDto: UpdateAmenityDto,
     @Query() query: CustomRepresentationQueryDto,
   ) {
-    return this.propertyservice.updateAmenity({
+    return this.propertyservice.amenities.updateAmenity({
       id,
       queryBuilder: { v: query?.v },
       ...updateAmenityDto,
@@ -76,7 +79,7 @@ export class AmenitiesController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,
   ) {
-    return this.propertyservice.deleteAmenity({
+    return this.propertyservice.amenities.deleteAmenity({
       id,
       queryBuilder: { v: query.v },
       purge: query.purge,
