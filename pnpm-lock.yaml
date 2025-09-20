@@ -186,6 +186,9 @@ importers:
       '@grpc/proto-loader':
         specifier: ^0.8.0
         version: 0.8.0
+      '@hive/authorization':
+        specifier: workspace:*
+        version: link:../../packages/authorization
       '@hive/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -295,6 +298,9 @@ importers:
       '@grpc/proto-loader':
         specifier: ^0.8.0
         version: 0.8.0
+      '@hive/authorization':
+        specifier: workspace:*
+        version: link:../../packages/authorization
       '@hive/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -398,6 +404,9 @@ importers:
       '@grpc/proto-loader':
         specifier: ^0.8.0
         version: 0.8.0
+      '@hive/authorization':
+        specifier: workspace:*
+        version: link:../../packages/authorization
       '@hive/common':
         specifier: workspace:*
         version: link:../../packages/common
@@ -872,6 +881,9 @@ importers:
 
   packages/files:
     dependencies:
+      '@hive/authorization':
+        specifier: workspace:*
+        version: link:../authorization
       '@hive/common':
         specifier: workspace:*
         version: link:../common
@@ -924,6 +936,9 @@ importers:
 
   packages/identity:
     dependencies:
+      '@hive/authorization':
+        specifier: workspace:*
+        version: link:../authorization
       '@hive/registry':
         specifier: workspace:*
         version: link:../registry
@@ -985,6 +1000,9 @@ importers:
 
   packages/property:
     dependencies:
+      '@hive/authorization':
+        specifier: workspace:*
+        version: link:../authorization
       '@hive/common':
         specifier: workspace:*
         version: link:../common

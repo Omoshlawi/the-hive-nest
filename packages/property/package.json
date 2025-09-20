@@ -54,6 +54,7 @@
     "@hive/registry": "workspace:*",
     "@hive/utils": "workspace:*",
     "@hive/common": "workspace:*",
+    "@hive/authorization": "workspace:*",
     "rxjs": "^7.8.1",
     "zod": "^4.0.15"
   },

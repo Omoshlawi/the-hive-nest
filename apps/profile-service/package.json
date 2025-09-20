@@ -25,6 +25,7 @@
     "@hive/registry": "workspace:*",
     "@hive/utils": "workspace:*",
     "@hive/common": "workspace:*",
+    "@hive/authorization": "workspace:*",
     "@hive/identity": "workspace:*",
     "@itgorillaz/configify": "^4.0.1",
     "@nestjs/common": "^11.0.1",
