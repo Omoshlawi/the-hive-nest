@@ -1,11 +1,12 @@
-import { Controller, NotFoundException } from '@nestjs/common';
+import {
+  CustomRepresentationService
+} from '@hive/common';
 import {
   GetInvitationRequest,
   GetMemberRequest,
   GetOrganizationRequest,
   GetUserRequest,
   IDENTITY_SERVICE_NAME,
-  IdentityController as RIdentityController,
   Invitation,
   ListInvitationsRequest,
   ListInvitationsResponse,
@@ -15,18 +16,14 @@ import {
   ListOrganizationsResponse,
   Member,
   Organization,
+  IdentityController as RIdentityController,
   User,
 } from '@hive/identity';
-import { Observable } from 'rxjs';
+import { Controller, NotFoundException } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
-import { auth } from '../lib/auth';
+import { Observable } from 'rxjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { IdentityMappersUtils } from './indentity.utils';
-import {
-  CustomRepresentationService,
-  PaginationService,
-  SortService,
-} from '@hive/common';
 
 @Controller('identity')
 export class IdentityController implements RIdentityController {

@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  output   = "../generated/prisma" // Generated folder must be added to assets for watch and copy to dist folder
 }
 
 datasource db {

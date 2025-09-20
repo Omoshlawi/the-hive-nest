@@ -1,0 +1,70 @@
+model
+  schema 1.1
+
+type user
+
+# Global system with comprehensive super user powers
+type system
+  relations
+    define super_user: [user]
+    # Super users can access any organization
+    define global_org_access: super_user
+    # Super users can access any resource
+    define global_resource_access: super_user
+
+type organization
+  relations
+    define admin: [user] 
+    define member: [user]
+    define owner: [user]
+    define user_in_context: [user]
+    
+    # Super users automatically have all org permissions
+    define super_admin: [system#super_user]
+    define effective_admin: admin or super_admin
+    define effective_member: member or super_admin
+    define effective_owner: owner or super_admin
+
+type file_usage_rule
+  relations
+    define can_manage: [user, system#super_user]
+    define can_view: [user:*]
+
+type file_usage_scope  
+  relations
+    define can_manage: [user, system#super_user]
+    define can_view: [user:*]
+
+type file
+  relations
+    define organization: [organization]
+    define owner: [user]
+    define manager: [user]
+    
+    # Super users get all permissions automatically
+    define super_access: [system#super_user]
+    define can_manage: owner or manager or user_in_context from organization or super_access
+    define can_view: [user:*] or can_manage
+    define can_delete: owner or effective_admin from organization or super_access
+
+type property  
+  relations
+    define organization: [organization]
+    define owner: [user]
+    define manager: [user]
+    
+    define super_access: [system#super_user]
+    define can_manage: owner or manager or user_in_context from organization or super_access
+    define can_view: [user:*] or can_manage  
+    define can_delete: owner or effective_admin from organization or super_access
+
+type listing
+  relations
+    define organization: [organization]
+    define owner: [user] 
+    define manager: [user]
+    
+    define super_access: [system#super_user]
+    define can_manage: owner or manager or user_in_context from organization or super_access
+    define can_view: [user:*] or can_manage
+    define can_delete: owner or effective_admin from organization or super_access

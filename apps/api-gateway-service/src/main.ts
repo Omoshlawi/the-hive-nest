@@ -4,7 +4,7 @@ import { AppConfig } from './config/app.config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NextFunction, Request, Response } from 'express';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
-import { auth } from './lib/auth';
+import { auth } from '../auth.config';
 import { mergeBetterAuthSchema, ServerConfig } from '@hive/utils';
 import {
   IDENTITY_PACKAGE,

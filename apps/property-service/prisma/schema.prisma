@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  output   = "../generated/prisma" // Generated folder must be added to assets for watch and copy to dist folder
 }
 
 datasource db {
@@ -47,7 +47,7 @@ model Amenity {
 model Category {
   id             String             @id @default(uuid()) @db.Uuid
   name           String
-  organizationId String?           
+  organizationId String?
   icon           Json // {name, family}
   // organization   Organization? @relation(fields: [organizationId], references: [id])
   voided         Boolean            @default(false)

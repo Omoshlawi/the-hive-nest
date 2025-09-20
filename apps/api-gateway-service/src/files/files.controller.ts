@@ -36,7 +36,7 @@ import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { createHash } from 'crypto';
 import { lastValueFrom } from 'rxjs';
 import { S3Service } from '../s3/s3.service';
-import { AuthGuard, Session, UserSession } from '@thallesp/nestjs-better-auth';
+import { AuthGuard, Session, UserSession } from '@mguay/nestjs-better-auth';
 
 // TODO: implement deduplication of files by generating file hash and cross checking on dab if exist then retuern reference
 // Also implement methods to validate before uploading to bucket
@@ -153,8 +153,8 @@ export class FilesController {
       return files;
     } catch (error) {
       this.logger.error(
-        `S3 upload failed for ${file.originalname}: ${error.message}`,
-        error.stack,
+        `S3 upload failed for ${file.originalname}: ${error?.message}`,
+        error?.stack,
       );
       if (error instanceof HttpException) {
         throw error;

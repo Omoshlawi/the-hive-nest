@@ -18,7 +18,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { AuthGuard } from '@thallesp/nestjs-better-auth';
+import { AuthGuard } from '@mguay/nestjs-better-auth';
 
 @UseGuards(AuthGuard)
 @Controller('files/usage-rules')

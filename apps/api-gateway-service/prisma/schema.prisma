@@ -6,8 +6,8 @@
 
 generator client {
   provider = "prisma-client-js"
-  // TODO: For production output to dist.Dev server deletes dist folder on every change hence not suitable in dev environment
   output   = "../generated/prisma"
+  // Generated folder must be added to assets for watch and copy to dist folder
 }
 
 datasource db {
