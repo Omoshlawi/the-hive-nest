@@ -25,9 +25,15 @@ export interface QueryBuilder {
   v?: string | undefined;
 }
 
+export interface RequestContext {
+  userId?: string | undefined;
+  organizationId?: string | undefined;
+}
+
 export interface GetRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface DeleteRequest {

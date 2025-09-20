@@ -15,9 +15,15 @@ message QueryBuilder {
     optional string v = 4;
 }
 
+message RequestContext {
+    optional string userId = 1;
+    optional string organizationId = 2;
+}
+
 message GetRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
+    optional RequestContext context = 3;
 }
 
 message DeleteRequest {

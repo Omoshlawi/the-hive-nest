@@ -5,7 +5,7 @@
 // source: file-usage.message.proto
 
 /* eslint-disable */
-import { QueryBuilder } from "./common.message";
+import { QueryBuilder, RequestContext } from "./common.message";
 import { FileUsageRule, FileUsageScope } from "./files.model";
 
 export const protobufPackage = "";
@@ -17,6 +17,7 @@ export interface QueryFileUsageScopeRequest {
   modelName?: string | undefined;
   purpose?: string | undefined;
   includeVoided?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface QueryFileUsageScopeResponse {
@@ -34,6 +35,7 @@ export interface CreateFileUsageScopeRequest {
   modelName: string;
   purpose: string;
   description?: string | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface UpdateFileUsageScopeRequest {
@@ -42,6 +44,7 @@ export interface UpdateFileUsageScopeRequest {
   modelName?: string | undefined;
   purpose?: string | undefined;
   description?: string | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface GetFileUsageScopeResponse {
@@ -62,6 +65,7 @@ export interface QueryFileUsageRuleRequest {
   modelName?: string | undefined;
   purpose?: string | undefined;
   includeVoided?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface QueryFileUsageRuleResponse {
@@ -78,6 +82,7 @@ export interface CreateFileUsageRuleRequest {
   queryBuilder: QueryBuilder | undefined;
   scopeId: string;
   maxFiles: number;
+  context?: RequestContext | undefined;
 }
 
 export interface UpdateFileUsageRuleRequest {
@@ -85,6 +90,7 @@ export interface UpdateFileUsageRuleRequest {
   id: string;
   scopeId?: string | undefined;
   maxFiles?: number | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface GetFileUsageRuleResponse {

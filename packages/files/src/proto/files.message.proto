@@ -8,6 +8,7 @@ message QueryFileRequest {
     optional string search = 2;
     optional string organization_id = 3;
     optional bool include_voided = 4;
+    optional RequestContext context = 5;
 }
 
 message QueryFileResponse {
@@ -50,6 +51,7 @@ message CreateFileRequest {
     optional string last_accessed_at = 14;
     optional string expires_at = 15;
     repeated CreateFileStorage storages = 16;
+    optional RequestContext context = 17;
 }
 
 message GetFileResponse {

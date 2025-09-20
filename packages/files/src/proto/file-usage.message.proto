@@ -10,6 +10,7 @@ message QueryFileUsageScopeRequest {
     optional string model_name = 3;
     optional string purpose = 4;
     optional bool include_voided = 5;
+    optional RequestContext context = 6;
 }
 
 message QueryFileUsageScopeResponse {
@@ -22,6 +23,8 @@ message CreateFileUsageScopeRequest {
     string model_name = 2;
     string purpose = 3;
     optional string description = 4;
+    optional RequestContext context = 5;
+
 }
 message UpdateFileUsageScopeRequest {
     QueryBuilder query_builder = 1;
@@ -29,6 +32,7 @@ message UpdateFileUsageScopeRequest {
     optional string model_name = 3;
     optional string purpose = 4;
     optional string description = 5;
+    optional RequestContext context = 6;
 }
 
 message GetFileUsageScopeResponse {
@@ -44,6 +48,7 @@ message QueryFileUsageRuleRequest {
     optional string model_name = 4;
     optional string purpose = 5;
     optional bool include_voided = 6;
+    optional RequestContext context = 7;
 }
 
 message QueryFileUsageRuleResponse {
@@ -55,12 +60,14 @@ message CreateFileUsageRuleRequest {
     QueryBuilder query_builder = 1;
     string scope_id = 2;
     int32 max_files = 3;
+    optional RequestContext context = 4;
 }
 message UpdateFileUsageRuleRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
     optional string scope_id = 3;
     optional int32 max_files = 4;
+    optional RequestContext context = 5;
 }
 
 message GetFileUsageRuleResponse {

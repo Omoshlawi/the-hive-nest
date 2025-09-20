@@ -5,7 +5,7 @@
 // source: files.message.proto
 
 /* eslint-disable */
-import { QueryBuilder } from "./common.message";
+import { QueryBuilder, RequestContext } from "./common.message";
 import { File } from "./files.model";
 
 export const protobufPackage = "";
@@ -15,6 +15,7 @@ export interface QueryFileRequest {
   search?: string | undefined;
   organizationId?: string | undefined;
   includeVoided?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface QueryFileResponse {
@@ -63,6 +64,7 @@ export interface CreateFileRequest {
   lastAccessedAt?: string | undefined;
   expiresAt?: string | undefined;
   storages: CreateFileStorage[];
+  context?: RequestContext | undefined;
 }
 
 export interface GetFileResponse {
