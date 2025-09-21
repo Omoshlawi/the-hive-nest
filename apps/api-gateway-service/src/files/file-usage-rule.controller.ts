@@ -18,13 +18,19 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { AuthGuard } from '@mguay/nestjs-better-auth';
+import {
+  AuthGuard,
+  Public,
+  Session,
+  UserSession,
+} from '@mguay/nestjs-better-auth';
 
 @UseGuards(AuthGuard)
 @Controller('files/usage-rules')
 export class FileUsageRuleController {
   constructor(private readonly fileService: HiveFileServiceClient) {}
   @Get('/')
+  @Public()
   @ApiOperation({ summary: 'Query File Usage Rule' })
   queryFileUsageRule(@Query() query: QueryFileUsageRuleDto) {
     return this.fileService.fileUsageRule.queryFileUsageRule({
@@ -56,12 +62,14 @@ export class FileUsageRuleController {
   createFileUsageRule(
     @Body() createFileUsageRuleDto: CreatFileUsageRuleDto,
     @Query() query: CustomRepresentationQueryDto,
+    @Session() { user }: UserSession,
   ) {
     return this.fileService.fileUsageRule.createFileUsageRule({
       queryBuilder: {
         v: query.v,
       },
-      ...createFileUsageRuleDto,
+      context: { userId: user.id }
+,      ...createFileUsageRuleDto,
     });
   }
   @Patch('/:id')
@@ -70,10 +78,12 @@ export class FileUsageRuleController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateFileUsageRuleDto: UpdateFileUsageRuleDto,
     @Query() query: CustomRepresentationQueryDto,
+    @Session() { user }: UserSession,
   ) {
     return this.fileService.fileUsageRule.updateFileUsageRule({
       id,
       queryBuilder: { v: query?.v },
+      context: { userId: user.id },
       ...updateFileUsageRuleDto,
     });
   }
@@ -82,11 +92,13 @@ export class FileUsageRuleController {
   deleteFileUsageRule(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,
+    @Session() { user }: UserSession,
   ) {
     return this.fileService.fileUsageRule.deleteFileUsageRule({
       id,
       queryBuilder: { v: query.v },
       purge: query.purge,
+      context: { userId: user.id },
     });
   }
 }

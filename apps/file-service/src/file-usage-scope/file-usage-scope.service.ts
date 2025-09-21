@@ -9,6 +9,7 @@ import {
 import {
   CreateFileUsageScopeRequest,
   DeleteRequest,
+  FileUsageAuthzService,
   GetRequest,
   QueryFileUsageScopeRequest,
   UpdateFileUsageScopeRequest,
@@ -23,6 +24,7 @@ export class FileUsageScopeService {
     private readonly sortService: SortService,
     private readonly paginationService: PaginationService,
     private readonly representationService: CustomRepresentationService,
+    private readonly authz: FileUsageAuthzService,
   ) {}
 
   async getAll(query: QueryFileUsageScopeRequest) {
@@ -78,9 +80,9 @@ export class FileUsageScopeService {
   }
 
   async create(query: CreateFileUsageScopeRequest) {
-    const { queryBuilder, ...props } = query;
+    const { queryBuilder, context, ...props } = query;
     const data = await this.prismaService.fileUsageScope.create({
-      data: props as any,
+      data: props,
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
@@ -93,10 +95,10 @@ export class FileUsageScopeService {
   }
 
   async update(query: UpdateFileUsageScopeRequest) {
-    const { queryBuilder, id, ...props } = query;
+    const { queryBuilder, id, context, ...props } = query;
     const data = await this.prismaService.fileUsageScope.update({
       where: { id },
-      data: props as any,
+      data: props,
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
@@ -108,7 +110,7 @@ export class FileUsageScopeService {
     };
   }
   async delete(query: DeleteRequest) {
-    const { id, purge, queryBuilder } = query;
+    const { id, purge, queryBuilder, context } = query;
     let data: FileUsageScope;
     if (purge) {
       data = await this.prismaService.fileUsageScope.delete({

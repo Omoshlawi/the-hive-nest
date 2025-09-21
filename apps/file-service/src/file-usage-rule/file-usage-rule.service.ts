@@ -78,9 +78,9 @@ export class FileUsageRuleService {
   }
 
   async create(query: CreateFileUsageRuleRequest) {
-    const { queryBuilder, ...props } = query;
+    const { queryBuilder, context, ...props } = query;
     const data = await this.prismaService.fileUsageRule.create({
-      data: props as any,
+      data: props,
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
@@ -93,10 +93,10 @@ export class FileUsageRuleService {
   }
 
   async update(query: UpdateFileUsageRuleRequest) {
-    const { queryBuilder, id, ...props } = query;
+    const { queryBuilder, id, context, ...props } = query;
     const data = await this.prismaService.fileUsageRule.update({
       where: { id },
-      data: props as any,
+      data: props,
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
@@ -108,7 +108,7 @@ export class FileUsageRuleService {
     };
   }
   async delete(query: DeleteRequest) {
-    const { id, purge, queryBuilder } = query;
+    const { id, purge, queryBuilder, context } = query;
     let data: FileUsageRule;
     if (purge) {
       data = await this.prismaService.fileUsageRule.delete({

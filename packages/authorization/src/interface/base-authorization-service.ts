@@ -4,12 +4,35 @@ import {
   ClientListObjectsRequest,
   OpenFgaClient,
 } from '@openfga/sdk';
-import { AuthorizationConfig } from 'config/authorization.config';
+import { AuthorizationConfig } from '../config/authorization.config';
 
 export abstract class BaseAuthorizationService {
-  protected abstract servicePrefix: string;
   protected fgaClient: OpenFgaClient;
   protected logger: Logger;
+
+  protected getUserObject(userId: string) {
+    return `user:${userId}`;
+  }
+
+  protected getSystemObject(system: string = 'global') {
+    return `system:global`;
+  }
+
+  /**
+   * Checks if the given user is a super user.
+   *
+   * A super user has global administrative privileges and can access or manage any resource.
+   *
+   * @param userId - The ID of the user to check.
+   * @returns A promise that resolves to a boolean indicating whether the user is a super user.
+   */
+  isSuperUser(userId: string) {
+    return this.check(
+      this.getUserObject(userId),
+      'super_user',
+      this.getSystemObject(),
+    );
+  }
 
   constructor(config: AuthorizationConfig) {
     this.fgaClient = new OpenFgaClient({
@@ -18,10 +41,6 @@ export abstract class BaseAuthorizationService {
       authorizationModelId: config.fgaModelId,
     });
     this.logger = new Logger(this.constructor.name);
-  }
-
-  protected getResourceType(resourceType: string): string {
-    return `${this.servicePrefix}:${resourceType}`;
   }
 
   /**

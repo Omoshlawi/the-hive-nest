@@ -16,7 +16,7 @@ import {
 } from '@hive/files';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from './prisma/prisma.module';
-import { QueryBuilderModule } from '@hive/common';
+import { GlobalRpcExceptionFilter, QueryBuilderModule } from '@hive/common';
 import { FileUsageScopeModule } from './file-usage-scope/file-usage-scope.module';
 import { FileUsageRuleModule } from './file-usage-rule/file-usage-rule.module';
 
@@ -81,6 +81,6 @@ import { FileUsageRuleModule } from './file-usage-rule/file-usage-rule.module';
     FileUsageRuleModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, GlobalRpcExceptionFilter],
 })
 export class AppModule {}

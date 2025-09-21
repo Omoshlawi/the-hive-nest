@@ -1,9 +1,47 @@
-import { BaseAuthorizationService } from '@hive/authorization';
+import {
+  AuthorizationConfig,
+  BaseAuthorizationService,
+} from '@hive/authorization';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class FileUsageScopeAuthzService extends BaseAuthorizationService {
-  protected servicePrefix: string = 'file_usage_scope';
+export class FileUsageAuthzService extends BaseAuthorizationService {
+  constructor(config: AuthorizationConfig) {
+    super(config);
+  }
 
-  
+  private getUsageScopeObject(scopeId: string) {
+    return `file_usage_scope:${scopeId}`;
+  }
+  private getUsageRuleObject(scopeId: string) {
+    return `file_usage_scope:${scopeId}`;
+  }
+
+  listFileUsageScopeId() {
+    return this.listObjects(
+      this.getUserObject('*'),
+      'can_view',
+      this.getUsageScopeObject('*'),
+    );
+  }
+  listFileUsageRuleId() {
+    return this.listObjects(
+      this.getUserObject('*'),
+      'can_view',
+      this.getUsageRuleObject('*'),
+    );
+  }
+
+  canCreateFileUsageScope(userId: string) {
+    this.logger.log(
+      "Checking 'file_usage_scope' create permisions for user " + userId,
+    );
+    return this.isSuperUser(userId);
+  }
+  canCreateFileUsageRule(userId: string) {
+    this.logger.log(
+      "Checking 'file_usage_rule' create permisions for user " + userId,
+    );
+    return this.isSuperUser(userId);
+  }
 }

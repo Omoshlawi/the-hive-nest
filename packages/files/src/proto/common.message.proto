@@ -30,4 +30,6 @@ message DeleteRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
+    optional RequestContext context = 4;
+
 }

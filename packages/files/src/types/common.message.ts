@@ -40,6 +40,7 @@ export interface DeleteRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
   purge?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export const _PACKAGE_NAME = "";
