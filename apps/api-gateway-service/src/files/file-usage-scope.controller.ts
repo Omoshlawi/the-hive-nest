@@ -6,6 +6,12 @@ import {
   UpdateFileUsageScopeDto,
 } from '@hive/files';
 import {
+  AuthGuard,
+  Public,
+  Session,
+  UserSession,
+} from '@mguay/nestjs-better-auth';
+import {
   Body,
   Controller,
   Delete,
@@ -18,12 +24,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import {
-  AuthGuard,
-  Public,
-  Session,
-  UserSession,
-} from '@mguay/nestjs-better-auth';
 
 @UseGuards(AuthGuard)
 @Controller('files/usage-scope')

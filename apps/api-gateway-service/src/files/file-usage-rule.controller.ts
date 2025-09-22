@@ -1,10 +1,16 @@
 import { CustomRepresentationQueryDto, DeleteQueryDto } from '@hive/common';
 import {
+  CreatFileUsageRuleDto,
   HiveFileServiceClient,
   QueryFileUsageRuleDto,
-  CreatFileUsageRuleDto,
   UpdateFileUsageRuleDto,
 } from '@hive/files';
+import {
+  AuthGuard,
+  Public,
+  Session,
+  UserSession,
+} from '@mguay/nestjs-better-auth';
 import {
   Body,
   Controller,
@@ -18,12 +24,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import {
-  AuthGuard,
-  Public,
-  Session,
-  UserSession,
-} from '@mguay/nestjs-better-auth';
 
 @UseGuards(AuthGuard)
 @Controller('files/usage-rules')
