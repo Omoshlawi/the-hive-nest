@@ -12,10 +12,11 @@ import {
   openAPI,
   jwt,
 } from 'better-auth/plugins';
+import { BetterAuthWithPlugins } from './src/types';
 
 const prisma = new PrismaClient();
 
-export const auth = betterAuth({
+export const auth: BetterAuthWithPlugins = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
@@ -31,4 +32,3 @@ export const auth = betterAuth({
     jwt(),
   ],
 });
-

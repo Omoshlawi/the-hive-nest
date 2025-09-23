@@ -1,4 +1,5 @@
 import {
+  BridgeModule,
   GlobalRpcExceptionInterceptor,
   GlobalZodExceptionFilter,
   GlobalZodValidationPipe,
@@ -40,16 +41,31 @@ import {
   username,
 } from 'better-auth/plugins';
 import { betterAuth } from 'better-auth';
-import { AuthModule } from '@mguay/nestjs-better-auth';
+import { AuthModule as AuthenticationModule } from '@mguay/nestjs-better-auth';
 import { PrismaModule } from './prisma/prisma.module';
+import { SignUpHook } from './hooks/sign-up-hook.service';
+import { AuthorizatioModule, AuthorizationConfig } from '@hive/authorization';
 
 @Module({
   imports: [
     ConfigifyModule.forRootAsync(),
     ScheduleModule.forRoot(),
-    AuthModule.forRootAsync({
-      imports: [PrismaModule],
-      useFactory(prisma: PrismaService) {
+    AuthenticationModule.forRootAsync({
+      imports: [
+        PrismaModule,
+        AuthorizatioModule.forRootAsync({
+          inject: [AuthorizationConfig],
+          useFactory(config: AuthorizationConfig) {
+            return {
+              storeId: config.fgaStoreId,
+              apiUrl: config.fgaApiUrl,
+              authorizationModelId: config.fgaModelId,
+            };
+          },
+        }),
+        BridgeModule.providers(SignUpHook),
+      ],
+      useFactory(prisma: PrismaService, signUpHook: SignUpHook) {
         return {
           auth: betterAuth({
             database: prismaAdapter(prisma, {
@@ -60,17 +76,18 @@ import { PrismaModule } from './prisma/prisma.module';
               anonymous(),
               admin(),
               apiKey(),
-              organization({}),
+              organization(),
               bearer(),
               multiSession(),
               openAPI(),
               jwt(),
             ],
             emailAndPassword: { enabled: true },
+            databaseHooks:{}
           }),
         };
       },
-      inject: [PrismaService],
+      inject: [PrismaService, SignUpHook],
     }),
     // Make Identity service Discoverable
     // Made global for benefit of forFeature In modules only consuming specific services (shares gobal services HiveDiscovery service)
@@ -125,5 +142,6 @@ import { PrismaModule } from './prisma/prisma.module';
     GlobalZodExceptionFilter,
     GlobalRpcExceptionInterceptor,
   ],
+  exports: [],
 })
 export class AppModule {}

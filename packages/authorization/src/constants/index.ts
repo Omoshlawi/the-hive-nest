@@ -1,0 +1,1 @@
+export const OPEN_FGA_CONFIG_TOKEN = 'OPEN_FGA_CONFIG';

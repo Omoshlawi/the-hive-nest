@@ -2,14 +2,16 @@ import { Logger } from '@nestjs/common';
 import {
   ClientCheckRequest,
   ClientListObjectsRequest,
-  OpenFgaClient,
   TupleKey,
 } from '@openfga/sdk';
-import { AuthorizationConfig } from '../config/authorization.config';
+import { OpenFGAService } from '../client';
 
 export abstract class BaseAuthorizationService {
-  protected fgaClient: OpenFgaClient;
   protected logger: Logger;
+
+  constructor(private openFgaService: OpenFGAService) {
+    this.logger = new Logger(this.constructor.name);
+  }
 
   protected getUserObject(userId: string) {
     return `user:${userId}`;
@@ -60,15 +62,6 @@ export abstract class BaseAuthorizationService {
     );
   }
 
-  constructor(config: AuthorizationConfig) {
-    this.fgaClient = new OpenFgaClient({
-      apiUrl: config.fgaApiUrl,
-      storeId: config.fgaStoreId,
-      authorizationModelId: config.fgaModelId,
-    });
-    this.logger = new Logger(this.constructor.name);
-  }
-
   /**
    * Checks whether a user has a specific relation to an object.
    *
@@ -86,7 +79,7 @@ export abstract class BaseAuthorizationService {
     options?: Pick<ClientCheckRequest, 'context' | 'contextualTuples'>,
   ): Promise<boolean> {
     try {
-      const response = await this.fgaClient.check({
+      const response = await this.openFgaService.check({
         ...options,
         user,
         relation,
@@ -138,7 +131,7 @@ export abstract class BaseAuthorizationService {
     options?: Pick<ClientListObjectsRequest, 'context' | 'contextualTuples'>,
   ): Promise<string[]> {
     try {
-      const response = await this.fgaClient.listObjects({
+      const response = await this.openFgaService.listObjects({
         ...options,
         user,
         relation,
@@ -163,7 +156,7 @@ export abstract class BaseAuthorizationService {
     object: string,
   ): Promise<boolean> {
     try {
-      await this.fgaClient.write({
+      await this.openFgaService.write({
         writes: [
           {
             user,
@@ -191,7 +184,7 @@ export abstract class BaseAuthorizationService {
     object: string,
   ): Promise<boolean> {
     try {
-      await this.fgaClient.write({
+      await this.openFgaService.write({
         deletes: [
           {
             user,

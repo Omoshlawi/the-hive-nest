@@ -80,7 +80,6 @@ export class FilesController {
         v: query.v,
       },
       includeVoided: query.includeVoided,
-      organizationId: query.organizationId,
       search: query.search,
       context: {
         userId: user.id,
