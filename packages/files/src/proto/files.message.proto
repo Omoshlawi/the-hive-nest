@@ -6,7 +6,6 @@ import "files.model.proto";
 message QueryFileRequest {
     QueryBuilder query_builder = 1;
     optional string search = 2;
-    optional string organization_id = 3;
     optional bool include_voided = 4;
     optional RequestContext context = 5;
 }
@@ -42,16 +41,13 @@ message CreateFileRequest {
     string related_model_name = 8;
     string purpose = 9;
 
-    string uploaded_by_id = 10;
-    optional string organization_id = 11;
+    optional string metadata = 10; // JSON as string
+    repeated string tags = 11;
 
-    optional string metadata = 12; // JSON as string
-    repeated string tags = 13;
-
-    optional string last_accessed_at = 14;
-    optional string expires_at = 15;
-    repeated CreateFileStorage storages = 16;
-    optional RequestContext context = 17;
+    optional string last_accessed_at = 12;
+    optional string expires_at = 13;
+    repeated CreateFileStorage storages = 14;
+    optional RequestContext context = 15;
 }
 
 message GetFileResponse {

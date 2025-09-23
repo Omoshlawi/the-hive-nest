@@ -13,7 +13,6 @@ export const protobufPackage = "";
 export interface QueryFileRequest {
   queryBuilder: QueryBuilder | undefined;
   search?: string | undefined;
-  organizationId?: string | undefined;
   includeVoided?: boolean | undefined;
   context?: RequestContext | undefined;
 }
@@ -54,10 +53,6 @@ export interface CreateFileRequest {
   relatedModelId: string;
   relatedModelName: string;
   purpose: string;
-  uploadedById: string;
-  organizationId?:
-    | string
-    | undefined;
   /** JSON as string */
   metadata?: string | undefined;
   tags: string[];

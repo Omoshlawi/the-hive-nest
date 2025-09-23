@@ -34,7 +34,10 @@ export class AppService {
         AND: [
           {
             voided: query?.includeVoided ? undefined : false,
-            organizationId: query?.organizationId,
+            organizationId: query.context?.organizationId,
+            uploadedById: query.context?.organizationId
+              ? undefined
+              : query.context?.userId,
           },
           {
             OR: query.search
@@ -98,11 +101,13 @@ export class AppService {
   }
 
   async create(query: CreateFileRequest) {
-    const { queryBuilder, ...props } = query;
+    const { queryBuilder, context, ...props } = query;
     const data = await this.prismaService.file.create({
       data: {
         ...props,
         size: parseInt(props.size),
+        organizationId: context?.organizationId,
+        uploadedById: context!.userId!,
         storages: {
           createMany: {
             skipDuplicates: true,
@@ -125,7 +130,7 @@ export class AppService {
   }
 
   async delete(query: DeleteRequest) {
-    const { id, purge, queryBuilder } = query;
+    const { id, purge, queryBuilder, context } = query;
     let data: File;
     if (purge) {
       data = await this.prismaService.file.delete({

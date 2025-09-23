@@ -11,6 +11,6 @@ export class AuthorizationConfig {
   fgaApiUrl: string;
   @Value('FGA_STORE_ID', { default: '01K5NVFDBGNJS29BARVS8840BT' })
   fgaStoreId: string;
-  @Value('FGA_MODEL_ID', { default: '01K5NVFSNCB8RQ8Q0EEPRGNXTM' })
+  @Value('FGA_MODEL_ID', { default: '01K5SC22YJEFGRT4BGDEBHB78W' })
   fgaModelId: string;
 }

@@ -11,6 +11,7 @@ import { ServerConfig } from '@hive/utils';
 import {
   FILE_HTTP_SERVER_CONFIG_TOKEN,
   FILE_RPC_SERVER_CONFIG_TOKEN,
+  FileAuthZService,
   FileHTTPServerConfigProvider,
   FileRPCServerConfigProvider,
 } from '@hive/files';
@@ -81,6 +82,6 @@ import { FileUsageRuleModule } from './file-usage-rule/file-usage-rule.module';
     FileUsageRuleModule,
   ],
   controllers: [AppController],
-  providers: [AppService, GlobalRpcExceptionFilter],
+  providers: [AppService, GlobalRpcExceptionFilter, FileAuthZService],
 })
 export class AppModule {}

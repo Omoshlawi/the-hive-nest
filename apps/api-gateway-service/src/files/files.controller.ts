@@ -7,6 +7,7 @@ import {
   UploadMutipleFilesDto,
   UploadSingleFileDto,
 } from '@hive/files';
+import { AuthGuard, Session } from '@mguay/nestjs-better-auth';
 import {
   Body,
   Controller,
@@ -36,7 +37,7 @@ import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { createHash } from 'crypto';
 import { lastValueFrom } from 'rxjs';
 import { S3Service } from '../s3/s3.service';
-import { AuthGuard, Session, UserSession } from '@mguay/nestjs-better-auth';
+import { UserSession } from '../types';
 
 // TODO: implement deduplication of files by generating file hash and cross checking on dab if exist then retuern reference
 // Also implement methods to validate before uploading to bucket
@@ -67,7 +68,10 @@ export class FilesController {
 
   @Get('/')
   @ApiOperation({ summary: 'Query File' })
-  queryFile(@Query() query: QueryFileDto) {
+  queryFile(
+    @Query() query: QueryFileDto,
+    @Session() { user, session }: UserSession,
+  ) {
     return this.fileService.file.queryFile({
       queryBuilder: {
         limit: query.limit,
@@ -78,18 +82,27 @@ export class FilesController {
       includeVoided: query.includeVoided,
       organizationId: query.organizationId,
       search: query.search,
+      context: {
+        userId: user.id,
+        organizationId: session?.activeOrganizationId ?? undefined,
+      },
     });
   }
 
   @Get('/:id')
   @ApiOperation({ summary: 'Get File' })
-  getFileUsageRule(
+  getFile(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
+    @Session() { user, session }: UserSession,
   ) {
     return this.fileService.file.getFile({
       id,
       queryBuilder: query,
+      context: {
+        userId: user.id,
+        organizationId: session?.activeOrganizationId ?? undefined,
+      },
     });
   }
 
@@ -101,7 +114,6 @@ export class FilesController {
   })
   @Post('upload/single')
   async uploadSingleFile(
-    @Session() { user }: UserSession,
     @UploadedFile(
       'file',
       new ParseFilePipeBuilder()
@@ -111,6 +123,7 @@ export class FilesController {
     file: Express.Multer.File,
     @Query() query: CustomRepresentationQueryDto,
     @Body() uploadFileDto: UploadSingleFileDto,
+    @Session() { user, session }: UserSession,
   ) {
     this.logger.log(
       `S3 single file upload: ${file.originalname} (${this.formatFileSize(file.size)})`,
@@ -143,11 +156,13 @@ export class FilesController {
             },
           ],
           tags: uploadFileDto.tags?.split(',')?.map((t) => t.trim()),
-          uploadedById: user.id,
           metadata: JSON.stringify(s3FileMetadata.customMetadata ?? {}),
-          organizationId: undefined,
           expiresAt: undefined, // TODO Future impl
           lastAccessedAt: undefined, // TODO Future impl
+          context: {
+            userId: user.id,
+            organizationId: session?.activeOrganizationId ?? undefined,
+          },
         }),
       );
       return files;
@@ -181,7 +196,7 @@ export class FilesController {
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
     )
     files: Array<Express.Multer.File>,
-    @Session() { user }: UserSession,
+    @Session() { user, session }: UserSession,
     @Query() query: CustomRepresentationQueryDto,
     @Body() uploadFileDto: UploadMutipleFilesDto,
   ) {
@@ -214,11 +229,13 @@ export class FilesController {
               },
             ],
             tags: uploadFileDto.tags?.split(',')?.map((t) => t.trim()),
-            uploadedById: user.id,
             metadata: JSON.stringify(file.customMetadata ?? {}),
-            organizationId: undefined,
             expiresAt: undefined, // TODO Future impl
-            lastAccessedAt: undefined, // TODO Future impl
+            lastAccessedAt: undefined, // TODO Future impl,
+            context: {
+              userId: user.id,
+              organizationId: session?.activeOrganizationId ?? undefined,
+            },
           }),
         ),
       );
@@ -262,7 +279,7 @@ export class FilesController {
         }),
     )
     files: Array<Express.Multer.File>,
-    @Session() { user }: UserSession,
+    @Session() { user, session }: UserSession,
     @Query() query: CustomRepresentationQueryDto,
     @Body() uploadFileDto: UploadFilesDto,
   ) {
@@ -295,11 +312,13 @@ export class FilesController {
               },
             ],
             tags: uploadFileDto.tags?.split(',')?.map((t) => t.trim()),
-            uploadedById: user.id,
             metadata: JSON.stringify(file.customMetadata ?? {}),
-            organizationId: undefined,
             expiresAt: undefined, // TODO Future impl
             lastAccessedAt: undefined, // TODO Future impl
+            context: {
+              userId: user.id,
+              organizationId: session?.activeOrganizationId ?? undefined,
+            },
           }),
         ),
       );
@@ -323,14 +342,19 @@ export class FilesController {
 
   @Delete('/:id')
   @ApiOperation({ summary: 'Delete File' })
-  deleteFileUsageRule(
+  delete(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,
+    @Session() { user, session }: UserSession,
   ) {
     return this.fileService.file.deleteFile({
       id,
       queryBuilder: { v: query.v },
       purge: query.purge,
+      context: {
+        userId: user.id,
+        organizationId: session?.activeOrganizationId ?? undefined,
+      },
     });
   }
 }

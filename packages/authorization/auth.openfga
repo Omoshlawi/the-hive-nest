@@ -18,12 +18,31 @@ type organization
     define member: [user]
     define owner: [user]
     define user_in_context: [user]
-    
+
     # Super users automatically have all org permissions
     define super_admin: [system#super_user]
     define effective_admin: admin or super_admin
     define effective_member: member or super_admin
     define effective_owner: owner or super_admin
+
+    # Class/type level access
+    # 1.Files
+    define files_creator:[user] or effective_admin  or effective_owner
+    define files_viewer:[user] or effective_member
+    define can_create_files: files_creator  and user_in_context
+    define can_view_files: files_viewer and user_in_context
+
+    # 2.Properties
+    define properties_creator:[user] or effective_admin  or effective_owner
+    define properties_viewer:[user] or effective_member
+    define can_create_properties: properties_creator  and user_in_context
+    define can_view_properties: properties_viewer and user_in_context
+    # 3.Listing
+    define listings_creator:[user] or effective_admin  or effective_owner
+    define listings_viewer:[user] or effective_member
+    define can_create_listings: listings_creator  and user_in_context
+    define can_view_listings: listings_viewer and user_in_context    
+    
 
 type file_usage_rule
   relations
@@ -43,8 +62,11 @@ type file
     
     # Super users get all permissions automatically
     define super_access: [system#super_user]
+    # All org members or managers/owners or superusers can manage
     define can_manage: owner or manager or user_in_context from organization or super_access
-    define can_view: [user:*] or can_manage
+    # All org members can view (not [user:*] unless public)
+    define can_view: can_manage or member from organization
+    # Only owners/admins/superusers can delete
     define can_delete: owner or effective_admin from organization or super_access
 
 type property  
@@ -55,7 +77,7 @@ type property
     
     define super_access: [system#super_user]
     define can_manage: owner or manager or user_in_context from organization or super_access
-    define can_view: [user:*] or can_manage  
+    define can_view: can_manage or member from organization
     define can_delete: owner or effective_admin from organization or super_access
 
 type listing
@@ -66,5 +88,5 @@ type listing
     
     define super_access: [system#super_user]
     define can_manage: owner or manager or user_in_context from organization or super_access
-    define can_view: [user:*] or can_manage
+    define can_view: can_manage or member from organization
     define can_delete: owner or effective_admin from organization or super_access

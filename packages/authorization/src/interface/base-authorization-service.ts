@@ -3,6 +3,7 @@ import {
   ClientCheckRequest,
   ClientListObjectsRequest,
   OpenFgaClient,
+  TupleKey,
 } from '@openfga/sdk';
 import { AuthorizationConfig } from '../config/authorization.config';
 
@@ -16,6 +17,31 @@ export abstract class BaseAuthorizationService {
 
   protected getSystemObject(system: string = 'global') {
     return `system:global`;
+  }
+
+  protected getOrganizationObject(organizationId: string) {
+    return `organization:${organizationId}`;
+  }
+
+  getCurrentActiveOrganizationContextTuple(
+    userId: string,
+    organizationId: string,
+  ): Array<TupleKey> {
+    return [
+      {
+        user: this.getUserObject(userId),
+        relation: 'user_in_context',
+        object: this.getOrganizationObject(organizationId),
+      },
+    ];
+  }
+
+  isOrganizationAdmin(userId: string, organizationId: string) {
+    return this.check(
+      this.getUserObject(userId),
+      'admin',
+      this.getOrganizationObject(organizationId),
+    );
   }
 
   /**
