@@ -1,50 +1,67 @@
+import { AuthorizatioModule, AuthorizationConfig } from '@hive/authorization';
 import {
   BridgeModule,
   GlobalRpcExceptionInterceptor,
   GlobalZodExceptionFilter,
   GlobalZodValidationPipe,
 } from '@hive/common';
-import { ConfigifyModule } from '@itgorillaz/configify';
-import { Module } from '@nestjs/common';
-import { AmenitiesModule } from './amenities/amenities.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AttributeTypesModule } from './attribute-types/attribute-types.module';
-import { CategoriesModule } from './categories/categories.module';
-import { IdentityModule } from './identity/identity.module';
-import { RegistryModule } from './registry/registry.module';
-import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
-import { FilesModule } from './files/files.module';
-import { ScheduleModule } from '@nestjs/schedule';
+import {
+  HIVE_IDENTITY_SERVICE_NAME,
+  IDENTITY_RPC_SERVER_CONFIG_TOKEN,
+  IdentityRPCServerConfigProvider,
+} from '@hive/identity';
 import {
   Endpoint,
   HiveServiceModule,
   RegistryClientConfig,
 } from '@hive/registry';
 import { ServerConfig } from '@hive/utils';
+import { ConfigifyModule } from '@itgorillaz/configify';
 import {
-  HIVE_IDENTITY_SERVICE_NAME,
-  IDENTITY_RPC_SERVER_CONFIG_TOKEN,
-  IdentityRPCServerConfigProvider,
-} from '@hive/identity';
-import { PrismaService } from './prisma/prisma.service';
+  AFTER_HOOK_KEY,
+  AuthModule as AuthenticationModule,
+  BEFORE_HOOK_KEY,
+  HOOK_KEY,
+} from '@mguay/nestjs-better-auth';
+import { Module } from '@nestjs/common';
+import {
+  DiscoveryModule,
+  DiscoveryService,
+  MetadataScanner,
+  Reflector,
+} from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
+import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import {
   admin,
   anonymous,
   apiKey,
   bearer,
+  createAuthMiddleware,
   jwt,
   multiSession,
   openAPI,
   organization,
   username,
 } from 'better-auth/plugins';
-import { betterAuth } from 'better-auth';
-import { AuthModule as AuthenticationModule } from '@mguay/nestjs-better-auth';
-import { PrismaModule } from './prisma/prisma.module';
+import { AmenitiesModule } from './amenities/amenities.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AttributeTypesModule } from './attribute-types/attribute-types.module';
+import { CategoriesModule } from './categories/categories.module';
+import { FilesModule } from './files/files.module';
 import { SignUpHook } from './hooks/sign-up-hook.service';
-import { AuthorizatioModule, AuthorizationConfig } from '@hive/authorization';
+import { IdentityModule } from './identity/identity.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { PrismaService } from './prisma/prisma.service';
+import { RegistryModule } from './registry/registry.module';
+import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
+
+const HOOKS = [
+  { metadataKey: BEFORE_HOOK_KEY, hookType: 'before' as const },
+  { metadataKey: AFTER_HOOK_KEY, hookType: 'after' as const },
+];
 
 @Module({
   imports: [
@@ -63,9 +80,47 @@ import { AuthorizatioModule, AuthorizationConfig } from '@hive/authorization';
             };
           },
         }),
-        BridgeModule.providers(SignUpHook),
+        BridgeModule.for({
+          providers: [SignUpHook],
+          imports: [DiscoveryModule],
+        }),
       ],
-      useFactory(prisma: PrismaService, signUpHook: SignUpHook) {
+      useFactory(
+        prisma: PrismaService,
+        discover: DiscoveryService,
+        reflector: Reflector,
+        metadataScanner: MetadataScanner,
+      ) {
+        const providers = discover
+          .getProviders()
+          .filter(
+            ({ metatype }) => metatype && reflector.get(HOOK_KEY, metatype),
+          );
+        const hooks = {};
+
+        for (const provider of providers) {
+          const providerPrototype = Object.getPrototypeOf(provider.instance);
+          const methods = metadataScanner.getAllMethodNames(providerPrototype);
+          for (const method of methods) {
+            const providerMethod = providerPrototype[method];
+            for (const { metadataKey, hookType } of HOOKS) {
+              const hookPath = reflector.get(metadataKey, providerMethod);
+              if (!hookPath) continue;
+
+              const originalHook = hooks[hookType];
+              hooks[hookType] = createAuthMiddleware(async (ctx) => {
+                if (originalHook) {
+                  await originalHook(ctx);
+                }
+
+                if (hookPath === ctx.path) {
+                  await providerMethod.apply(provider.instance, [ctx]);
+                }
+              });
+            }
+          }
+        }
+
         return {
           auth: betterAuth({
             database: prismaAdapter(prisma, {
@@ -83,11 +138,11 @@ import { AuthorizatioModule, AuthorizationConfig } from '@hive/authorization';
               jwt(),
             ],
             emailAndPassword: { enabled: true },
-            databaseHooks:{}
+            hooks,
           }),
         };
       },
-      inject: [PrismaService, SignUpHook],
+      inject: [PrismaService, DiscoveryService, Reflector, MetadataScanner],
     }),
     // Make Identity service Discoverable
     // Made global for benefit of forFeature In modules only consuming specific services (shares gobal services HiveDiscovery service)
