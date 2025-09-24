@@ -1,13 +1,5 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigifyModule } from '@itgorillaz/configify';
-import {
-  Endpoint,
-  HiveServiceModule,
-  RegistryClientConfig,
-} from '@hive/registry';
-import { ServerConfig } from '@hive/utils';
+import { AuthorizatioModule, AuthorizationConfig } from '@hive/authorization';
+import { GlobalRpcExceptionFilter, QueryBuilderModule } from '@hive/common';
 import {
   FILE_HTTP_SERVER_CONFIG_TOKEN,
   FILE_RPC_SERVER_CONFIG_TOKEN,
@@ -15,14 +7,34 @@ import {
   FileHTTPServerConfigProvider,
   FileRPCServerConfigProvider,
 } from '@hive/files';
+import {
+  Endpoint,
+  HiveServiceModule,
+  RegistryClientConfig,
+} from '@hive/registry';
+import { ServerConfig } from '@hive/utils';
+import { ConfigifyModule } from '@itgorillaz/configify';
+import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { PrismaModule } from './prisma/prisma.module';
-import { GlobalRpcExceptionFilter, QueryBuilderModule } from '@hive/common';
-import { FileUsageScopeModule } from './file-usage-scope/file-usage-scope.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { FileUsageRuleModule } from './file-usage-rule/file-usage-rule.module';
+import { FileUsageScopeModule } from './file-usage-scope/file-usage-scope.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
+    AuthorizatioModule.forRootAsync({
+      global: true,
+      inject: [AuthorizationConfig],
+      useFactory(config: AuthorizationConfig) {
+        return {
+          storeId: config.fgaStoreId,
+          apiUrl: config.fgaApiUrl,
+          authorizationModelId: config.fgaModelId,
+        };
+      },
+    }),
     QueryBuilderModule.register({ global: true }),
     ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
     ScheduleModule.forRoot(),

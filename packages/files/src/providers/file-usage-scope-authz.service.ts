@@ -1,13 +1,10 @@
-import {
-  AuthorizationConfig,
-  BaseAuthorizationService,
-} from '@hive/authorization';
+import { BaseAuthorizationService, OpenFGAService } from '@hive/authorization';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class FileUsageAuthzService extends BaseAuthorizationService {
-  constructor(config: AuthorizationConfig) {
-    super(config);
+  constructor(authz: OpenFGAService) {
+    super(authz);
   }
 
   private getUsageScopeObject(scopeId: string) {
