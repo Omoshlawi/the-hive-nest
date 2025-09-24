@@ -8,4 +8,6 @@ export class OpenFGAService extends OpenFgaClient {
   constructor(@Inject(OPEN_FGA_CONFIG_TOKEN) config: OpenFGAConfig) {
     super(config);
   }
+
+  
 }

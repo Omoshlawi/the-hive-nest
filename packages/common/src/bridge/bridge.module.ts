@@ -34,7 +34,7 @@ export class BridgeModule {
       global: options.global || false,
       imports: options.imports || [],
       providers,
-      exports: providers,
+      exports: [...providers, ...((options.imports as any) ?? [])],
     };
   }
 
