@@ -236,7 +236,7 @@ export class OrganizationHook {
 
       await this.authzService.write({
         deletes:
-          member.role === 'admin'
+          member.role === 'owner'
             ? this.organizationOwnerTupples(
                 member.userId,
                 member.organizationId,
@@ -272,7 +272,7 @@ export class OrganizationHook {
 
       await this.authzService.write({
         deletes:
-          data.role === 'admin'
+          data.role === 'owner'
             ? this.organizationOwnerTupples(data.userId, data.organizationId)
             : this.organizationMemberTupples(
                 data.userId,
