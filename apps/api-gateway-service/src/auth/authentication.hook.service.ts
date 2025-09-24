@@ -13,15 +13,15 @@ export class AuthenticationHook {
   private logger = new Logger(AuthenticationHook.name);
   constructor(private readonly authzService: OpenFGAService) {}
   @AfterHook('/delete-user')
-  async handleAfter(ctx: AuthHookContext) {
+  async handleUserCreated(ctx: AuthHookContext) {
     const status = (ctx.context.returned as any).statusCode;
     if (status === HttpStatus.OK) {
       this.logger.log('User deleted succesfully, cleaning auth touples');
+      //  await this.authzService.write({deletes: [{user: `user:${ctx.}`}]})
     } else {
       this.logger.warn(
         'Delete failed with status ' + status + '.Skipping cleaning tupples',
       );
     }
-    //  await this.authzService.write({deletes: [{user: `user:${ctx.}`}]})
   }
 }

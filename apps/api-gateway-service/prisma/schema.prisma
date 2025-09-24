@@ -138,6 +138,8 @@ model Member {
   role           String
   createdAt      DateTime
 
+  memberRelations String[]
+
   @@map("member")
 }
 
@@ -151,6 +153,8 @@ model Invitation {
   expiresAt      DateTime
   inviterId      String
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  memberRelations String[]
 
   @@map("invitation")
 }

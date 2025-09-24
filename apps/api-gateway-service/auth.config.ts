@@ -25,7 +25,30 @@ export const auth: BetterAuthWithPlugins = betterAuth({
     anonymous(),
     admin(),
     apiKey(),
-    organization({}),
+    organization({
+      schema: {
+        member: {
+          additionalFields: {
+            memberRelations: {
+              type: 'string[]',
+              defaultValue: [],
+              input: true,
+              required: false,
+            },
+          },
+        },
+        invitation: {
+          additionalFields: {
+            memberRelations: {
+              type: 'string[]',
+              defaultValue: [],
+              input: true,
+              required: false,
+            },
+          },
+        },
+      },
+    }),
     bearer(),
     multiSession(),
     openAPI(),

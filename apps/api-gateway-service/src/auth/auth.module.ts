@@ -35,7 +35,6 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthenticationHook } from './authentication.hook.service';
 import { OrganizationHook } from './organization.hook.service';
-import { functions } from 'lodash';
 
 const HOOKS = [
   { metadataKey: BEFORE_HOOK_KEY, hookType: 'before' as const },
@@ -48,6 +47,7 @@ export class AuthModule {
         PrismaModule,
         BridgeModule.for({
           imports: [
+            PrismaModule, //Required by the hooks
             DiscoveryModule,
             AuthorizatioModule.forRootAsync({
               inject: [AuthorizationConfig],
@@ -110,7 +110,30 @@ export class AuthModule {
               anonymous(),
               admin(),
               apiKey(),
-              organization(),
+              organization({
+                schema: {
+                  member: {
+                    additionalFields: {
+                      memberRelations: {
+                        type: 'string[]',
+                        defaultValue: [],
+                        input: true,
+                        required: false,
+                      },
+                    },
+                  },
+                  invitation: {
+                    additionalFields: {
+                      memberRelations: {
+                        type: 'string[]',
+                        defaultValue: [],
+                        input: true,
+                        required: false,
+                      },
+                    },
+                  },
+                },
+              }),
               bearer(),
               multiSession(),
               openAPI(),
