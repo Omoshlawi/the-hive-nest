@@ -222,36 +222,67 @@ export class OrganizationHook {
   @AfterHook('/organization/remove-member')
   async handleMemberRemoved(ctx: AuthHookContext) {
     try {
-      const body: any = ctx.context.body;
-
-      const organizationId = body?.organizationId;
-      const memberId = body?.userId || body?.memberId;
-      const role = body?.role || 'member';
-
-      if (!organizationId || !memberId) {
-        this.logger.error(
-          'Missing organizationId or memberId for member removal',
-        );
+      const response: any = ctx.context.returned;
+      if (this.isErrorResponse(response)) {
+        this.logger.error('Error leaving organization membership.');
         return;
       }
 
+      const { member }: { member: Member } = response;
+
       this.logger.log(
-        `Removing member ${memberId} from organization ${organizationId}`,
+        `Removing member ${member.userId} from organization ${member.organizationId}`,
       );
 
-      // TODO: You'll need to implement a delete method in your OpenFGAService
-      // await this.authzService.delete({
-      //   deletes: [
-      //     {
-      //       user: `user:${memberId}`,
-      //       relation: role.toLowerCase(),
-      //       object: `organization:${organizationId}`,
-      //     },
-      //   ],
-      // });
+      await this.authzService.write({
+        deletes:
+          member.role === 'admin'
+            ? this.organizationOwnerTupples(
+                member.userId,
+                member.organizationId,
+              )
+            : this.organizationMemberTupples(
+                member.userId,
+                member.organizationId,
+                member.memberRelations,
+              ),
+      });
 
       this.logger.log(
-        `Authorization cleanup required for removed member ${memberId}`,
+        `Cleaned up authz relation tuples for user: ${member.userId}`,
+      );
+    } catch (error) {
+      this.logger.error('Error in handleMemberRemoved hook:', error);
+    }
+  }
+  @AfterHook('/organization/leave')
+  async handleLeftGroup(ctx: AuthHookContext) {
+    try {
+      const response: any = ctx.context.returned;
+      if (this.isErrorResponse(response)) {
+        this.logger.error('Error leaving organization membership.');
+        return;
+      }
+
+      const data: Member = response;
+
+      this.logger.log(
+        `Member ${data.userId} leaving organization ${data.organizationId}`,
+      );
+
+      await this.authzService.write({
+        deletes:
+          data.role === 'admin'
+            ? this.organizationOwnerTupples(data.userId, data.organizationId)
+            : this.organizationMemberTupples(
+                data.userId,
+                data.organizationId,
+                data.memberRelations,
+              ),
+      });
+
+      this.logger.log(
+        `Cleaned up authz relation tuples for user: ${data.userId}`,
       );
     } catch (error) {
       this.logger.error('Error in handleMemberRemoved hook:', error);
