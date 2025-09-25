@@ -111,27 +111,8 @@ export class AuthModule {
               admin(),
               apiKey(),
               organization({
-                schema: {
-                  member: {
-                    additionalFields: {
-                      memberRelations: {
-                        type: 'string[]',
-                        defaultValue: [],
-                        input: true,
-                        required: false,
-                      },
-                    },
-                  },
-                  invitation: {
-                    additionalFields: {
-                      memberRelations: {
-                        type: 'string[]',
-                        defaultValue: [],
-                        input: true,
-                        required: false,
-                      },
-                    },
-                  },
+                teams:{
+                  enabled:true
                 },
               }),
               bearer(),
