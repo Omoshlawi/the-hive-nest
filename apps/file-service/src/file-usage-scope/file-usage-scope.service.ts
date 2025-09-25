@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   SortService,
@@ -16,6 +20,7 @@ import {
 } from '@hive/files';
 import { pick } from 'lodash';
 import { FileUsageScope } from '../../generated/prisma';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class FileUsageScopeService {
@@ -26,6 +31,22 @@ export class FileUsageScopeService {
     private readonly representationService: CustomRepresentationService,
     private readonly authz: FileUsageAuthzService,
   ) {}
+
+  private async requirePermisions(userId?: string) {
+    if (!userId) {
+      throw new RpcException(
+        new BadRequestException('User ID is required in the request context.'),
+      );
+    }
+    const canCreate = await this.authz.canCreateFileUsageScope(userId);
+    if (!canCreate) {
+      throw new RpcException(
+        new ForbiddenException(
+          'You do not have permission to create a file usage scope.',
+        ),
+      );
+    }
+  }
 
   async getAll(query: QueryFileUsageScopeRequest) {
     const dbQuery: FunctionFirstArgument<
@@ -81,6 +102,8 @@ export class FileUsageScopeService {
 
   async create(query: CreateFileUsageScopeRequest) {
     const { queryBuilder, context, ...props } = query;
+    await this.requirePermisions(context?.userId);
+
     const data = await this.prismaService.fileUsageScope.create({
       data: props,
       ...this.representationService.buildCustomRepresentationQuery(
@@ -96,6 +119,8 @@ export class FileUsageScopeService {
 
   async update(query: UpdateFileUsageScopeRequest) {
     const { queryBuilder, id, context, ...props } = query;
+    await this.requirePermisions(context?.userId);
+
     const data = await this.prismaService.fileUsageScope.update({
       where: { id },
       data: props,
@@ -111,6 +136,8 @@ export class FileUsageScopeService {
   }
   async delete(query: DeleteRequest) {
     const { id, purge, queryBuilder, context } = query;
+    await this.requirePermisions(context?.userId);
+
     let data: FileUsageScope;
     if (purge) {
       data = await this.prismaService.fileUsageScope.delete({

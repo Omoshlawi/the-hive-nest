@@ -2,51 +2,27 @@ import {
   CreateFileUsageScopeRequest,
   DeleteRequest,
   FILES_SERVICE_NAME,
-  FileUsageAuthzService,
   GetFileUsageScopeResponse,
   GetRequest,
   QueryFileUsageScopeRequest,
   QueryFileUsageScopeResponse,
   UpdateFileUsageScopeRequest,
 } from '@hive/files';
-import {
-  BadRequestException,
-  Controller,
-  ForbiddenException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Controller, NotFoundException } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { FileUsageScopeService } from './file-usage-scope.service';
 
 @Controller('file-usage-scope')
 export class FileUsageScopeController {
-  constructor(
-    private fileUsageScopeService: FileUsageScopeService,
-    private authz: FileUsageAuthzService,
-  ) {}
+  constructor(private fileUsageScopeService: FileUsageScopeService) {}
 
-  private async requirePermisions(userId?: string) {
-    if (!userId) {
-      throw new RpcException(
-        new BadRequestException('User ID is required in the request context.'),
-      );
-    }
-    const canCreate = await this.authz.canCreateFileUsageScope(userId);
-    if (!canCreate) {
-      throw new RpcException(
-        new ForbiddenException(
-          'You do not have permission to create a file usage scope.',
-        ),
-      );
-    }
-  }
   @GrpcMethod(FILES_SERVICE_NAME)
-  async queryFileUsageScope(
+  queryFileUsageScope(
     request: QueryFileUsageScopeRequest,
   ): Promise<QueryFileUsageScopeResponse> {
     return this.fileUsageScopeService.getAll(
       request,
-    ) as unknown as QueryFileUsageScopeResponse;
+    ) as unknown as Promise<QueryFileUsageScopeResponse>;
   }
   @GrpcMethod(FILES_SERVICE_NAME)
   async getFileUsageScope(
@@ -59,30 +35,27 @@ export class FileUsageScopeController {
   }
 
   @GrpcMethod(FILES_SERVICE_NAME)
-  async createFileUsageScope(
+  createFileUsageScope(
     request: CreateFileUsageScopeRequest,
   ): Promise<GetFileUsageScopeResponse> {
-    await this.requirePermisions(request.context?.userId);
-    const scope = (await this.fileUsageScopeService.create(
+    return this.fileUsageScopeService.create(
       request,
-    )) as unknown as GetFileUsageScopeResponse;
-    return scope;
+    ) as unknown as Promise<GetFileUsageScopeResponse>;
   }
   @GrpcMethod(FILES_SERVICE_NAME)
-  async updateFileUsageScope(
+  updateFileUsageScope(
     request: UpdateFileUsageScopeRequest,
   ): Promise<GetFileUsageScopeResponse> {
-    await this.requirePermisions(request.context?.userId);
-    const res = await this.fileUsageScopeService.update(request);
-    return res as unknown as GetFileUsageScopeResponse;
+    return this.fileUsageScopeService.update(
+      request,
+    ) as unknown as Promise<GetFileUsageScopeResponse>;
   }
   @GrpcMethod(FILES_SERVICE_NAME)
-  async deleteFileUsageScope(
+  deleteFileUsageScope(
     request: DeleteRequest,
   ): Promise<GetFileUsageScopeResponse> {
-    await this.requirePermisions(request.context?.userId);
-    return (await this.fileUsageScopeService.delete(
+    return this.fileUsageScopeService.delete(
       request,
-    )) as unknown as GetFileUsageScopeResponse;
+    ) as unknown as Promise<GetFileUsageScopeResponse>;
   }
 }

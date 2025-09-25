@@ -57,8 +57,10 @@ type file_usage_scope
 type file
   relations
     define organization: [organization]
+    define blocked: [user]  # Explicitly blocked users
     define owner: [user]
-    define manager: [user]
+    define manager: [user] but not blocked
+
     
     # Super users get all permissions automatically
     define super_access: [system#super_user]
@@ -67,13 +69,14 @@ type file
     # All org members can view (not [user:*] unless public)
     define can_view: can_manage or member from organization
     # Only owners/admins/superusers can delete
-    define can_delete: owner or effective_admin from organization or super_access
+    define can_delete: owner or effective_admin from organization or super_access 
 
 type property  
   relations
     define organization: [organization]
+    define blocked: [user]
     define owner: [user]
-    define manager: [user]
+    define manager: [user] but not blocked
     
     define super_access: [system#super_user]
     define can_manage: owner or manager or user_in_context from organization or super_access
@@ -83,8 +86,9 @@ type property
 type listing
   relations
     define organization: [organization]
+    define blocked: [user]
     define owner: [user] 
-    define manager: [user]
+    define manager: [user] but not blocked
     
     define super_access: [system#super_user]
     define can_manage: owner or manager or user_in_context from organization or super_access

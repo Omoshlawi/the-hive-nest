@@ -8,13 +8,20 @@ import {
   CreateFileRequest,
   CreateFileStorage_StorageProviders,
   DeleteRequest,
+  FileAuthZService,
   GetRequest,
   QueryFileRequest,
 } from '@hive/files';
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { Prisma, File, StorageProvider } from '../generated/prisma';
 import { PrismaService } from './prisma/prisma.service';
 import { pick } from 'lodash';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class AppService {
@@ -24,9 +31,28 @@ export class AppService {
     private readonly sortService: SortService,
     private readonly paginationService: PaginationService,
     private readonly representationService: CustomRepresentationService,
+    private readonly authz: FileAuthZService,
   ) {}
 
   async getAll(query: QueryFileRequest) {
+    if (!query.context?.userId) {
+      throw new RpcException(
+        new BadRequestException('User ID is required in context'),
+      );
+    }
+    if (query.context?.organizationId) {
+      const hasAccess = await this.authz.canViewOrganizationFiles(
+        query.context!.userId!,
+        query.context.organizationId,
+      );
+      if (!hasAccess)
+        throw new RpcException(
+          new ForbiddenException(
+            'You do not have permission to view a file in this organization.',
+          ),
+        );
+    }
+
     const dbQuery: FunctionFirstArgument<
       typeof this.prismaService.file.findMany
     > = {
@@ -102,6 +128,21 @@ export class AppService {
 
   async create(query: CreateFileRequest) {
     const { queryBuilder, context, ...props } = query;
+    if (!context?.userId) {
+      throw new RpcException(
+        new BadRequestException('User ID is required in context'),
+      );
+    }
+    if (
+      context?.organizationId &&
+      !(await this.authz.canCreateFile(context.userId, context.organizationId))
+    )
+      throw new RpcException(
+        new ForbiddenException(
+          'You do not have permission to create a file in this organization.',
+        ),
+      );
+    // TODO: eNHANCE VALIDATION to chech upload purpose scope scope and rules
     const data = await this.prismaService.file.create({
       data: {
         ...props,

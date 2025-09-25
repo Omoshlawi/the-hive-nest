@@ -4,7 +4,11 @@ import {
   CustomRepresentationService,
   FunctionFirstArgument,
 } from '@hive/common';
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   QueryFileUsageRuleRequest,
@@ -12,9 +16,11 @@ import {
   CreateFileUsageRuleRequest,
   UpdateFileUsageRuleRequest,
   DeleteRequest,
+  FileUsageAuthzService,
 } from '@hive/files';
 import { FileUsageRule } from '../../generated/prisma';
 import { pick } from 'lodash';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class FileUsageRuleService {
@@ -23,7 +29,24 @@ export class FileUsageRuleService {
     private readonly sortService: SortService,
     private readonly paginationService: PaginationService,
     private readonly representationService: CustomRepresentationService,
+    private readonly authz: FileUsageAuthzService,
   ) {}
+
+  private async requirePermisions(userId?: string) {
+    if (!userId) {
+      throw new RpcException(
+        new BadRequestException('User ID is required in the request context.'),
+      );
+    }
+    const canCreate = await this.authz.canCreateFileUsageRule(userId);
+    if (!canCreate) {
+      throw new RpcException(
+        new ForbiddenException(
+          'You do not have permission to create a file usage scope.',
+        ),
+      );
+    }
+  }
 
   async getAll(query: QueryFileUsageRuleRequest) {
     const dbQuery: FunctionFirstArgument<
@@ -79,6 +102,8 @@ export class FileUsageRuleService {
 
   async create(query: CreateFileUsageRuleRequest) {
     const { queryBuilder, context, ...props } = query;
+    await this.requirePermisions(context?.userId);
+
     const data = await this.prismaService.fileUsageRule.create({
       data: props,
       ...this.representationService.buildCustomRepresentationQuery(
@@ -94,6 +119,8 @@ export class FileUsageRuleService {
 
   async update(query: UpdateFileUsageRuleRequest) {
     const { queryBuilder, id, context, ...props } = query;
+    await this.requirePermisions(context?.userId);
+
     const data = await this.prismaService.fileUsageRule.update({
       where: { id },
       data: props,
@@ -109,6 +136,8 @@ export class FileUsageRuleService {
   }
   async delete(query: DeleteRequest) {
     const { id, purge, queryBuilder, context } = query;
+    await this.requirePermisions(context?.userId);
+
     let data: FileUsageRule;
     if (purge) {
       data = await this.prismaService.fileUsageRule.delete({
