@@ -1,10 +1,4 @@
 import {
-  AuthorizatioModule,
-  AuthorizationConfig,
-  OpenFGAService,
-} from '@hive/authorization';
-import { BridgeModule } from '@hive/common';
-import {
   AFTER_HOOK_KEY,
   AuthModule as AuthenticationModule,
   BEFORE_HOOK_KEY,
@@ -16,7 +10,7 @@ import {
   MetadataScanner,
   Reflector,
 } from '@nestjs/core';
-import { betterAuth, GenericEndpointContext } from 'better-auth';
+import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import {
   admin,
@@ -30,11 +24,8 @@ import {
   organization,
   username,
 } from 'better-auth/plugins';
-import { User } from '../../generated/prisma';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
-import { AuthenticationHook } from './authentication.hook.service';
-import { OrganizationHook } from './organization.hook.service';
 
 const HOOKS = [
   { metadataKey: BEFORE_HOOK_KEY, hookType: 'before' as const },
@@ -43,32 +34,12 @@ const HOOKS = [
 export class AuthModule {
   static forRoot() {
     return AuthenticationModule.forRootAsync({
-      imports: [
-        PrismaModule,
-        BridgeModule.for({
-          imports: [
-            PrismaModule, //Required by the hooks
-            DiscoveryModule,
-            AuthorizatioModule.forRootAsync({
-              inject: [AuthorizationConfig],
-              useFactory(config: AuthorizationConfig) {
-                return {
-                  storeId: config.fgaStoreId,
-                  apiUrl: config.fgaApiUrl,
-                  authorizationModelId: config.fgaModelId,
-                };
-              },
-            }),
-          ],
-          providers: [AuthenticationHook, OrganizationHook],
-        }),
-      ],
+      imports: [PrismaModule, DiscoveryModule],
       useFactory(
         prisma: PrismaService,
         discover: DiscoveryService,
         reflector: Reflector,
         metadataScanner: MetadataScanner,
-        authz: OpenFGAService,
       ) {
         const providers = discover
           .getProviders()
@@ -111,8 +82,8 @@ export class AuthModule {
               admin(),
               apiKey(),
               organization({
-                teams:{
-                  enabled:true
+                teams: {
+                  enabled: true,
                 },
               }),
               bearer(),
@@ -122,45 +93,10 @@ export class AuthModule {
             ],
             emailAndPassword: { enabled: true },
             hooks,
-            databaseHooks: {
-              user: {
-                create: {
-                  after: (user: User, context) =>
-                    userAfterHook(user, context, authz),
-                },
-                update: {
-                  after: (user: User, context) =>
-                    userAfterHook(user, context, authz),
-                },
-              },
-            },
           }),
         };
       },
-      inject: [
-        PrismaService,
-        DiscoveryService,
-        Reflector,
-        MetadataScanner,
-        OpenFGAService,
-      ],
+      inject: [PrismaService, DiscoveryService, Reflector, MetadataScanner],
     });
   }
-}
-
-async function userAfterHook(
-  user: User,
-  context: GenericEndpointContext | undefined,
-  authz: OpenFGAService,
-) {
-  if (user.role === 'admin')
-    await authz.write({
-      writes: [
-        {
-          user: `user:${user.id}`,
-          relation: 'super_user',
-          object: `system:global`,
-        },
-      ],
-    });
 }
