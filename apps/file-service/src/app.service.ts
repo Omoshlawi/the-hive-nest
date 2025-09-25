@@ -35,6 +35,7 @@ export class AppService {
   ) {}
 
   async getAll(query: QueryFileRequest) {
+    let viewableFiles: string[] | undefined;
     if (!query.context?.userId) {
       throw new RpcException(
         new BadRequestException('User ID is required in context'),
@@ -51,6 +52,10 @@ export class AppService {
             'You do not have permission to view a file in this organization.',
           ),
         );
+      viewableFiles = await this.authz.listOrganizationUserViewableFileObjects(
+        query.context.userId,
+        query.context.organizationId,
+      );
     }
 
     const dbQuery: FunctionFirstArgument<
@@ -59,6 +64,7 @@ export class AppService {
       where: {
         AND: [
           {
+            id: viewableFiles && { in: viewableFiles },
             voided: query?.includeVoided ? undefined : false,
             organizationId: query.context?.organizationId,
             uploadedById: query.context?.organizationId

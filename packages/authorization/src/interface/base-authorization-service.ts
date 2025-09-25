@@ -9,7 +9,7 @@ import { OpenFGAService } from '../client';
 export abstract class BaseAuthorizationService {
   protected logger: Logger;
 
-  constructor(private openFgaService: OpenFGAService) {
+  constructor(protected openFgaService: OpenFGAService) {
     this.logger = new Logger(this.constructor.name);
   }
 
@@ -120,7 +120,7 @@ export abstract class BaseAuthorizationService {
    *
    * @param user The user identifier (e.g., "user:123").
    * @param relation The relation to check (e.g., "viewer", "editor").
-   * @param type The resource type (e.g., "organization:property").
+   * @param type The resource type (e.g., "property").
    * @param options Optional context or contextual tuples for the check.
    * @returns A promise that resolves to an array of object IDs the user has the relation to.
    */

@@ -3,12 +3,16 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class FileAuthZService extends BaseAuthorizationService {
-  constructor(authz: OpenFGAService) {
-    super(authz);
+  constructor(authZ: OpenFGAService) {
+    super(authZ);
   }
 
-  private getFileObject(scopeId: string) {
-    return `file:${scopeId}`;
+  private getFileObject(fileId: string) {
+    return `file:${fileId}`;
+  }
+
+  createOrganizationFileTupple(userId:string, organizationId:string){
+    
   }
 
   canCreateFile(userId: string, organizationId: string) {
@@ -40,5 +44,41 @@ export class FileAuthZService extends BaseAuthorizationService {
         ),
       },
     );
+  }
+
+  async listOrganizationUserViewableFileObjects(
+    userId: string,
+    organizationId: string,
+  ) {
+    this.logger.log(
+      `Retreiving authorized files for user ${userId} on organzization ${organizationId}`,
+    );
+
+    const objects = await this.listObjects(
+      this.getUserObject(userId),
+      'can_view',
+      'file',
+      {
+        contextualTuples: this.getCurrentActiveOrganizationContextTuple(
+          userId,
+          organizationId,
+        ),
+      },
+    );
+    this.logger.debug(`Retreived authorized files objects : ${objects}`);
+    return objects;
+  }
+
+  async listUserFiles(userId: string) {
+    this.logger.log(
+      `Retrieving authorized files for user ${userId} (no organization context)`,
+    );
+    const objects = await this.listObjects(
+      this.getUserObject(userId),
+      'can_view',
+      'file',
+    );
+    this.logger.debug(`Retrieved authorized file objects: ${objects}`);
+    return objects;
   }
 }

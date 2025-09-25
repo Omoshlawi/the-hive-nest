@@ -57,19 +57,21 @@ type file_usage_scope
 type file
   relations
     define organization: [organization]
-    define blocked: [user]  # Explicitly blocked users
+    define blocked: [user]
     define owner: [user]
-    define manager: [user] but not blocked
-
+    define manager: [user]
     
-    # Super users get all permissions automatically
     define super_access: [system#super_user]
-    # All org members or managers/owners or superusers can manage
-    define can_manage: owner or manager or user_in_context from organization or super_access
-    # All org members can view (not [user:*] unless public)
-    define can_view: can_manage or member from organization
-    # Only owners/admins/superusers can delete
-    define can_delete: owner or effective_admin from organization or super_access 
+    
+    # base permissions without blocking
+    define base_can_manage: (owner or manager) and user_in_context from organization
+    define base_can_view: (base_can_manage or member from organization) and user_in_context from organization
+    define base_can_delete: (owner or effective_admin from organization) and user_in_context from organization
+    
+    # Final permissions: super access OR (base permissions but not blocked)
+    define can_manage: super_access or (base_can_manage but not blocked)
+    define can_view: super_access or (base_can_view but not blocked)
+    define can_delete: super_access or (base_can_delete but not blocked)
 
 type property  
   relations
@@ -79,9 +81,16 @@ type property
     define manager: [user] but not blocked
     
     define super_access: [system#super_user]
-    define can_manage: owner or manager or user_in_context from organization or super_access
-    define can_view: can_manage or member from organization
-    define can_delete: owner or effective_admin from organization or super_access
+    
+    # base permissions without blocking
+    define base_can_manage: (owner or manager) and user_in_context from organization
+    define base_can_view: (base_can_manage or member from organization) and user_in_context from organization
+    define base_can_delete: (owner or effective_admin from organization) and user_in_context from organization
+    
+    # Final permissions: super access OR (base permissions but not blocked)
+    define can_manage: super_access or (base_can_manage but not blocked)
+    define can_view: super_access or (base_can_view but not blocked)
+    define can_delete: super_access or (base_can_delete but not blocked)
 
 type listing
   relations
@@ -91,6 +100,13 @@ type listing
     define manager: [user] but not blocked
     
     define super_access: [system#super_user]
-    define can_manage: owner or manager or user_in_context from organization or super_access
-    define can_view: can_manage or member from organization
-    define can_delete: owner or effective_admin from organization or super_access
+    
+    # base permissions without blocking
+    define base_can_manage: (owner or manager) and user_in_context from organization
+    define base_can_view: (base_can_manage or member from organization) and user_in_context from organization
+    define base_can_delete: (owner or effective_admin from organization) and user_in_context from organization
+    
+    # Final permissions: super access OR (base permissions but not blocked)
+    define can_manage: super_access or (base_can_manage but not blocked)
+    define can_view: super_access or (base_can_view but not blocked)
+    define can_delete: super_access or (base_can_delete but not blocked)
