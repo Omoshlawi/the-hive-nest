@@ -26,9 +26,12 @@ export const auth: BetterAuthWithPlugins = betterAuth({
     admin(),
     apiKey(),
     organization({
-      teams:{
-        enabled:true,
-      }
+      teams: {
+        enabled: true,
+      },
+      dynamicAccessControl: {
+        enabled: true,
+      },
     }),
     bearer(),
     multiSession(),

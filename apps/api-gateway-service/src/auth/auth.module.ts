@@ -26,6 +26,12 @@ import {
 } from 'better-auth/plugins';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  adminAcl,
+  adminRoles,
+  organizationAcl,
+  organizationRoles,
+} from './auth.acl';
 
 const HOOKS = [
   { metadataKey: BEFORE_HOOK_KEY, hookType: 'before' as const },
@@ -79,10 +85,15 @@ export class AuthModule {
             plugins: [
               username(),
               anonymous(),
-              admin(),
+              admin({ ac: adminAcl, roles: adminRoles }),
               apiKey(),
               organization({
+                ac: organizationAcl,
+                roles: organizationRoles,
                 teams: {
+                  enabled: true,
+                },
+                dynamicAccessControl: {
                   enabled: true,
                 },
               }),
