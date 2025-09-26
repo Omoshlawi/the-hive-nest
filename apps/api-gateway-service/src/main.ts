@@ -4,13 +4,14 @@ import { AppConfig } from './config/app.config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NextFunction, Request, Response } from 'express';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
-import { auth } from '../auth.config';
 import { mergeBetterAuthSchema, ServerConfig } from '@hive/utils';
 import {
   IDENTITY_PACKAGE,
   IDENTITY_RPC_SERVER_CONFIG_TOKEN,
 } from '@hive/identity';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { AuthService } from '@mguay/nestjs-better-auth';
+import { BetterAuthWithPlugins } from './auth/auth.types';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -18,9 +19,10 @@ async function bootstrap() {
   });
   app.setGlobalPrefix('api');
   const appConfig = app.get(AppConfig);
+  const authService: AuthService<BetterAuthWithPlugins> = app.get(AuthService);
 
   // Set up swagger docs
-  const betterAuthOpenAPISchema = await auth.api.generateOpenAPISchema({
+  const betterAuthOpenAPISchema = await authService.api.generateOpenAPISchema({
     path: '/api/auth',
   });
 

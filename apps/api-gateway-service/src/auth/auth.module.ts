@@ -19,6 +19,7 @@ import {
   bearer,
   createAuthMiddleware,
   jwt,
+  magicLink,
   multiSession,
   openAPI,
   organization,
@@ -32,6 +33,7 @@ import {
   organizationAcl,
   organizationRoles,
 } from './auth.acl';
+import { adminConfig, organizationConfig } from './auth.contants';
 
 const HOOKS = [
   { metadataKey: BEFORE_HOOK_KEY, hookType: 'before' as const },
@@ -85,18 +87,9 @@ export class AuthModule {
             plugins: [
               username(),
               anonymous(),
-              admin({ ac: adminAcl, roles: adminRoles }),
+              admin(adminConfig),
               apiKey(),
-              organization({
-                ac: organizationAcl,
-                roles: organizationRoles,
-                teams: {
-                  enabled: true,
-                },
-                dynamicAccessControl: {
-                  enabled: true,
-                },
-              }),
+              organization(organizationConfig),
               bearer(),
               multiSession(),
               openAPI(),

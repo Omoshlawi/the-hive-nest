@@ -37,7 +37,7 @@ import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { createHash } from 'crypto';
 import { lastValueFrom } from 'rxjs';
 import { S3Service } from '../s3/s3.service';
-import { UserSession } from '../types';
+import { UserSession } from '../auth/auth.types';
 
 // TODO: implement deduplication of files by generating file hash and cross checking on dab if exist then retuern reference
 // Also implement methods to validate before uploading to bucket

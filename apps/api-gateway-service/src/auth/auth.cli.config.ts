@@ -1,18 +1,19 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { PrismaClient } from './generated/prisma';
 import {
-  username,
-  anonymous,
   admin,
+  anonymous,
   apiKey,
-  organization,
   bearer,
+  jwt,
   multiSession,
   openAPI,
-  jwt,
+  organization,
+  username,
 } from 'better-auth/plugins';
-import { BetterAuthWithPlugins } from './src/types';
+import { PrismaClient } from '../../generated/prisma';
+import { adminConfig, organizationConfig } from './auth.contants';
+import { BetterAuthWithPlugins } from './auth.types';
 
 const prisma = new PrismaClient();
 
@@ -23,16 +24,9 @@ export const auth: BetterAuthWithPlugins = betterAuth({
   plugins: [
     username(),
     anonymous(),
-    admin(),
+    admin(adminConfig),
     apiKey(),
-    organization({
-      teams: {
-        enabled: true,
-      },
-      dynamicAccessControl: {
-        enabled: true,
-      },
-    }),
+    organization(organizationConfig),
     bearer(),
     multiSession(),
     openAPI(),

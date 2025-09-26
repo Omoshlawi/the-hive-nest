@@ -9,7 +9,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "auth:gen": "pnpx @better-auth/cli@latest generate --config ./auth.config.ts",
+    "auth:gen": "pnpx @better-auth/cli generate --config ./src/auth/auth.cli.config.ts",
     "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",

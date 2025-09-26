@@ -1,27 +1,26 @@
+import { UserSession as BetterAuthUserSession } from '@mguay/nestjs-better-auth';
 import { betterAuth } from 'better-auth';
 import {
   admin,
   anonymous,
   apiKey,
   bearer,
+  jwt,
   multiSession,
   openAPI,
   organization,
   username,
-  jwt,
-  AdminOptions,
-  OrganizationOptions,
 } from 'better-auth/plugins';
-import { UserSession as BetterAuthUserSession } from '@mguay/nestjs-better-auth';
+import { adminConfig, organizationConfig } from './auth.contants';
 
 export type BetterAuthWithPlugins = ReturnType<
   typeof betterAuth<{
     plugins: [
       ReturnType<typeof username>,
       ReturnType<typeof anonymous>,
-      ReturnType<typeof admin<AdminOptions>>,
+      ReturnType<typeof admin<typeof adminConfig>>,
       ReturnType<typeof apiKey>,
-      ReturnType<typeof organization<OrganizationOptions>>,
+      ReturnType<typeof organization<typeof organizationConfig>>,
       ReturnType<typeof bearer>,
       ReturnType<typeof multiSession>,
       ReturnType<typeof openAPI>,
