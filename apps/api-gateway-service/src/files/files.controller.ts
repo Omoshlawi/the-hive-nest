@@ -242,7 +242,7 @@ export class FilesController {
       const success = res
         .filter((r) => r.status === 'fulfilled')
         .map((r) => r.value.data);
-      return success;
+      return { files: success };
     } catch (error) {
       this.logger.error(`S3 upload failed : ${error.message}`, error.stack);
       if (error instanceof HttpException) {
@@ -267,11 +267,11 @@ export class FilesController {
     @UploadedFiles(
       new ParseFilePipeBuilder()
         .addValidator(new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 })) // 10MB per file
-        .addValidator(
-          new FileTypeValidator({
-            fileType: /\.(jpg|jpeg|png|gif|pdf|doc|docx|txt)$/,
-          }),
-        )
+        // .addValidator(
+        //   new FileTypeValidator({
+        //     fileType: /\.(jpg|jpeg|png|gif|pdf|doc|docx|txt)$/,
+        //   }),
+        // )
         .build({
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
           fileIsRequired: false, // Allow empty uploads for this endpoint
@@ -325,7 +325,13 @@ export class FilesController {
       const success = res
         .filter((r) => r.status === 'fulfilled')
         .map((r) => r.value.data);
-      return success;
+
+      const failed = res
+        .filter((r) => r.status === 'rejected')
+        .map((r) => r.reason);
+      console.log('Failed uploads', failed);
+
+      return { files: success };
     } catch (error) {
       this.logger.error(`S3 upload failed : ${error.message}`, error.stack);
       if (error instanceof HttpException) {

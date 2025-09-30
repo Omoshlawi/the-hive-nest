@@ -95,7 +95,24 @@ export class AuthModule {
               openAPI(),
               jwt(),
             ],
-            emailAndPassword: { enabled: true },
+            emailAndPassword: {
+              enabled: true,
+              async sendResetPassword({ url, token, user }, _) {
+                // http://localhost:8090/api/auth/reset-password/4IlzTEQRdCSm4B1fy4YqrVUF?callbackURL=%2Freset-password
+                console.log('Token ---------', token);
+                console.log('Url ---------', `/reset-password?token=${token}`);
+              },
+              requireEmailVerification: true,
+            },
+            emailVerification: {
+              async sendVerificationEmail({ token, url }, request) {
+                console.log('Token ---------', token);
+                console.log('URL ---------', url);
+                console.log('Url ---------', `/verify-email?token=${token}`);
+              },
+              autoSignInAfterVerification: true,
+              sendOnSignUp: true,
+            },
             hooks,
           }),
         };
