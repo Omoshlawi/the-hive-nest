@@ -1,4 +1,4 @@
-import { UserSession as BetterAuthUserSession } from '@mguay/nestjs-better-auth';
+import { UserSession as BetterAuthUserSession } from '@thallesp/nestjs-better-auth';
 import { betterAuth } from 'better-auth';
 import {
   admin,

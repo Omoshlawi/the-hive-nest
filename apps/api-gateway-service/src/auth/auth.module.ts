@@ -1,15 +1,5 @@
-import {
-  AFTER_HOOK_KEY,
-  AuthModule as AuthenticationModule,
-  BEFORE_HOOK_KEY,
-  HOOK_KEY,
-} from '@mguay/nestjs-better-auth';
-import {
-  DiscoveryModule,
-  DiscoveryService,
-  MetadataScanner,
-  Reflector,
-} from '@nestjs/core';
+import { Reflector } from '@nestjs/core';
+import { AuthModule as AuthenticationModule } from '@thallesp/nestjs-better-auth';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import {
@@ -17,9 +7,7 @@ import {
   anonymous,
   apiKey,
   bearer,
-  createAuthMiddleware,
   jwt,
-  magicLink,
   multiSession,
   openAPI,
   organization,
@@ -27,58 +15,27 @@ import {
 } from 'better-auth/plugins';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  adminAcl,
-  adminRoles,
-  organizationAcl,
-  organizationRoles,
-} from './auth.acl';
 import { adminConfig, organizationConfig } from './auth.contants';
+import { DynamicModule } from '@nestjs/common';
+import { AuthExtendedController } from './auth.controller';
 
-const HOOKS = [
-  { metadataKey: BEFORE_HOOK_KEY, hookType: 'before' as const },
-  { metadataKey: AFTER_HOOK_KEY, hookType: 'after' as const },
-];
 export class AuthModule {
-  static forRoot() {
+  static forRoot(): DynamicModule {
+    const authModule = this.getAuthModule();
+    return {
+      module: AuthModule,
+      global: true,
+
+      imports: [authModule, PrismaModule],
+      exports: [authModule],
+      controllers: [AuthExtendedController],
+    };
+  }
+
+  private static getAuthModule() {
     return AuthenticationModule.forRootAsync({
-      imports: [PrismaModule, DiscoveryModule],
-      useFactory(
-        prisma: PrismaService,
-        discover: DiscoveryService,
-        reflector: Reflector,
-        metadataScanner: MetadataScanner,
-      ) {
-        const providers = discover
-          .getProviders()
-          .filter(
-            ({ metatype }) => metatype && reflector.get(HOOK_KEY, metatype),
-          );
-        const hooks = {};
-
-        for (const provider of providers) {
-          const providerPrototype = Object.getPrototypeOf(provider.instance);
-          const methods = metadataScanner.getAllMethodNames(providerPrototype);
-          for (const method of methods) {
-            const providerMethod = providerPrototype[method];
-            for (const { metadataKey, hookType } of HOOKS) {
-              const hookPath = reflector.get(metadataKey, providerMethod);
-              if (!hookPath) continue;
-
-              const originalHook = hooks[hookType];
-              hooks[hookType] = createAuthMiddleware(async (ctx) => {
-                if (originalHook) {
-                  await originalHook(ctx);
-                }
-
-                if (hookPath === ctx.path) {
-                  await providerMethod.apply(provider.instance, [ctx]);
-                }
-              });
-            }
-          }
-        }
-
+      imports: [PrismaModule],
+      useFactory(prisma: PrismaService) {
         return {
           auth: betterAuth({
             database: prismaAdapter(prisma, {
@@ -113,11 +70,10 @@ export class AuthModule {
               autoSignInAfterVerification: true,
               sendOnSignUp: true,
             },
-            hooks,
           }),
         };
       },
-      inject: [PrismaService, DiscoveryService, Reflector, MetadataScanner],
+      inject: [PrismaService, Reflector],
     });
   }
 }

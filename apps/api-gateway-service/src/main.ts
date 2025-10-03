@@ -10,7 +10,7 @@ import {
   IDENTITY_RPC_SERVER_CONFIG_TOKEN,
 } from '@hive/identity';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { AuthService } from '@mguay/nestjs-better-auth';
+import { AuthService } from '@thallesp/nestjs-better-auth';
 import { BetterAuthWithPlugins } from './auth/auth.types';
 
 async function bootstrap() {

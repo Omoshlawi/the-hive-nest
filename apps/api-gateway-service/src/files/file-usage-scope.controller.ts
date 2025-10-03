@@ -10,7 +10,7 @@ import {
   Public,
   Session,
   UserSession,
-} from '@mguay/nestjs-better-auth';
+} from '@thallesp/nestjs-better-auth';
 import {
   Body,
   Controller,

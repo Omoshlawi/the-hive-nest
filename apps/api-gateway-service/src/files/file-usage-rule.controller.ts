@@ -10,7 +10,7 @@ import {
   Public,
   Session,
   UserSession,
-} from '@mguay/nestjs-better-auth';
+} from '@thallesp/nestjs-better-auth';
 import {
   Body,
   Controller,
@@ -68,8 +68,8 @@ export class FileUsageRuleController {
       queryBuilder: {
         v: query.v,
       },
-      context: { userId: user.id }
-,      ...createFileUsageRuleDto,
+      context: { userId: user.id },
+      ...createFileUsageRuleDto,
     });
   }
   @Patch('/:id')

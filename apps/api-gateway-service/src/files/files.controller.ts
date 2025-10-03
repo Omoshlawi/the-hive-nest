@@ -7,7 +7,7 @@ import {
   UploadMutipleFilesDto,
   UploadSingleFileDto,
 } from '@hive/files';
-import { AuthGuard, Session } from '@mguay/nestjs-better-auth';
+import { AuthGuard, Session } from '@thallesp/nestjs-better-auth';
 import {
   Body,
   Controller,
