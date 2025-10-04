@@ -939,6 +939,9 @@ importers:
       '@hive/authorization':
         specifier: workspace:*
         version: link:../authorization
+      '@hive/common':
+        specifier: workspace:*
+        version: link:../common
       '@hive/registry':
         specifier: workspace:*
         version: link:../registry

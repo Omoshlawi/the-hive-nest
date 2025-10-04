@@ -18,10 +18,10 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-import { Prisma, File, StorageProvider } from '../generated/prisma';
-import { PrismaService } from './prisma/prisma.service';
-import { pick } from 'lodash';
 import { RpcException } from '@nestjs/microservices';
+import { pick } from 'lodash';
+import { File, StorageProvider } from '../generated/prisma';
+import { PrismaService } from './prisma/prisma.service';
 
 @Injectable()
 export class AppService {
@@ -43,7 +43,7 @@ export class AppService {
     }
     if (query.context?.organizationId) {
       const hasAccess = await this.authz.canViewOrganizationFiles(
-        query.context!.userId!,
+        query.context.userId,
         query.context.organizationId,
       );
       if (!hasAccess)
@@ -154,7 +154,7 @@ export class AppService {
         ...props,
         size: parseInt(props.size),
         organizationId: context?.organizationId,
-        uploadedById: context!.userId!,
+        uploadedById: context.userId,
         storages: {
           createMany: {
             skipDuplicates: true,
@@ -177,7 +177,7 @@ export class AppService {
   }
 
   async delete(query: DeleteRequest) {
-    const { id, purge, queryBuilder, context } = query;
+    const { id, purge, queryBuilder } = query;
     let data: File;
     if (purge) {
       data = await this.prismaService.file.delete({

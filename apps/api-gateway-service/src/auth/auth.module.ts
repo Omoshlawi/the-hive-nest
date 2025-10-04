@@ -18,6 +18,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { adminConfig, organizationConfig } from './auth.contants';
 import { DynamicModule } from '@nestjs/common';
 import { AuthExtendedController } from './auth.controller';
+import { QueryBuilderModule } from '@hive/common';
 
 export class AuthModule {
   static forRoot(): DynamicModule {
@@ -25,8 +26,7 @@ export class AuthModule {
     return {
       module: AuthModule,
       global: true,
-
-      imports: [authModule, PrismaModule],
+      imports: [authModule, PrismaModule, QueryBuilderModule.register()],
       exports: [authModule],
       controllers: [AuthExtendedController],
     };
@@ -54,7 +54,8 @@ export class AuthModule {
             ],
             emailAndPassword: {
               enabled: true,
-              async sendResetPassword({ url, token, user }, _) {
+              // eslint-disable-next-line @typescript-eslint/require-await
+              async sendResetPassword({ token }, _) {
                 // http://localhost:8090/api/auth/reset-password/4IlzTEQRdCSm4B1fy4YqrVUF?callbackURL=%2Freset-password
                 console.log('Token ---------', token);
                 console.log('Url ---------', `/reset-password?token=${token}`);
@@ -62,7 +63,8 @@ export class AuthModule {
               requireEmailVerification: true,
             },
             emailVerification: {
-              async sendVerificationEmail({ token, url }, request) {
+              // eslint-disable-next-line @typescript-eslint/require-await
+              async sendVerificationEmail({ token, url }, _) {
                 console.log('Token ---------', token);
                 console.log('URL ---------', url);
                 console.log('Url ---------', `/verify-email?token=${token}`);

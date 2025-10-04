@@ -54,6 +54,7 @@
     "nestjs-zod": "5.0.0-beta.20250806T023752",
     "@itgorillaz/configify": "^4.0.1",
     "@hive/utils": "workspace:*",
+    "@hive/common": "workspace:*",
     "rxjs": "^7.8.1",
     "zod": "^4.0.15"
   },
