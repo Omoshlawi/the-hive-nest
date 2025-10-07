@@ -10,7 +10,9 @@ service Files {
   // Files
   rpc QueryFile(QueryFileRequest) returns (QueryFileResponse){};
   rpc GetFile(GetRequest) returns (GetFileResponse){};
+  rpc GetBlobByHash(GetByHashRequest) returns (GetBlobResponse){};
   rpc CreateFile(CreateFileRequest) returns (GetFileResponse){};
+  rpc CreateFileFromExistingBlob(CreateFileFromExistingBlobRequest) returns (GetFileResponse){};
   rpc DeleteFile(DeleteRequest) returns (GetFileResponse){};
 
   // Scope

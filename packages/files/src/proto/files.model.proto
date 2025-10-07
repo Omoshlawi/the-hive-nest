@@ -3,51 +3,66 @@ syntax = 'proto3';
 
 message User { //Minimal cached user info
     string id = 1;
+    string email = 2;
+    string display_username = 3;
 }
 
 message Organization { // Minimal cached organization
     string id = 1;
+    string name = 2;
+    string logo = 3;
+    string slug = 4;
 }
 
-message File {
+
+
+message FileBlob {
     string id = 1;
-    string filename = 2;
-    string original_name = 3;
-    string mime_type = 4;
-    string size = 5;
-    string hash = 6;
-
-    string related_model_id = 7;
-    string related_model_name = 8;
-    string purpose = 9;
-
-    string uploaded_by_id = 10;
-    optional string organization_id = 11;
-    string category = 12;
-
-    optional string metadata = 13; // JSON as string
-    repeated string tags = 14;
-
-    optional User uploaded_by = 15; // JSON as string
-    optional Organization organization = 16; // JSON as string
-
-    string created_at = 17;
-    string updated_at = 18;
-    optional string last_accessed_at = 19;
-    optional string expires_at = 20;
-    bool voided = 21;
-    repeated FileStorage storages = 22;
+    string hash = 2;
+    string size = 3;
+    string filename = 4;
+    string mime_type = 5;
+    string remote_id = 6;
+    string storage_path = 7;
+    optional string storage_url = 8;
+    optional FileMetadata rereferences = 9;
+    optional string metadata = 10; // JSON as string
 }
 
-message FileStorage {
+message FileMetadata {
     string id = 1;
-    string file_id = 2;
-    string provider = 3;
-    string remote_id = 4;
-    string storage_path = 5;
-    optional string storage_url = 6;
-    string created_at = 7;
-    File file = 8;
+
+    // Reference to physical file
+    string blob_id = 2;
+    optional FileBlob blob = 3;
+
+    // User-specific information
+    string original_name = 4;
+
+    // Context and relationships
+    string related_model_id = 5;
+    string related_model_name = 6;
+    string purpose = 7;
+
+    // Ownership
+    string uploaded_by_id = 8;
+    optional string organization_id = 9;
+
+    // User-specific metadata
+    optional string metadata = 10; // JSON as string
+    repeated string tags = 11;
+    optional string description = 12;
+
+    // Cached user/org data
+    optional User uploaded_by = 13;
+    optional Organization organization = 14;
+
+    // Lifecycle
+    string created_at = 15;
+    string updated_at = 16;
+    optional string last_accessed_at = 17;
+    optional string expires_at = 18;
+    bool voided = 19;
 }
 
 message FileUsageScope {
@@ -55,14 +70,17 @@ message FileUsageScope {
     string model_name = 2;
     string purpose = 3;
     optional string description = 4;
-    string created_at = 5;
-    repeated FileUsageRule rules = 6;
+    bool voided = 5;
+    string created_at = 6;
+    repeated FileUsageRule rules = 7;
+
 }
 
 message FileUsageRule {
     string id = 1;
     string scope_id = 2;
-    FileUsageScope scope = 3;
+    optional FileUsageScope scope = 3;
     int32 max_files = 4;
-    string created_at = 5;
+    bool voided = 5;
+    string created_at = 6;
 }

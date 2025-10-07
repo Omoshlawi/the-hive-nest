@@ -1,4 +1,5 @@
-import { Reflector } from '@nestjs/core';
+import { QueryBuilderModule } from '@hive/common';
+import { DynamicModule } from '@nestjs/common';
 import { AuthModule as AuthenticationModule } from '@thallesp/nestjs-better-auth';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
@@ -16,9 +17,8 @@ import {
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { adminConfig, organizationConfig } from './auth.contants';
-import { DynamicModule } from '@nestjs/common';
 import { AuthExtendedController } from './auth.controller';
-import { QueryBuilderModule } from '@hive/common';
+import { SignUpHook } from './auth.hooks';
 
 export class AuthModule {
   static forRoot(): DynamicModule {
@@ -29,6 +29,7 @@ export class AuthModule {
       imports: [authModule, PrismaModule, QueryBuilderModule.register()],
       exports: [authModule],
       controllers: [AuthExtendedController],
+      providers: [SignUpHook],
     };
   }
 
@@ -75,7 +76,7 @@ export class AuthModule {
           }),
         };
       },
-      inject: [PrismaService, Reflector],
+      inject: [PrismaService],
     });
   }
 }

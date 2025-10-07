@@ -3,15 +3,6 @@ import { createZodDto } from 'nestjs-zod';
 import { ApiProperty } from '@nestjs/swagger';
 import { COMMA_SEPARATED_REGEX } from '@hive/utils';
 export const UploadFileSchema = z.object({
-  uploadTo: z
-    .string()
-    .nonempty()
-    .describe('Destination folder within the S3 bucket'),
-  isPublic: z
-    .stringbool({ truthy: ['true', '1'], falsy: ['false', '0'] })
-    .optional()
-    .describe('Whether to make the file publicly accessible')
-    .default(false),
   relatedModelName: z
     .string()
     .nonempty()

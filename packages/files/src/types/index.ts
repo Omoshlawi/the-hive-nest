@@ -1,9 +1,9 @@
-export * from './files.service';
 export {
   DeleteRequest,
   Empty,
   GetRequest,
   QueryBuilder,
+  RequestContext,
 } from './common.message';
 export {
   CreateFileUsageRuleRequest,
@@ -21,22 +21,23 @@ export {
   UpdateFileUsageRuleRequest,
   UpdateFileUsageScopeRequest,
 } from './file-usage.message';
+export * from './files.service';
 
 export {
   CreateFileRequest,
-  CreateFileStorage,
-  CreateFileStorage_StorageProviders,
+  GetByHashRequest,
   GetFileResponse,
-  GetFileResponse_MetadataEntry,
   QueryFileRequest,
   QueryFileResponse,
-  QueryFileResponse_MetadataEntry,
+  CreateFileFromExistingBlobRequest,
+  GetBlobResponse,
+  CreateNestedBlobRequest,
 } from './files.message';
 export {
-  File,
-  FileStorage,
   FileUsageRule,
   FileUsageScope,
   Organization,
   User,
+  FileBlob,
+  FileMetadata,
 } from './files.model';

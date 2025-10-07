@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   CustomRepresentationService,
   FunctionFirstArgument,
@@ -5,23 +8,19 @@ import {
   SortService,
 } from '@hive/common';
 import {
+  CreateFileFromExistingBlobRequest,
   CreateFileRequest,
-  CreateFileStorage_StorageProviders,
   DeleteRequest,
   FileAuthZService,
+  GetByHashRequest,
   GetRequest,
   QueryFileRequest,
 } from '@hive/files';
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { pick } from 'lodash';
-import { File, StorageProvider } from '../generated/prisma';
 import { PrismaService } from './prisma/prisma.service';
+import { FileMetadata } from '../generated/prisma';
 
 @Injectable()
 export class AppService {
@@ -35,36 +34,34 @@ export class AppService {
   ) {}
 
   async getAll(query: QueryFileRequest) {
-    let viewableFiles: string[] | undefined;
     if (!query.context?.userId) {
       throw new RpcException(
         new BadRequestException('User ID is required in context'),
       );
     }
-    if (query.context?.organizationId) {
-      const hasAccess = await this.authz.canViewOrganizationFiles(
-        query.context.userId,
-        query.context.organizationId,
-      );
-      if (!hasAccess)
-        throw new RpcException(
-          new ForbiddenException(
-            'You do not have permission to view a file in this organization.',
-          ),
-        );
-      viewableFiles = await this.authz.listOrganizationUserViewableFileObjects(
-        query.context.userId,
-        query.context.organizationId,
-      );
-    }
+    // if (query.context?.organizationId) {
+    //   const hasAccess = await this.authz.canViewOrganizationFiles(
+    //     query.context.userId,
+    //     query.context.organizationId,
+    //   );
+    //   if (!hasAccess)
+    //     throw new RpcException(
+    //       new ForbiddenException(
+    //         'You do not have permission to view a file in this organization.',
+    //       ),
+    //     );
+    //   viewableFiles = await this.authz.listOrganizationUserViewableFileObjects(
+    //     query.context.userId,
+    //     query.context.organizationId,
+    //   );
+    // }
 
     const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.file.findMany
+      typeof this.prismaService.fileMetadata.findMany
     > = {
       where: {
         AND: [
           {
-            id: viewableFiles && { in: viewableFiles },
             voided: query?.includeVoided ? undefined : false,
             organizationId: query.context?.organizationId,
             uploadedById: query.context?.organizationId
@@ -88,17 +85,17 @@ export class AppService {
       ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
     };
     const [data, totalCount] = await Promise.all([
-      this.prismaService.file.findMany(dbQuery),
-      this.prismaService.file.count(pick(dbQuery, 'where')),
+      this.prismaService.fileMetadata.findMany(dbQuery),
+      this.prismaService.fileMetadata.count(pick(dbQuery, 'where')),
     ]);
     return {
       data,
-      metadata: { totalCount: totalCount.toString() },
+      metadata: JSON.stringify({ totalCount: totalCount }),
     };
   }
 
   async getById(query: GetRequest) {
-    const data = await this.prismaService.file.findUnique({
+    const data = await this.prismaService.fileMetadata.findUnique({
       where: {
         id: query.id,
       },
@@ -111,57 +108,47 @@ export class AppService {
       metadata: {},
     };
   }
-
-  private resolveproviderEnum(
-    provider: CreateFileStorage_StorageProviders,
-  ): StorageProvider {
-    switch (provider) {
-      case CreateFileStorage_StorageProviders.AWS_S3:
-        return 'AWS_S3';
-      case CreateFileStorage_StorageProviders.AZURE_BLOB:
-        return 'AZURE_BLOB';
-      case CreateFileStorage_StorageProviders.CLOUDFLARE_R2:
-        return 'CLOUDFLARE_R2';
-      case CreateFileStorage_StorageProviders.GOOGLE_CLOUD:
-        return 'GOOGLE_CLOUD';
-      case CreateFileStorage_StorageProviders.LOCAL:
-        return 'LOCAL';
-      default:
-        this.logger.error('Error Resolving Storage provider enum');
-        throw new Error('Uknonke Storage provider');
-    }
+  async getBlobByHash(query: GetByHashRequest) {
+    const data = await this.prismaService.fileBlob.findUnique({
+      where: {
+        hash: query.hash,
+      },
+      ...this.representationService.buildCustomRepresentationQuery(
+        query.queryBuilder?.v,
+      ),
+    });
+    return {
+      data,
+      metadata: JSON.stringify({}),
+    };
   }
 
   async create(query: CreateFileRequest) {
-    const { queryBuilder, context, ...props } = query;
+    const { queryBuilder, context, blob, ...props } = query;
     if (!context?.userId) {
       throw new RpcException(
         new BadRequestException('User ID is required in context'),
       );
     }
-    if (
-      context?.organizationId &&
-      !(await this.authz.canCreateFile(context.userId, context.organizationId))
-    )
-      throw new RpcException(
-        new ForbiddenException(
-          'You do not have permission to create a file in this organization.',
-        ),
-      );
+    // if (
+    //   context?.organizationId &&
+    //   !(await this.authz.canCreateFile(context.userId, context.organizationId))
+    // )
+    //   throw new RpcException(
+    //     new ForbiddenException(
+    //       'You do not have permission to create a file in this organization.',
+    //     ),
+    //   );
     // TODO: eNHANCE VALIDATION to chech upload purpose scope scope and rules
-    const data = await this.prismaService.file.create({
+    const data = await this.prismaService.fileMetadata.create({
       data: {
         ...props,
-        size: parseInt(props.size),
         organizationId: context?.organizationId,
         uploadedById: context.userId,
-        storages: {
-          createMany: {
-            skipDuplicates: true,
-            data: props.storages.map((storage) => ({
-              ...storage,
-              provider: this.resolveproviderEnum(storage.provider),
-            })),
+        blob: {
+          create: {
+            ...blob!,
+            size: parseInt(blob!.size),
           },
         },
       },
@@ -172,22 +159,55 @@ export class AppService {
 
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
+    };
+  }
+  async createFromExistingBlob(query: CreateFileFromExistingBlobRequest) {
+    const { queryBuilder, context, ...props } = query;
+    if (!context?.userId) {
+      throw new RpcException(
+        new BadRequestException('User ID is required in context'),
+      );
+    }
+    // if (
+    //   context?.organizationId &&
+    //   !(await this.authz.canCreateFile(context.userId, context.organizationId))
+    // )
+    //   throw new RpcException(
+    //     new ForbiddenException(
+    //       'You do not have permission to create a file in this organization.',
+    //     ),
+    //   );
+    // TODO: eNHANCE VALIDATION to chech upload purpose scope scope and rules
+    const data = await this.prismaService.fileMetadata.create({
+      data: {
+        ...props,
+        organizationId: context?.organizationId,
+        uploadedById: context.userId,
+      },
+      ...this.representationService.buildCustomRepresentationQuery(
+        queryBuilder?.v,
+      ),
+    });
+
+    return {
+      data,
+      metadata: JSON.stringify({}),
     };
   }
 
   async delete(query: DeleteRequest) {
     const { id, purge, queryBuilder } = query;
-    let data: File;
+    let data: FileMetadata;
     if (purge) {
-      data = await this.prismaService.file.delete({
+      data = await this.prismaService.fileMetadata.delete({
         where: { id },
         ...this.representationService.buildCustomRepresentationQuery(
           queryBuilder?.v,
         ),
       });
     } else {
-      data = await this.prismaService.file.update({
+      data = await this.prismaService.fileMetadata.update({
         where: { id },
         data: { voided: true },
         ...this.representationService.buildCustomRepresentationQuery(
@@ -197,7 +217,35 @@ export class AppService {
     }
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
+    };
+  }
+
+  async getDeduplicationStats() {
+    const [totalFiles, uniqueBlobs, totalSize, deduplicatedSize] =
+      await Promise.all([
+        this.prismaService.fileMetadata.count(),
+        this.prismaService.fileBlob.count(),
+        this.prismaService.$queryRaw`
+        SELECT COALESCE(SUM(size), 0) as total
+        FROM file_metadata fm
+        JOIN file_blobs fb ON fm."blobId" = fb.id
+      `,
+        this.prismaService.$queryRaw`
+        SELECT COALESCE(SUM(size), 0) as total
+        FROM file_blobs
+      `,
+      ]);
+
+    return {
+      totalFiles,
+      uniqueBlobs,
+      deduplicationRate: (
+        ((totalFiles - uniqueBlobs) / totalFiles) *
+        100
+      ).toFixed(2),
+      storageSaved:
+        (totalSize as any)[0].total - (deduplicatedSize as any)[0].total,
     };
   }
 }

@@ -1,7 +1,10 @@
 import {
+  CreateFileFromExistingBlobRequest,
   CreateFileRequest,
   DeleteRequest,
   FILES_SERVICE_NAME,
+  GetBlobResponse,
+  GetByHashRequest,
   GetFileResponse,
   GetRequest,
   QueryFileRequest,
@@ -24,12 +27,27 @@ export class AppController {
   async getFile(request: GetRequest): Promise<GetFileResponse> {
     const res = await this.appService.getById(request);
     if (!res.data)
-      throw new RpcException(new NotFoundException('Amenity not found'));
+      throw new RpcException(new NotFoundException('File not found'));
     return res as unknown as GetFileResponse;
+  }
+  @GrpcMethod(FILES_SERVICE_NAME)
+  async getBlobByHash(request: GetByHashRequest): Promise<GetBlobResponse> {
+    const res = await this.appService.getBlobByHash(request);
+    if (!res.data)
+      throw new RpcException(new NotFoundException('File not found'));
+    return res as unknown as GetBlobResponse;
   }
   @GrpcMethod(FILES_SERVICE_NAME)
   createFile(request: CreateFileRequest): Promise<GetFileResponse> {
     return this.appService.create(
+      request,
+    ) as unknown as Promise<GetFileResponse>;
+  }
+  @GrpcMethod(FILES_SERVICE_NAME)
+  createFileFromExistingBlob(
+    request: CreateFileFromExistingBlobRequest,
+  ): Promise<GetFileResponse> {
+    return this.appService.createFromExistingBlob(
       request,
     ) as unknown as Promise<GetFileResponse>;
   }

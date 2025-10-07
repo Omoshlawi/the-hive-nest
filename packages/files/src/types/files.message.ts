@@ -6,7 +6,7 @@
 
 /* eslint-disable */
 import { QueryBuilder, RequestContext } from "./common.message";
-import { File } from "./files.model";
+import { FileBlob, FileMetadata } from "./files.model";
 
 export const protobufPackage = "";
 
@@ -18,38 +18,29 @@ export interface QueryFileRequest {
 }
 
 export interface QueryFileResponse {
-  data: File[];
-  metadata: { [key: string]: string };
+  data: FileMetadata[];
+  /** JSON as string */
+  metadata: string;
 }
 
-export interface QueryFileResponse_MetadataEntry {
-  key: string;
-  value: string;
-}
-
-export interface CreateFileStorage {
-  provider: CreateFileStorage_StorageProviders;
+export interface CreateNestedBlobRequest {
+  hash: string;
+  size: string;
+  mimeType: string;
   remoteId: string;
+  filename: string;
   storagePath: string;
-  storageUrl: string;
-}
-
-export enum CreateFileStorage_StorageProviders {
-  LOCAL = 0,
-  AWS_S3 = 1,
-  GOOGLE_CLOUD = 2,
-  AZURE_BLOB = 3,
-  CLOUDFLARE_R2 = 4,
-  UNRECOGNIZED = -1,
+  storageUrl?:
+    | string
+    | undefined;
+  /** JSON as string */
+  metadata?: string | undefined;
 }
 
 export interface CreateFileRequest {
   queryBuilder: QueryBuilder | undefined;
-  filename: string;
+  blob: CreateNestedBlobRequest | undefined;
   originalName: string;
-  mimeType: string;
-  size: string;
-  hash: string;
   relatedModelId: string;
   relatedModelName: string;
   purpose: string;
@@ -58,18 +49,44 @@ export interface CreateFileRequest {
   tags: string[];
   lastAccessedAt?: string | undefined;
   expiresAt?: string | undefined;
-  storages: CreateFileStorage[];
   context?: RequestContext | undefined;
 }
 
-export interface GetFileResponse {
-  data: File | undefined;
-  metadata: { [key: string]: string };
+export interface CreateFileFromExistingBlobRequest {
+  queryBuilder: QueryBuilder | undefined;
+  blobId: string;
+  originalName: string;
+  relatedModelId: string;
+  relatedModelName: string;
+  purpose: string;
+  /** JSON as string */
+  metadata?: string | undefined;
+  tags: string[];
+  lastAccessedAt?: string | undefined;
+  expiresAt?: string | undefined;
+  context?: RequestContext | undefined;
 }
 
-export interface GetFileResponse_MetadataEntry {
-  key: string;
-  value: string;
+export interface GetByHashRequest {
+  queryBuilder: QueryBuilder | undefined;
+  context?: RequestContext | undefined;
+  hash: string;
+}
+
+export interface GetFileResponse {
+  data:
+    | FileMetadata
+    | undefined;
+  /** JSON as string */
+  metadata: string;
+}
+
+export interface GetBlobResponse {
+  data:
+    | FileBlob
+    | undefined;
+  /** JSON as string */
+  metadata: string;
 }
 
 export const _PACKAGE_NAME = "";

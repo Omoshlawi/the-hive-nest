@@ -1,13 +1,18 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { HiveService, HiveServiceClient } from '@hive/registry';
 import { OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { FILE_PACKAGE, HIVE_FILE_SERVICE_NAME } from '../constants';
 import {
+  CreateFileFromExistingBlobRequest,
   CreateFileRequest,
   CreateFileUsageRuleRequest,
   CreateFileUsageScopeRequest,
   FILES_SERVICE_NAME,
   FilesClient,
+  GetBlobResponse,
+  GetByHashRequest,
   GetFileResponse,
   GetFileUsageRuleResponse,
   GetFileUsageScopeResponse,
@@ -91,6 +96,12 @@ export class HiveFileServiceClient implements OnModuleInit, OnModuleDestroy {
       this.loadBalance().queryFile(request),
     getFile: (request: GetRequest): Observable<GetFileResponse> =>
       this.loadBalance().getFile(request),
+    getBlobByHash: (request: GetByHashRequest): Observable<GetBlobResponse> =>
+      this.loadBalance().getBlobByHash(request),
+    createFileFromExistingBlob: (
+      request: CreateFileFromExistingBlobRequest,
+    ): Observable<GetFileResponse> =>
+      this.loadBalance().createFileFromExistingBlob(request),
     createFile: (request: CreateFileRequest): Observable<GetFileResponse> =>
       this.loadBalance().createFile(request),
     deleteFile: (request: DeleteRequest): Observable<GetFileResponse> =>

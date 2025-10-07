@@ -11,52 +11,69 @@ export const protobufPackage = "";
 /** Minimal cached user info */
 export interface User {
   id: string;
+  email: string;
+  displayUsername: string;
 }
 
 /** Minimal cached organization */
 export interface Organization {
   id: string;
+  name: string;
+  logo: string;
+  slug: string;
 }
 
-export interface File {
+export interface FileBlob {
   id: string;
-  filename: string;
-  originalName: string;
-  mimeType: string;
-  size: string;
   hash: string;
+  size: string;
+  filename: string;
+  mimeType: string;
+  remoteId: string;
+  storagePath: string;
+  storageUrl?: string | undefined;
+  rereferences?:
+    | FileMetadata
+    | undefined;
+  /** JSON as string */
+  metadata?: string | undefined;
+}
+
+export interface FileMetadata {
+  id: string;
+  /** Reference to physical file */
+  blobId: string;
+  blob?:
+    | FileBlob
+    | undefined;
+  /** User-specific information */
+  originalName: string;
+  /** Context and relationships */
   relatedModelId: string;
   relatedModelName: string;
   purpose: string;
+  /** Ownership */
   uploadedById: string;
-  organizationId?: string | undefined;
-  category: string;
-  /** JSON as string */
+  organizationId?:
+    | string
+    | undefined;
+  /** User-specific metadata */
   metadata?: string | undefined;
   tags: string[];
-  /** JSON as string */
-  uploadedBy?:
-    | User
+  description?:
+    | string
     | undefined;
-  /** JSON as string */
-  organization?: Organization | undefined;
+  /** Cached user/org data */
+  uploadedBy?: User | undefined;
+  organization?:
+    | Organization
+    | undefined;
+  /** Lifecycle */
   createdAt: string;
   updatedAt: string;
   lastAccessedAt?: string | undefined;
   expiresAt?: string | undefined;
   voided: boolean;
-  storages: FileStorage[];
-}
-
-export interface FileStorage {
-  id: string;
-  fileId: string;
-  provider: string;
-  remoteId: string;
-  storagePath: string;
-  storageUrl?: string | undefined;
-  createdAt: string;
-  file: File | undefined;
 }
 
 export interface FileUsageScope {
@@ -64,6 +81,7 @@ export interface FileUsageScope {
   modelName: string;
   purpose: string;
   description?: string | undefined;
+  voided: boolean;
   createdAt: string;
   rules: FileUsageRule[];
 }
@@ -71,8 +89,9 @@ export interface FileUsageScope {
 export interface FileUsageRule {
   id: string;
   scopeId: string;
-  scope: FileUsageScope | undefined;
+  scope?: FileUsageScope | undefined;
   maxFiles: number;
+  voided: boolean;
   createdAt: string;
 }
 

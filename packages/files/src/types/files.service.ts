@@ -20,7 +20,15 @@ import {
   UpdateFileUsageRuleRequest,
   UpdateFileUsageScopeRequest,
 } from "./file-usage.message";
-import { CreateFileRequest, GetFileResponse, QueryFileRequest, QueryFileResponse } from "./files.message";
+import {
+  CreateFileFromExistingBlobRequest,
+  CreateFileRequest,
+  GetBlobResponse,
+  GetByHashRequest,
+  GetFileResponse,
+  QueryFileRequest,
+  QueryFileResponse,
+} from "./files.message";
 
 export const protobufPackage = "hive.files.v1";
 
@@ -33,7 +41,11 @@ export interface FilesClient {
 
   getFile(request: GetRequest): Observable<GetFileResponse>;
 
+  getBlobByHash(request: GetByHashRequest): Observable<GetBlobResponse>;
+
   createFile(request: CreateFileRequest): Observable<GetFileResponse>;
+
+  createFileFromExistingBlob(request: CreateFileFromExistingBlobRequest): Observable<GetFileResponse>;
 
   deleteFile(request: DeleteRequest): Observable<GetFileResponse>;
 
@@ -69,7 +81,13 @@ export interface FilesController {
 
   getFile(request: GetRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
 
+  getBlobByHash(request: GetByHashRequest): Promise<GetBlobResponse> | Observable<GetBlobResponse> | GetBlobResponse;
+
   createFile(request: CreateFileRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
+
+  createFileFromExistingBlob(
+    request: CreateFileFromExistingBlobRequest,
+  ): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
 
   deleteFile(request: DeleteRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
 
@@ -123,7 +141,9 @@ export function FilesControllerMethods() {
     const grpcMethods: string[] = [
       "queryFile",
       "getFile",
+      "getBlobByHash",
       "createFile",
+      "createFileFromExistingBlob",
       "deleteFile",
       "queryFileUsageScope",
       "getFileUsageScope",

@@ -11,46 +11,63 @@ message QueryFileRequest {
 }
 
 message QueryFileResponse {
-    repeated File data = 1;
-    map<string, string> metadata = 2; 
+    repeated FileMetadata data = 1;
+    string metadata = 2; // JSON as string
 }
 
-message CreateFileStorage {
-    enum StorageProviders {
-        LOCAL = 0;
-        AWS_S3 = 1;
-        GOOGLE_CLOUD = 2;
-        AZURE_BLOB = 3;
-        CLOUDFLARE_R2 = 4;
-    }
-    StorageProviders provider = 1;
-    string remote_id = 2;
-    string storage_path = 3;
-    string storage_url = 4;
+message CreateNestedBlobRequest {
+    string hash = 1;
+    string size = 2;
+    string mime_type = 3;
+    string remote_id = 4;
+    string filename = 5;
+    string storage_path = 6;
+    optional string storage_url = 7;
+    optional string metadata = 8; // JSON as string
 }
 
 message CreateFileRequest {
     QueryBuilder query_builder = 1;
-    string filename = 2;
+    CreateNestedBlobRequest blob = 2;
     string original_name = 3;
-    string mime_type = 4;
-    string size = 5;
-    string hash = 6;
 
-    string related_model_id = 7;
-    string related_model_name = 8;
-    string purpose = 9;
+    string related_model_id = 4;
+    string related_model_name = 5;
+    string purpose = 6;
 
-    optional string metadata = 10; // JSON as string
-    repeated string tags = 11;
+    optional string metadata = 7; // JSON as string
+    repeated string tags = 8;
 
-    optional string last_accessed_at = 12;
-    optional string expires_at = 13;
-    repeated CreateFileStorage storages = 14;
-    optional RequestContext context = 15;
+    optional string last_accessed_at = 9;
+    optional string expires_at = 10;
+    optional RequestContext context = 11;
+}
+
+message CreateFileFromExistingBlobRequest {
+    QueryBuilder query_builder = 1;
+    string blob_id = 2;
+    string original_name = 3;
+    string related_model_id = 4;
+    string related_model_name = 5;
+    string purpose = 6;
+    optional string metadata = 7; // JSON as string
+    repeated string tags = 8;
+    optional string last_accessed_at = 9;
+    optional string expires_at = 10;
+    optional RequestContext context = 11;
+}
+
+message GetByHashRequest {
+    QueryBuilder query_builder = 1;
+    optional RequestContext context = 3;
+    string hash = 4;
 }
 
 message GetFileResponse {
-    File data = 1;
-    map<string, string> metadata = 2; 
+    FileMetadata data = 1;
+    string metadata = 2; // JSON as string
+}
+message GetBlobResponse {
+    FileBlob data = 1;
+    string metadata = 2; // JSON as string
 }

@@ -1,12 +1,8 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Prisma schema with proper file deduplication
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma" // Generated folder must be added to assets for watch and copy to dist folder
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,101 +10,95 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model File {
-  id           String @id @default(uuid()) @db.Uuid
-  filename     String
-  originalName String
-  mimeType     String
-  size         BigInt // In bytes
-  hash         String @unique // For deduplication 
+// Physical file storage (deduplicated by hash)
+model FileBlob {
+  id       String @id @default(uuid()) @db.Uuid
+  hash     String @unique // SHA-256 or similar
+  size     BigInt
+  mimeType String
 
-  relatedModelId   String // The specific instance ID of the model
-  relatedModelName String // Which model/entity uses the file (e.g. User, Property, Listing)
-  purpose          String // Purpose of the file within that model (e.g. 'avatar', 'gallery', 'document')
+  // Physical storage locations
+  remoteId    String  @unique
+  storagePath String
+  storageUrl  String?
+  metadata    String? @db.Text
+  filename     String // Name file is saved with
 
-  // Ownership and Context
-  uploadedById   String // Better auth user uses no uuid for id fields
-  organizationId String? // NULL for personal files
+  // Reference count for cleanup
+  references FileMetadata[]
 
-  // Metadata
-  metadata Json? // Flexible JSON for file-specific data
-  tags     String[] // For categorization and search
+  createdAt DateTime @default(now())
 
-  // Relationships
-  uploadedBy   Json? // Minimal cached user details
-  organization Json? // Minimal cached organization details
-
-  // Timestamps
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  lastAccessedAt DateTime?
-  expiresAt      DateTime? // For temporary files
-  voided         Boolean       @default(false)
-  storages       FileStorage[]
-
-  // Indexes for performance
-  @@index([uploadedById])
-  @@index([organizationId])
-  @@index([createdAt])
-  @@index([hash]) // For deduplication queries
-  @@index([tags])
-  @@map("files")
+  @@index([hash])
+  @@map("file_blobs")
 }
 
-// multi-provider storage (e.g., store a file in S3 + R2 for redundancy)
-model FileStorage {
-  id          String          @id @default(uuid()) @db.Uuid
-  fileId      String          @db.Uuid
-  provider    StorageProvider
-  remoteId    String          @unique
-  storagePath String
-  storageUrl  String? // CDN/public URL
-  createdAt   DateTime        @default(now())
+// User-specific file metadata (can have duplicates)
+model FileMetadata {
+  id String @id @default(uuid()) @db.Uuid
 
-  file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  // Reference to physical file
+  blobId String   @db.Uuid
+  blob   FileBlob @relation(fields: [blobId], references: [id], onDelete: Restrict)
 
-  @@map("file_storage")
+  // User-specific information
+  originalName String // Original upload name
+
+  // Context and relationships
+  relatedModelId   String
+  relatedModelName String
+  purpose          String
+
+  // Ownership
+  uploadedById   String
+  organizationId String?
+
+  // User-specific metadata
+  metadata    String?  @db.Text
+  tags        String[]
+  description String?
+
+  // Cached user/org data
+  uploadedBy   Json?
+  organization Json?
+
+  // Lifecycle
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  lastAccessedAt DateTime?
+  expiresAt      DateTime?
+  voided         Boolean   @default(false)
+
+  // Indexes
+  @@index([blobId])
+  @@index([uploadedById])
+  @@index([organizationId])
+  @@index([relatedModelName, relatedModelId])
+  @@index([createdAt])
+  @@index([tags])
+  @@map("file_metadata")
 }
 
 model FileUsageScope {
-  id          String  @id @default(uuid()) @db.Uuid
-  modelName   String // e.g User,Property,e.t.c
-  purpose     String // e.g. "avatar", "gallery"
+  id          String          @id @default(uuid()) @db.Uuid
+  modelName   String
+  purpose     String
   description String?
-
-  voided    Boolean         @default(false)
-  createdAt DateTime        @default(now())
-  rules     FileUsageRule[]
+  voided      Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  rules       FileUsageRule[]
 
   @@unique([modelName, purpose])
+  @@map("file_usage_scopes")
 }
 
 model FileUsageRule {
   id        String         @id @default(uuid()) @db.Uuid
   scopeId   String         @db.Uuid
   scope     FileUsageScope @relation(fields: [scopeId], references: [id], onDelete: Cascade)
-  // tier      String?
   maxFiles  Int
   voided    Boolean        @default(false)
   createdAt DateTime       @default(now())
-}
 
-// Handled by tags
-// enum FileCategory {
-//   AVATAR // Profile pictures (always free)
-//   DOCUMENT // Business documents
-//   IMAGE // General images
-//   VIDEO // Video files
-//   AUDIO // Audio files
-//   ARCHIVE // Zip, tar, etc.
-//   CODE // Source code files
-//   OTHER // Miscellaneous
-// }
-
-enum StorageProvider {
-  LOCAL
-  AWS_S3
-  GOOGLE_CLOUD
-  AZURE_BLOB
-  CLOUDFLARE_R2
+  @@map("file_usage_rules")
 }

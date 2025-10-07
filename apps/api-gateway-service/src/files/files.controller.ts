@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import { CustomRepresentationQueryDto, DeleteQueryDto } from '@hive/common';
 import {
-  CreateFileStorage_StorageProviders,
+  FileBlob,
+  GetFileByHashQueryDto,
   HiveFileServiceClient,
   QueryFileDto,
   UploadFilesDto,
@@ -36,7 +39,7 @@ import {
 import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { AuthGuard, Session } from '@thallesp/nestjs-better-auth';
 import { createHash } from 'crypto';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, map } from 'rxjs';
 import { UserSession } from '../auth/auth.types';
 import { S3Service } from '../s3/s3.service';
 
@@ -47,6 +50,7 @@ import { S3Service } from '../s3/s3.service';
 @Controller('files')
 export class FilesController {
   private readonly logger = new Logger(FilesController.name);
+  private readonly uploadPath = 'uploads';
   constructor(
     private readonly s3Service: S3Service,
     private readonly fileService: HiveFileServiceClient,
@@ -73,15 +77,38 @@ export class FilesController {
     @Query() query: QueryFileDto,
     @Session() { user, session }: UserSession,
   ) {
-    return this.fileService.file.queryFile({
-      queryBuilder: {
-        limit: query.limit,
-        orderBy: query.orderBy,
-        page: query.page,
-        v: query.v,
-      },
-      includeVoided: query.includeVoided,
-      search: query.search,
+    return this.fileService.file
+      .queryFile({
+        queryBuilder: {
+          limit: query.limit,
+          orderBy: query.orderBy,
+          page: query.page,
+          v: query.v,
+        },
+        includeVoided: query.includeVoided,
+        search: query.search,
+        context: {
+          userId: user.id,
+          organizationId: session?.activeOrganizationId ?? undefined,
+        },
+      })
+      .pipe(
+        map((value) => ({
+          results: value?.data ?? [],
+          ...JSON.parse(value.metadata),
+        })),
+      );
+  }
+
+  @Get('/hash')
+  @ApiOperation({ summary: 'Get FileBlob by hash' })
+  getFileByHash(
+    @Query() query: GetFileByHashQueryDto,
+    @Session() { user, session }: UserSession,
+  ) {
+    return this.fileService.file.getBlobByHash({
+      hash: query.hash,
+      queryBuilder: query,
       context: {
         userId: user.id,
         organizationId: session?.activeOrganizationId ?? undefined,
@@ -106,6 +133,21 @@ export class FilesController {
     });
   }
 
+  private async getBlobByHashIfFileExists(hash: string) {
+    try {
+      const res = await lastValueFrom(
+        this.fileService.file.getBlobByHash({
+          hash,
+          queryBuilder: {},
+        }),
+      );
+      return res?.data;
+    } catch (e: any) {
+      this.logger.error('Error getting blob by id ' + e?.message);
+      return null;
+    }
+  }
+
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
@@ -128,44 +170,64 @@ export class FilesController {
     this.logger.log(
       `S3 single file upload: ${file.originalname} (${this.formatFileSize(file.size)})`,
     );
+    const fileHash = this.generateFileHash(file.buffer);
+    const alreadyExist = await this.getBlobByHashIfFileExists(fileHash);
+    if (alreadyExist) {
+      return this.fileService.file.createFileFromExistingBlob({
+        queryBuilder: query,
+        purpose: uploadFileDto.purpose,
+        relatedModelId: uploadFileDto.relatedModelId,
+        relatedModelName: uploadFileDto.relatedModelName,
+        tags: uploadFileDto.tags?.split(',')?.map((t) => t.trim()),
+        expiresAt: undefined, // TODO Future impl
+        lastAccessedAt: undefined, // TODO Future impl
+        context: {
+          userId: user.id,
+          organizationId: session?.activeOrganizationId ?? undefined,
+        },
+        blobId: alreadyExist.id,
+        originalName: file.originalname,
+        metadata: JSON.stringify({ createdFromExistingBlob: true }),
+      });
+    }
 
     try {
       const s3FileMetadata = await this.s3Service.uploadSingleFile(
         file,
-        uploadFileDto.uploadTo,
-        uploadFileDto.isPublic,
+        this.uploadPath, // Can not use model name or purpose for destination folders since differnct users can upload the same file for diferent purpose
+        true,
         {},
       );
-      const files = await lastValueFrom(
-        this.fileService.file.createFile({
-          queryBuilder: query,
-          filename: s3FileMetadata.filename,
-          hash: this.generateFileHash(file.buffer),
-          mimeType: s3FileMetadata.contentType,
-          originalName: s3FileMetadata.originalName,
-          purpose: uploadFileDto.purpose,
-          relatedModelId: uploadFileDto.relatedModelId,
-          relatedModelName: uploadFileDto.relatedModelName,
-          size: s3FileMetadata.size.toString(),
-          storages: [
-            {
-              provider: CreateFileStorage_StorageProviders.LOCAL,
-              remoteId: s3FileMetadata.id,
-              storagePath: uploadFileDto.uploadTo,
-              storageUrl: s3FileMetadata.url ?? s3FileMetadata.signedUrl,
-            },
-          ],
-          tags: uploadFileDto.tags?.split(',')?.map((t) => t.trim()),
-          metadata: JSON.stringify(s3FileMetadata.customMetadata ?? {}),
-          expiresAt: undefined, // TODO Future impl
-          lastAccessedAt: undefined, // TODO Future impl
-          context: {
-            userId: user.id,
-            organizationId: session?.activeOrganizationId ?? undefined,
-          },
+      return this.fileService.file.createFile({
+        queryBuilder: query,
+        originalName: s3FileMetadata.originalName,
+        purpose: uploadFileDto.purpose,
+        relatedModelId: uploadFileDto.relatedModelId,
+        relatedModelName: uploadFileDto.relatedModelName,
+        tags: uploadFileDto.tags?.split(',')?.map((t) => t.trim()),
+        metadata: JSON.stringify({
+          createdFromExistingBlob: false,
         }),
-      );
-      return files;
+        expiresAt: undefined, // TODO Future impl
+        lastAccessedAt: undefined, // TODO Future impl
+        context: {
+          userId: user.id,
+          organizationId: session?.activeOrganizationId ?? undefined,
+        },
+        blob: {
+          filename: s3FileMetadata.filename,
+          hash: fileHash,
+          metadata: JSON.stringify({
+            ...(s3FileMetadata.customMetadata ?? {}),
+            bucket: s3FileMetadata.bucket,
+          }),
+          mimeType: s3FileMetadata.contentType,
+          remoteId: s3FileMetadata.id,
+          size: s3FileMetadata.size.toString(),
+          storagePath: 'uploads', // TODO: use correct path
+          storageUrl: s3FileMetadata.url,
+        },
+      });
     } catch (error) {
       this.logger.error(
         `S3 upload failed for ${file.originalname}: ${error?.message}`,
@@ -201,45 +263,92 @@ export class FilesController {
     @Body() uploadFileDto: UploadMutipleFilesDto,
   ) {
     try {
+      const checkIfAlreadyUploaded = await Promise.all(
+        files.map((file) =>
+          this.getBlobByHashIfFileExists(this.generateFileHash(file.buffer)),
+        ),
+      );
+      const existingFiles: Array<Express.Multer.File> = [];
+      const newFiles: Array<Express.Multer.File> = [];
+      checkIfAlreadyUploaded.forEach((blob, index) => {
+        if (blob) {
+          existingFiles.push(files[index]);
+        } else {
+          newFiles.push(files[index]);
+        }
+      });
+      const existingBlobs = checkIfAlreadyUploaded.filter(
+        Boolean,
+      ) as Array<FileBlob>;
+
       const s3FileMetadata = await this.s3Service.uploadMultipleFiles(
-        files,
-        uploadFileDto.uploadTo,
-        uploadFileDto.isPublic,
+        newFiles,
+        this.uploadPath,
+        true,
         {},
       );
 
-      const uploadTasks = s3FileMetadata.files.map((file, index) =>
-        lastValueFrom(
+      // New Uploads
+      const newUploadTasks = s3FileMetadata.files.map(async (file, index) => {
+        return await lastValueFrom(
           this.fileService.file.createFile({
             queryBuilder: query,
-            filename: file.filename,
-            hash: this.generateFileHash(files[index].buffer),
-            mimeType: file.contentType,
             originalName: file.originalName,
             purpose: uploadFileDto.purpose,
             relatedModelId: uploadFileDto.relatedModelId,
             relatedModelName: uploadFileDto.relatedModelName,
-            size: file.size.toString(),
-            storages: [
-              {
-                provider: CreateFileStorage_StorageProviders.LOCAL,
-                remoteId: file.id,
-                storagePath: uploadFileDto.uploadTo,
-                storageUrl: file.url ?? file.signedUrl,
-              },
-            ],
+            blob: {
+              filename: file.filename,
+              hash: this.generateFileHash(files[index].buffer),
+              mimeType: file.contentType,
+              remoteId: file.id,
+              size: file.size.toString(),
+              storagePath: 'uploads', // TODO: use correct path,
+              storageUrl: file.url,
+              metadata: JSON.stringify({
+                ...(file.customMetadata ?? {}),
+                bucket: file.bucket,
+              }),
+            },
             tags: uploadFileDto.tags?.split(',')?.map((t) => t.trim()),
-            metadata: JSON.stringify(file.customMetadata ?? {}),
             expiresAt: undefined, // TODO Future impl
             lastAccessedAt: undefined, // TODO Future impl,
             context: {
               userId: user.id,
               organizationId: session?.activeOrganizationId ?? undefined,
             },
+            metadata: JSON.stringify({
+              createdFromExistingBlob: false,
+            }),
+          }),
+        );
+      });
+      // Existing blobs
+      const existingUploadTasks = existingBlobs.map((alreadyExist, i) =>
+        lastValueFrom(
+          this.fileService.file.createFileFromExistingBlob({
+            queryBuilder: query,
+            purpose: uploadFileDto.purpose,
+            relatedModelId: uploadFileDto.relatedModelId,
+            relatedModelName: uploadFileDto.relatedModelName,
+            tags: uploadFileDto.tags?.split(',')?.map((t) => t.trim()),
+            expiresAt: undefined, // TODO Future impl
+            lastAccessedAt: undefined, // TODO Future impl
+            context: {
+              userId: user.id,
+              organizationId: session?.activeOrganizationId ?? undefined,
+            },
+            blobId: alreadyExist.id,
+            originalName: existingFiles[i].originalname,
+            metadata: JSON.stringify({ createdFromExistingBlob: true }),
           }),
         ),
       );
-      const res = await Promise.allSettled(uploadTasks);
+      // TODO Handle other errors apart from unique hash fields e.g Minio Upload related errors, also other error from remote server
+      const res = await Promise.allSettled([
+        ...newUploadTasks,
+        ...existingUploadTasks,
+      ]);
       const success = res
         .filter((r) => r.status === 'fulfilled')
         .map((r) => r.value.data);
@@ -284,54 +393,95 @@ export class FilesController {
     @Body() uploadFileDto: UploadFilesDto,
   ) {
     try {
+      const checkIfAlreadyUploaded = await Promise.all(
+        files.map((file) =>
+          this.getBlobByHashIfFileExists(this.generateFileHash(file.buffer)),
+        ),
+      );
+      const existingFiles: Array<Express.Multer.File> = [];
+      const newFiles: Array<Express.Multer.File> = [];
+      checkIfAlreadyUploaded.forEach((blob, index) => {
+        if (blob) {
+          existingFiles.push(files[index]);
+        } else {
+          newFiles.push(files[index]);
+        }
+      });
+      const existingBlobs = checkIfAlreadyUploaded.filter(
+        Boolean,
+      ) as Array<FileBlob>;
+
       const s3FileMetadata = await this.s3Service.uploadMultipleFiles(
-        files,
-        uploadFileDto.uploadTo,
-        uploadFileDto.isPublic,
+        newFiles,
+        this.uploadPath,
+        true,
         {},
       );
 
-      const uploadTasks = s3FileMetadata.files.map((file, index) =>
-        lastValueFrom(
+      // New Uploads
+      const newUploadTasks = s3FileMetadata.files.map(async (file, index) => {
+        return await lastValueFrom(
           this.fileService.file.createFile({
             queryBuilder: query,
-            filename: file.filename,
-            hash: this.generateFileHash(files[index].buffer),
-            mimeType: file.contentType,
             originalName: file.originalName,
             purpose: uploadFileDto.purpose,
             relatedModelId: uploadFileDto.relatedModelId,
             relatedModelName: uploadFileDto.relatedModelName,
-            size: file.size.toString(),
-            storages: [
-              {
-                provider: CreateFileStorage_StorageProviders.LOCAL,
-                remoteId: file.id,
-                storagePath: uploadFileDto.uploadTo,
-                storageUrl: file.url ?? file.signedUrl,
-              },
-            ],
+            blob: {
+              filename: file.filename,
+              hash: this.generateFileHash(files[index].buffer),
+              mimeType: file.contentType,
+              remoteId: file.id,
+              size: file.size.toString(),
+              storagePath: 'uploads', // TODO: use correct path,
+              storageUrl: file.url,
+              metadata: JSON.stringify({
+                ...(file.customMetadata ?? {}),
+                bucket: file.bucket,
+              }),
+            },
             tags: uploadFileDto.tags?.split(',')?.map((t) => t.trim()),
-            metadata: JSON.stringify(file.customMetadata ?? {}),
+            expiresAt: undefined, // TODO Future impl
+            lastAccessedAt: undefined, // TODO Future impl,
+            context: {
+              userId: user.id,
+              organizationId: session?.activeOrganizationId ?? undefined,
+            },
+            metadata: JSON.stringify({
+              createdFromExistingBlob: false,
+            }),
+          }),
+        );
+      });
+      // Existing blobs
+      const existingUploadTasks = existingBlobs.map((alreadyExist, i) =>
+        lastValueFrom(
+          this.fileService.file.createFileFromExistingBlob({
+            queryBuilder: query,
+            purpose: uploadFileDto.purpose,
+            relatedModelId: uploadFileDto.relatedModelId,
+            relatedModelName: uploadFileDto.relatedModelName,
+            tags: uploadFileDto.tags?.split(',')?.map((t) => t.trim()),
             expiresAt: undefined, // TODO Future impl
             lastAccessedAt: undefined, // TODO Future impl
             context: {
               userId: user.id,
               organizationId: session?.activeOrganizationId ?? undefined,
             },
+            blobId: alreadyExist.id,
+            originalName: existingFiles[i].originalname,
+            metadata: JSON.stringify({ createdFromExistingBlob: true }),
           }),
         ),
       );
-      const res = await Promise.allSettled(uploadTasks);
+      // TODO Handle other errors apart from unique hash fields e.g Minio Upload related errors, also other error from remote server
+      const res = await Promise.allSettled([
+        ...newUploadTasks,
+        ...existingUploadTasks,
+      ]);
       const success = res
         .filter((r) => r.status === 'fulfilled')
         .map((r) => r.value.data);
-
-      const failed = res
-        .filter((r) => r.status === 'rejected')
-        .map((r) => r.reason);
-      console.log('Failed uploads', failed);
-
       return { files: success };
     } catch (error) {
       this.logger.error(`S3 upload failed : ${error.message}`, error.stack);
