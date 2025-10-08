@@ -1,6 +1,7 @@
 import { createAccessControl } from 'better-auth/plugins/access';
 import {
   adminAc,
+  userAc,
   defaultStatements as defaultAdminStatements,
   defaultRoles as adminDefaultRoles,
 } from 'better-auth/plugins/admin/access';
@@ -12,7 +13,7 @@ import {
   defaultRoles as organizationDefaultRoles,
 } from 'better-auth/plugins/organization/access';
 
-export const adminAcl = createAccessControl({
+export const adminPluginAcl = createAccessControl({
   ...defaultAdminStatements,
   category: ['create', 'list', 'update', 'delete'],
   amenity: ['create', 'list', 'update', 'delete'],
@@ -21,7 +22,7 @@ export const adminAcl = createAccessControl({
   fileUsageRule: ['create', 'list', 'update', 'delete'],
 });
 
-const adminRole = adminAcl.newRole({
+const adminRole = adminPluginAcl.newRole({
   category: ['create', 'delete', 'list', 'update'],
   amenity: ['create', 'delete', 'list', 'update'],
   attributeType: ['create', 'delete', 'list', 'update'],
@@ -30,50 +31,50 @@ const adminRole = adminAcl.newRole({
   ...adminAc.statements,
 });
 
-const userRole = adminAcl.newRole({
+const userRole = adminPluginAcl.newRole({
   category: ['list'],
   amenity: ['list'],
   attributeType: ['list'],
   fileUsageScope: ['list'],
   fileUsageRule: ['list'],
-  ...adminAc.statements,
+  ...userAc.statements,
 });
 
-export const organizationAcl = createAccessControl({
+export const organizationPluginAcl = createAccessControl({
   ...defaultOrganizationStatements,
   file: ['upload', 'delete', 'list'],
   property: ['create', 'read', 'update', 'delete'],
   listing: ['create', 'read', 'update', 'delete'],
 });
 
-const organizationAdminRole = organizationAcl.newRole({
+const organizationAdminRole = organizationPluginAcl.newRole({
   file: ['delete', 'list', 'upload'],
   property: ['create', 'read', 'update', 'delete'],
   listing: ['create', 'read', 'update', 'delete'],
   ...organizationAdminAc.statements,
 });
 
-const organizationOwnerRole = organizationAcl.newRole({
+const organizationOwnerRole = organizationPluginAcl.newRole({
   file: ['delete', 'list', 'upload'],
   property: ['create', 'read', 'update', 'delete'],
   listing: ['create', 'read', 'update', 'delete'],
   ...ownerAc.statements,
 });
 
-const organizationMemberRole = organizationAcl.newRole({
+const organizationMemberRole = organizationPluginAcl.newRole({
   file: ['list'],
   property: ['read'],
   listing: ['read'],
   ...memberAc.statements,
 });
 
-export const adminRoles = {
+export const adminPluginRoles = {
   ...adminDefaultRoles,
   admin: adminRole,
   user: userRole,
 };
 
-export const organizationRoles = {
+export const organizationPluginRoles = {
   ...organizationDefaultRoles,
   admin: organizationAdminRole,
   owner: organizationOwnerRole,

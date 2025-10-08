@@ -1,13 +1,13 @@
 import {
-  adminAcl,
-  adminRoles,
-  organizationAcl,
-  organizationRoles,
+  adminPluginAcl,
+  adminPluginRoles,
+  organizationPluginAcl,
+  organizationPluginRoles,
 } from './auth.acl';
 
 export const organizationConfig = {
-  ac: organizationAcl,
-  roles: organizationRoles,
+  ac: organizationPluginAcl,
+  roles: organizationPluginRoles,
   teams: {
     enabled: true,
   },
@@ -16,4 +16,4 @@ export const organizationConfig = {
   },
 } as const;
 
-export const adminConfig = { ac: adminAcl, roles: adminRoles };
+export const adminConfig = { ac: adminPluginAcl, roles: adminPluginRoles };
