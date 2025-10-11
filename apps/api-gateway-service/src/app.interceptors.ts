@@ -25,7 +25,7 @@ export class ApiListTransformInterceptor<T>
       map((data: Record<string, any>) => {
         return {
           results: data?.data ?? [],
-          ...(JSON.stringify(data?.metadata) as unknown as Record<string, any>),
+          ...(JSON.parse(data.metadata) as unknown as Record<string, any>),
         };
       }),
     );

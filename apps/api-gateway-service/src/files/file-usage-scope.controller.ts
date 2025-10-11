@@ -22,14 +22,20 @@ import {
   Post,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import {
+  ApiDetailTransformInterceptor,
+  ApiListTransformInterceptor,
+} from '../app.interceptors';
 
 @UseGuards(AuthGuard)
 @Controller('files/usage-scope')
 export class FileUsageScopeController {
   constructor(private readonly fileService: HiveFileServiceClient) {}
   @Get('/')
+  @UseInterceptors(ApiListTransformInterceptor)
   @Public()
   @ApiOperation({ summary: 'Query File Usage Scope' })
   queryFileUsageScope(@Query() query: QueryFileUsageScopeDto) {
@@ -47,6 +53,7 @@ export class FileUsageScopeController {
     });
   }
   @Get('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @Public()
   @ApiOperation({ summary: 'Get File usage scope' })
   getFileUsageScope(
@@ -59,6 +66,7 @@ export class FileUsageScopeController {
     });
   }
   @Post('/')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create File Usage Scope' })
   createFileUsageScope(
     @Body() createFileUsageScopeDto: CreatFileUsageScopeDto,
@@ -74,6 +82,7 @@ export class FileUsageScopeController {
     });
   }
   @Patch('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update File Usage scope' })
   updateFileUsageScope(
     @Param('id', ParseUUIDPipe) id: string,
@@ -89,6 +98,7 @@ export class FileUsageScopeController {
     });
   }
   @Delete('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete File usage Scope' })
   deleteFileUsageScope(
     @Param('id', ParseUUIDPipe) id: string,

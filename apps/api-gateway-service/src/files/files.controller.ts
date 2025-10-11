@@ -42,6 +42,10 @@ import { createHash } from 'crypto';
 import { lastValueFrom, map } from 'rxjs';
 import { UserSession } from '../auth/auth.types';
 import { S3Service } from '../s3/s3.service';
+import {
+  ApiDetailTransformInterceptor,
+  ApiListTransformInterceptor,
+} from '../app.interceptors';
 
 // TODO: implement deduplication of files by generating file hash and cross checking on dab if exist then retuern reference
 // Also implement methods to validate before uploading to bucket
@@ -72,6 +76,7 @@ export class FilesController {
   }
 
   @Get('/')
+  @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query File' })
   queryFile(
     @Query() query: QueryFileDto,
@@ -101,6 +106,7 @@ export class FilesController {
   }
 
   @Get('/hash')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get FileBlob by hash' })
   getFileByHash(
     @Query() query: GetFileByHashQueryDto,
@@ -117,6 +123,7 @@ export class FilesController {
   }
 
   @Get('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get File' })
   getFile(
     @Param('id', ParseUUIDPipe) id: string,
@@ -497,6 +504,7 @@ export class FilesController {
   }
 
   @Delete('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete File' })
   delete(
     @Param('id', ParseUUIDPipe) id: string,

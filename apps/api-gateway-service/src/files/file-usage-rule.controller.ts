@@ -22,8 +22,13 @@ import {
   Post,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import {
+  ApiDetailTransformInterceptor,
+  ApiListTransformInterceptor,
+} from '../app.interceptors';
 
 @UseGuards(AuthGuard)
 @Controller('files/usage-rules')
@@ -32,6 +37,7 @@ export class FileUsageRuleController {
   @Get('/')
   @Public()
   @ApiOperation({ summary: 'Query File Usage Rule' })
+  @UseInterceptors(ApiListTransformInterceptor)
   queryFileUsageRule(@Query() query: QueryFileUsageRuleDto) {
     return this.fileService.fileUsageRule.queryFileUsageRule({
       queryBuilder: {
@@ -48,6 +54,7 @@ export class FileUsageRuleController {
   }
   @Get('/:id')
   @ApiOperation({ summary: 'Get File usage Rule' })
+  @UseInterceptors(ApiDetailTransformInterceptor)
   getFileUsageRule(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
@@ -59,6 +66,7 @@ export class FileUsageRuleController {
   }
   @Post('/')
   @ApiOperation({ summary: 'Create File Usage Rule' })
+  @UseInterceptors(ApiDetailTransformInterceptor)
   createFileUsageRule(
     @Body() createFileUsageRuleDto: CreatFileUsageRuleDto,
     @Query() query: CustomRepresentationQueryDto,
@@ -74,6 +82,7 @@ export class FileUsageRuleController {
   }
   @Patch('/:id')
   @ApiOperation({ summary: 'Update File Usage Rule' })
+  @UseInterceptors(ApiDetailTransformInterceptor)
   updateFileUsageRule(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateFileUsageRuleDto: UpdateFileUsageRuleDto,
@@ -89,6 +98,7 @@ export class FileUsageRuleController {
   }
   @Delete('/:id')
   @ApiOperation({ summary: 'Delete File usage Rule' })
+  @UseInterceptors(ApiDetailTransformInterceptor)
   deleteFileUsageRule(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,

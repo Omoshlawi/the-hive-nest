@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   ForbiddenException,
@@ -81,7 +82,7 @@ export class FileUsageScopeService {
     ]);
     return {
       data,
-      metadata: { totalCount: totalCount.toString() },
+      metadata: JSON.stringify({ totalCount }),
     };
   }
 
@@ -96,13 +97,12 @@ export class FileUsageScopeService {
     });
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
 
   async create(query: CreateFileUsageScopeRequest) {
-    const { queryBuilder, context, ...props } = query;
-    await this.requirePermisions(context?.userId);
+    const { queryBuilder, context:_, ...props } = query;
 
     const data = await this.prismaService.fileUsageScope.create({
       data: props,
@@ -113,7 +113,7 @@ export class FileUsageScopeService {
 
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
 
@@ -131,7 +131,7 @@ export class FileUsageScopeService {
 
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
   async delete(query: DeleteRequest) {
@@ -157,7 +157,7 @@ export class FileUsageScopeService {
     }
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
 }
