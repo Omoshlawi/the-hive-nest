@@ -12,7 +12,7 @@ message QueryRelationshipTypeRequest {
 
 message QueryRelationshipTypeResponse {
     repeated RelationshipType data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 
 message CreateRelationshipTypeRequest {
@@ -35,7 +35,7 @@ message GetRelationshipTypeRequest {
 }
 message GetRelationshipTypeResponse {
     RelationshipType data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message DeleteRelationshipTypeRequest {
     QueryBuilder query_builder = 1;

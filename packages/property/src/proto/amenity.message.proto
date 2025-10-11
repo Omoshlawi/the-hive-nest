@@ -13,7 +13,7 @@ message QueryAmenityRequest {
 
 message QueryAmenityResponse {
     repeated Amenity data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 
 message CreateAmenityRequest {
@@ -34,7 +34,7 @@ message GetAmenityRequest {
 }
 message GetAmenityResponse {
     Amenity data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; // JSON STRINGIFIED
 }
 message DeleteAmenityRequest {
     QueryBuilder query_builder = 1;

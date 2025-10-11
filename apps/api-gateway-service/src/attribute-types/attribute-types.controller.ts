@@ -15,13 +15,19 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import {
+  ApiDetailTransformInterceptor,
+  ApiListTransformInterceptor,
+} from '../app.interceptors';
 
 @Controller('attribute-types')
 export class AttributeTypesController {
   constructor(private propertyservice: HivePropertyServiceClient) {}
   @Get('/')
+  @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query attribute types' })
   queryAttributeType(@Query() query: QueryAttributeTypeDto) {
     return this.propertyservice.attributeTypes.queryAttributeTypes({
@@ -37,6 +43,7 @@ export class AttributeTypesController {
     });
   }
   @Post('/')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create AttributeType' })
   createAttributeType(
     @Body() createAttributeTypeDto: CreatAttributeTypeDto,
@@ -50,6 +57,7 @@ export class AttributeTypesController {
     });
   }
   @Get('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get AttributeType' })
   getAttributeType(
     @Param('id', ParseUUIDPipe) id: string,
@@ -61,6 +69,7 @@ export class AttributeTypesController {
     });
   }
   @Patch('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update AttributeType' })
   updateAttributeType(
     @Param('id', ParseUUIDPipe) id: string,
@@ -74,6 +83,7 @@ export class AttributeTypesController {
     });
   }
   @Delete('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete AttributeType' })
   deleteAttributeType(
     @Param('id', ParseUUIDPipe) id: string,

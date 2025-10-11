@@ -15,7 +15,7 @@ message QueryFileUsageScopeRequest {
 
 message QueryFileUsageScopeResponse {
     repeated FileUsageScope data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 
 message CreateFileUsageScopeRequest {
@@ -37,7 +37,7 @@ message UpdateFileUsageScopeRequest {
 
 message GetFileUsageScopeResponse {
     FileUsageScope data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 
 // Rule
@@ -53,7 +53,7 @@ message QueryFileUsageRuleRequest {
 
 message QueryFileUsageRuleResponse {
     repeated FileUsageRule data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 
 message CreateFileUsageRuleRequest {
@@ -72,5 +72,5 @@ message UpdateFileUsageRuleRequest {
 
 message GetFileUsageRuleResponse {
     FileUsageRule data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }

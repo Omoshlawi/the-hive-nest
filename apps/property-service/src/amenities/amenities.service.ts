@@ -12,7 +12,7 @@ import {
   UpdateAmenityRequest,
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
-import { Amenity } from 'generated/prisma';
+import { Amenity, Prisma } from '../../generated/prisma';
 import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -51,7 +51,7 @@ export class AmenitiesService {
     ]);
     return {
       data,
-      metadata: { totalCount: totalCount.toString() },
+      metadata: JSON.stringify({ totalCount: totalCount }),
     };
   }
 
@@ -66,14 +66,14 @@ export class AmenitiesService {
     });
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
 
   async create(query: CreateAmenityRequest) {
     const { queryBuilder, ...props } = query;
     const data = await this.prismaService.amenity.create({
-      data: props as any,
+      data: props as unknown as Prisma.AmenityCreateInput,
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
@@ -81,7 +81,7 @@ export class AmenitiesService {
 
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
 
@@ -89,7 +89,7 @@ export class AmenitiesService {
     const { queryBuilder, id, ...props } = query;
     const data = await this.prismaService.amenity.update({
       where: { id },
-      data: props as any,
+      data: props as Prisma.AmenityUpdateInput,
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
@@ -97,7 +97,7 @@ export class AmenitiesService {
 
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
   async delete(query: DeleteAmenityRequest) {
@@ -121,7 +121,7 @@ export class AmenitiesService {
     }
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
 }

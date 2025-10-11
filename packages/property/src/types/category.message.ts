@@ -19,12 +19,7 @@ export interface QueryCategoryRequest {
 
 export interface QueryCategoryResponse {
   data: Category[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryCategoryResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreateCategoryRequest {
@@ -48,12 +43,7 @@ export interface GetCategoryRequest {
 
 export interface GetCategoryResponse {
   data: Category | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetCategoryResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface DeleteCategoryRequest {

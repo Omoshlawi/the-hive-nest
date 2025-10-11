@@ -19,12 +19,7 @@ export interface QueryAmenityRequest {
 
 export interface QueryAmenityResponse {
   data: Amenity[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryAmenityResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreateAmenityRequest {
@@ -47,13 +42,11 @@ export interface GetAmenityRequest {
 }
 
 export interface GetAmenityResponse {
-  data: Amenity | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetAmenityResponse_MetadataEntry {
-  key: string;
-  value: string;
+  data:
+    | Amenity
+    | undefined;
+  /** JSON STRINGIFIED */
+  metadata: string;
 }
 
 export interface DeleteAmenityRequest {

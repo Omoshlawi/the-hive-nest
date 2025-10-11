@@ -15,12 +15,18 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import {
+  ApiDetailTransformInterceptor,
+  ApiListTransformInterceptor,
+} from '../app.interceptors';
 @Controller('relationship-types')
 export class RelationshipTypesController {
   constructor(private propertyservice: HivePropertyServiceClient) {}
   @Get('/')
+  @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query Relationship types' })
   queryRelationshipType(@Query() query: QueryRelationshipTypeDto) {
     return this.propertyservice.relationshipTypes.queryRelationshipType({
@@ -36,6 +42,7 @@ export class RelationshipTypesController {
     });
   }
   @Post('/')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create RelationshipType' })
   createRelationshipType(
     @Body() createRelationshipTypeDto: CreatRelationshipTypeDto,
@@ -49,6 +56,7 @@ export class RelationshipTypesController {
     });
   }
   @Get('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get RelationshipType' })
   getRelationshipType(
     @Param('id', ParseUUIDPipe) id: string,
@@ -60,6 +68,7 @@ export class RelationshipTypesController {
     });
   }
   @Patch('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update RelationshipType' })
   updateRelationshipType(
     @Param('id', ParseUUIDPipe) id: string,
@@ -73,6 +82,7 @@ export class RelationshipTypesController {
     });
   }
   @Delete('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete RelationshipType' })
   deleteRelationshipType(
     @Param('id', ParseUUIDPipe) id: string,

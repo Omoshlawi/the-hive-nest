@@ -18,12 +18,7 @@ export interface QueryRelationshipTypeRequest {
 
 export interface QueryRelationshipTypeResponse {
   data: RelationshipType[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryRelationshipTypeResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreateRelationshipTypeRequest {
@@ -48,12 +43,7 @@ export interface GetRelationshipTypeRequest {
 
 export interface GetRelationshipTypeResponse {
   data: RelationshipType | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetRelationshipTypeResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface DeleteRelationshipTypeRequest {

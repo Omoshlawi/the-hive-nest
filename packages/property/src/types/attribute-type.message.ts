@@ -19,12 +19,7 @@ export interface QueryAttributeTypeRequest {
 
 export interface QueryAttributeTypeResponse {
   data: AttributeType[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryAttributeTypeResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreateAttributeTypeRequest {
@@ -48,12 +43,7 @@ export interface GetAttributeTypeRequest {
 
 export interface GetAttributeTypeResponse {
   data: AttributeType | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetAttributeTypeResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface DeleteAttributeTypeRequest {

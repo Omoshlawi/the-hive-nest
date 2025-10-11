@@ -12,7 +12,7 @@ message QueryCategoryRequest {
 
 message QueryCategoryResponse {
     repeated Category data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 
 message CreateCategoryRequest {
@@ -33,7 +33,7 @@ message GetCategoryRequest {
 }
 message GetCategoryResponse {
     Category data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message DeleteCategoryRequest {
     QueryBuilder query_builder = 1;

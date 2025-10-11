@@ -9,11 +9,11 @@ import {
   DeleteAttributeTypeRequest,
   GetAttributeTypeRequest,
   QueryAttributeTypeRequest,
-  UpdateAttributeTypeRequest
+  UpdateAttributeTypeRequest,
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
-import { AttributeType } from '../../generated/prisma';
+import { AttributeType, Prisma } from '../../generated/prisma';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -51,7 +51,7 @@ export class AttributeTypesService {
     ]);
     return {
       data,
-      metadata: { totalCount },
+      metadata: JSON.stringify({ totalCount }),
     };
   }
 
@@ -66,14 +66,14 @@ export class AttributeTypesService {
     });
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
 
   async create(query: CreateAttributeTypeRequest) {
     const { queryBuilder, ...props } = query;
     const data = await this.prismaService.attributeType.create({
-      data: props as any,
+      data: props as unknown as Prisma.AttributeTypeCreateInput,
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
@@ -81,7 +81,7 @@ export class AttributeTypesService {
 
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
 
@@ -89,7 +89,7 @@ export class AttributeTypesService {
     const { queryBuilder, id, ...props } = query;
     const data = await this.prismaService.attributeType.update({
       where: { id },
-      data: props as any,
+      data: props as unknown as Prisma.AttributeTypeCreateInput,
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
@@ -97,7 +97,7 @@ export class AttributeTypesService {
 
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
   async delete(query: DeleteAttributeTypeRequest) {
@@ -121,7 +121,7 @@ export class AttributeTypesService {
     }
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
 }

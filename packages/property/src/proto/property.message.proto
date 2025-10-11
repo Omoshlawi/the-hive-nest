@@ -17,7 +17,7 @@ message QueryRelationshipRequest {
 }
 message QueryRelationshipResponse {
     repeated Relationship data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message CreateRelationshipRequest {
     QueryBuilder query_builder = 1;
@@ -42,7 +42,7 @@ message GetRelationshipRequest {
 }
 message GetRelationshipResponse {
     Relationship data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message DeleteRelationshipRequest {
     QueryBuilder query_builder = 1;
@@ -61,7 +61,7 @@ message QueryPropertyStatusHistoryRequest {
 
 message QueryPropertyStatusHistoryResponse {
     repeated PropertyStatusHistory data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 
 message CreatePropertyStatusHistoryRequest {
@@ -79,7 +79,7 @@ message GetPropertyStatusHistoryRequest {
 }
 message GetPropertyStatusHistoryResponse {
     PropertyStatusHistory data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message DeletePropertyStatusHistoryRequest {
     QueryBuilder query_builder = 1;
@@ -99,7 +99,7 @@ message QueryPropertyMediaRequest {
 }
 message QueryPropertyMediaResponse {
     repeated PropertyMedia data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 
 message CreatePropertyMediaRequest {
@@ -130,7 +130,7 @@ message GetPropertyMediaRequest {
 }
 message GetPropertyMediaResponse {
     PropertyMedia data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message DeletePropertyMediaRequest {
     QueryBuilder query_builder = 1;
@@ -148,7 +148,7 @@ message QueryPropertyAttributeRequest {
 
 message QueryPropertyAttributeResponse {
     repeated PropertyAttribute data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 
 message CreatePropertyAttributeRequest {
@@ -170,7 +170,7 @@ message GetPropertyAttributeRequest {
 }
 message GetPropertyAttributeResponse {
     PropertyAttribute data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message DeletePropertyAttributeRequest {
     QueryBuilder query_builder = 1;
@@ -187,7 +187,7 @@ message QueryPropertyAmenityRequest {
 
 message QueryPropertyAmenityResponse {
     repeated PropertyAmenity data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message CreatePropertyAmenityRequest {
     QueryBuilder query_builder = 1;
@@ -206,7 +206,7 @@ message GetPropertyAmenityRequest {
 }
 message GetPropertyAmenityResponse {
     PropertyAmenity data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message DeletePropertyAmenityRequest {
     QueryBuilder query_builder = 1;
@@ -222,7 +222,7 @@ message QueryPropertyCategoryRequest {
 }
 message QueryPropertyCategoryResponse {
     repeated PropertyCategory data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message CreatePropertyCategoryRequest {
     QueryBuilder query_builder = 1;
@@ -241,7 +241,7 @@ message GetPropertyCategoryRequest {
 }
 message GetPropertyCategoryResponse {
     PropertyCategory data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message DeletePropertyCategoryRequest {
     QueryBuilder query_builder = 1;
@@ -263,7 +263,7 @@ message QueryPropertyRequest {
 }
 message QueryPropertyResponse {
     repeated Property data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message CreatePropertyRequest {
     QueryBuilder query_builder = 1;
@@ -301,7 +301,7 @@ message GetPropertyRequest {
 }
 message GetPropertyResponse {
     Property data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message DeletePropertyRequest {
     QueryBuilder query_builder = 1;

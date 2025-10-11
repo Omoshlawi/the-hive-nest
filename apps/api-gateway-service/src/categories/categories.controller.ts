@@ -15,12 +15,18 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import {
+  ApiDetailTransformInterceptor,
+  ApiListTransformInterceptor,
+} from '../app.interceptors';
 @Controller('categories')
 export class CategoriesController {
   constructor(private propertyservice: HivePropertyServiceClient) {}
   @Get('/')
+  @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query Categories' })
   queryCategory(@Query() query: QueryCategoryDto) {
     return this.propertyservice.categories.queryCategories({
@@ -36,6 +42,7 @@ export class CategoriesController {
     });
   }
   @Post('/')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create Category' })
   createCategory(
     @Body() createCategoryDto: CreatCategoryDto,
@@ -49,6 +56,7 @@ export class CategoriesController {
     });
   }
   @Get('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get Category' })
   getCategory(
     @Param('id', ParseUUIDPipe) id: string,
@@ -60,6 +68,7 @@ export class CategoriesController {
     });
   }
   @Patch('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update Category' })
   updateCategory(
     @Param('id', ParseUUIDPipe) id: string,
@@ -73,6 +82,7 @@ export class CategoriesController {
     });
   }
   @Delete('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete Category' })
   deleteCategory(
     @Param('id', ParseUUIDPipe) id: string,

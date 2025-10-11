@@ -15,13 +15,19 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import {
+  ApiDetailTransformInterceptor,
+  ApiListTransformInterceptor,
+} from '../app.interceptors';
 
 @Controller('amenities')
 export class AmenitiesController {
   constructor(private propertyservice: HivePropertyServiceClient) {}
   @Get('/')
+  @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query Amenities' })
   queryAmenity(@Query() query: QueryAmenityDto) {
     return this.propertyservice.amenities.queryAmenities({
@@ -37,6 +43,7 @@ export class AmenitiesController {
     });
   }
   @Post('/')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create Amenity' })
   createAmenity(
     @Body() createAmenityDto: CreatAmenityDto,
@@ -50,6 +57,7 @@ export class AmenitiesController {
     });
   }
   @Get('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get Amenity' })
   getAmenity(
     @Param('id', ParseUUIDPipe) id: string,
@@ -61,6 +69,7 @@ export class AmenitiesController {
     });
   }
   @Patch('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update Amenity' })
   updateAmenity(
     @Param('id', ParseUUIDPipe) id: string,
@@ -74,6 +83,7 @@ export class AmenitiesController {
     });
   }
   @Delete('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete Amenity' })
   deleteAmenity(
     @Param('id', ParseUUIDPipe) id: string,

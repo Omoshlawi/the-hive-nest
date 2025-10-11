@@ -31,12 +31,7 @@ export interface QueryRelationshipRequest {
 
 export interface QueryRelationshipResponse {
   data: Relationship[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryRelationshipResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreateRelationshipRequest {
@@ -65,12 +60,7 @@ export interface GetRelationshipRequest {
 
 export interface GetRelationshipResponse {
   data: Relationship | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetRelationshipResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface DeleteRelationshipRequest {
@@ -91,12 +81,7 @@ export interface QueryPropertyStatusHistoryRequest {
 
 export interface QueryPropertyStatusHistoryResponse {
   data: PropertyStatusHistory[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryPropertyStatusHistoryResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreatePropertyStatusHistoryRequest {
@@ -115,12 +100,7 @@ export interface GetPropertyStatusHistoryRequest {
 
 export interface GetPropertyStatusHistoryResponse {
   data: PropertyStatusHistory | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetPropertyStatusHistoryResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface DeletePropertyStatusHistoryRequest {
@@ -142,12 +122,7 @@ export interface QueryPropertyMediaRequest {
 
 export interface QueryPropertyMediaResponse {
   data: PropertyMedia[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryPropertyMediaResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreatePropertyMediaRequest {
@@ -193,12 +168,7 @@ export interface GetPropertyMediaRequest {
 
 export interface GetPropertyMediaResponse {
   data: PropertyMedia | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetPropertyMediaResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface DeletePropertyMediaRequest {
@@ -218,12 +188,7 @@ export interface QueryPropertyAttributeRequest {
 
 export interface QueryPropertyAttributeResponse {
   data: PropertyAttribute[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryPropertyAttributeResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreatePropertyAttributeRequest {
@@ -248,12 +213,7 @@ export interface GetPropertyAttributeRequest {
 
 export interface GetPropertyAttributeResponse {
   data: PropertyAttribute | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetPropertyAttributeResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface DeletePropertyAttributeRequest {
@@ -272,12 +232,7 @@ export interface QueryPropertyAmenityRequest {
 
 export interface QueryPropertyAmenityResponse {
   data: PropertyAmenity[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryPropertyAmenityResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreatePropertyAmenityRequest {
@@ -300,12 +255,7 @@ export interface GetPropertyAmenityRequest {
 
 export interface GetPropertyAmenityResponse {
   data: PropertyAmenity | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetPropertyAmenityResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface DeletePropertyAmenityRequest {
@@ -324,12 +274,7 @@ export interface QueryPropertyCategoryRequest {
 
 export interface QueryPropertyCategoryResponse {
   data: PropertyCategory[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryPropertyCategoryResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreatePropertyCategoryRequest {
@@ -352,12 +297,7 @@ export interface GetPropertyCategoryRequest {
 
 export interface GetPropertyCategoryResponse {
   data: PropertyCategory | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetPropertyCategoryResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface DeletePropertyCategoryRequest {
@@ -382,12 +322,7 @@ export interface QueryPropertyRequest {
 
 export interface QueryPropertyResponse {
   data: Property[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryPropertyResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreatePropertyRequest {
@@ -432,12 +367,7 @@ export interface GetPropertyRequest {
 
 export interface GetPropertyResponse {
   data: Property | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetPropertyResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface DeletePropertyRequest {

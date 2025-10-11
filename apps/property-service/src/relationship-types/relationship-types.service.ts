@@ -53,7 +53,7 @@ export class RelationshipTypesService {
     ]);
     return {
       data,
-      metadata: { totalCount: totalCount.toString() },
+      metadata: JSON.stringify({ totalCount }),
     };
   }
 
@@ -68,14 +68,14 @@ export class RelationshipTypesService {
     });
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
 
   async create(query: CreateRelationshipTypeRequest) {
     const { queryBuilder, ...props } = query;
     const data = await this.prismaService.relationshipType.create({
-      data: props as any,
+      data: props,
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
@@ -83,7 +83,7 @@ export class RelationshipTypesService {
 
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
 
@@ -91,7 +91,7 @@ export class RelationshipTypesService {
     const { queryBuilder, id, ...props } = query;
     const data = await this.prismaService.relationshipType.update({
       where: { id },
-      data: props as any,
+      data: props,
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
@@ -99,7 +99,7 @@ export class RelationshipTypesService {
 
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
   async delete(query: DeleteRelationshipTypeRequest) {
@@ -123,7 +123,7 @@ export class RelationshipTypesService {
     }
     return {
       data,
-      metadata: {},
+      metadata: JSON.stringify({}),
     };
   }
 }

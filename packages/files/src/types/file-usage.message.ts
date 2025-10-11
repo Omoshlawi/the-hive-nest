@@ -22,12 +22,7 @@ export interface QueryFileUsageScopeRequest {
 
 export interface QueryFileUsageScopeResponse {
   data: FileUsageScope[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryFileUsageScopeResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreateFileUsageScopeRequest {
@@ -49,12 +44,7 @@ export interface UpdateFileUsageScopeRequest {
 
 export interface GetFileUsageScopeResponse {
   data: FileUsageScope | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetFileUsageScopeResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 /** Rule */
@@ -70,12 +60,7 @@ export interface QueryFileUsageRuleRequest {
 
 export interface QueryFileUsageRuleResponse {
   data: FileUsageRule[];
-  metadata: { [key: string]: string };
-}
-
-export interface QueryFileUsageRuleResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export interface CreateFileUsageRuleRequest {
@@ -95,12 +80,7 @@ export interface UpdateFileUsageRuleRequest {
 
 export interface GetFileUsageRuleResponse {
   data: FileUsageRule | undefined;
-  metadata: { [key: string]: string };
-}
-
-export interface GetFileUsageRuleResponse_MetadataEntry {
-  key: string;
-  value: string;
+  metadata: string;
 }
 
 export const _PACKAGE_NAME = "";

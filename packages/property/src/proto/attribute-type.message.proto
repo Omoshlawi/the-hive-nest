@@ -12,7 +12,7 @@ message QueryAttributeTypeRequest {
 
 message QueryAttributeTypeResponse {
     repeated AttributeType data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 
 message CreateAttributeTypeRequest {
@@ -33,7 +33,7 @@ message GetAttributeTypeRequest {
 }
 message GetAttributeTypeResponse {
     AttributeType data = 1;
-    map<string, string> metadata = 2; 
+    string metadata = 2; 
 }
 message DeleteAttributeTypeRequest {
     QueryBuilder query_builder = 1;
