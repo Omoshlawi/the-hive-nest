@@ -5,7 +5,7 @@
 // source: relationship-type.message.proto
 
 /* eslint-disable */
-import { QueryBuilder } from "./common.message";
+import { QueryBuilder, RequestContext } from "./common.message";
 import { RelationshipType } from "./property.models";
 
 export const protobufPackage = "";
@@ -14,6 +14,7 @@ export interface QueryRelationshipTypeRequest {
   queryBuilder: QueryBuilder | undefined;
   search?: string | undefined;
   includeVoided?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface QueryRelationshipTypeResponse {
@@ -26,6 +27,7 @@ export interface CreateRelationshipTypeRequest {
   description: string;
   aIsToB: string;
   bIsToA: string;
+  context?: RequestContext | undefined;
 }
 
 export interface UpdateRelationshipTypeRequest {
@@ -34,11 +36,13 @@ export interface UpdateRelationshipTypeRequest {
   aIsToB?: string | undefined;
   bIsToA?: string | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetRelationshipTypeRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetRelationshipTypeResponse {
@@ -50,6 +54,7 @@ export interface DeleteRelationshipTypeRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
   purge?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export const _PACKAGE_NAME = "";

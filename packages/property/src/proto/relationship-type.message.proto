@@ -8,6 +8,7 @@ message QueryRelationshipTypeRequest {
     QueryBuilder query_builder = 1;
     optional string search = 2;
     optional bool include_voided = 4;
+    optional RequestContext context = 5;
 }
 
 message QueryRelationshipTypeResponse {
@@ -20,6 +21,7 @@ message CreateRelationshipTypeRequest {
     string description = 2;
     string a_is_to_b = 3;
     string b_is_to_a = 4;
+    optional RequestContext context = 5;
 }
 message UpdateRelationshipTypeRequest {
     QueryBuilder query_builder = 1;
@@ -27,11 +29,12 @@ message UpdateRelationshipTypeRequest {
     optional string a_is_to_b = 3;
     optional string b_is_to_a = 4;
     string id = 5;
-
+    optional RequestContext context = 6;
 }
 message GetRelationshipTypeRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
+    optional RequestContext context = 3;
 }
 message GetRelationshipTypeResponse {
     RelationshipType data = 1;
@@ -41,4 +44,5 @@ message DeleteRelationshipTypeRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
+    optional RequestContext context = 4;
 }

@@ -8,6 +8,7 @@ message QueryCategoryRequest {
     optional string search = 2;
     optional string organization_id = 3;
     optional bool include_voided = 4;
+    optional RequestContext context = 5;
 }
 
 message QueryCategoryResponse {
@@ -20,16 +21,19 @@ message CreateCategoryRequest {
     string name = 2;
     optional string organization_id = 3;
     Icon icon = 4;
+    optional RequestContext context = 5;
 }
 message UpdateCategoryRequest {
     QueryBuilder query_builder = 1;
     optional string name = 2;
     optional Icon icon = 3;
     string id = 4;
+    optional RequestContext context = 5;
 }
 message GetCategoryRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
+    optional RequestContext context = 3;
 }
 message GetCategoryResponse {
     Category data = 1;
@@ -39,4 +43,5 @@ message DeleteCategoryRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
+    optional RequestContext context = 4;
 }

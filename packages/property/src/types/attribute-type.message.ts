@@ -5,7 +5,7 @@
 // source: attribute-type.message.proto
 
 /* eslint-disable */
-import { Icon, QueryBuilder } from "./common.message";
+import { Icon, QueryBuilder, RequestContext } from "./common.message";
 import { AttributeType } from "./property.models";
 
 export const protobufPackage = "";
@@ -15,6 +15,7 @@ export interface QueryAttributeTypeRequest {
   search?: string | undefined;
   organizationId?: string | undefined;
   includeVoided?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface QueryAttributeTypeResponse {
@@ -27,6 +28,7 @@ export interface CreateAttributeTypeRequest {
   name: string;
   organizationId?: string | undefined;
   icon: Icon | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface UpdateAttributeTypeRequest {
@@ -34,11 +36,13 @@ export interface UpdateAttributeTypeRequest {
   name?: string | undefined;
   icon?: Icon | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetAttributeTypeRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetAttributeTypeResponse {
@@ -50,6 +54,7 @@ export interface DeleteAttributeTypeRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
   purge?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export const _PACKAGE_NAME = "";

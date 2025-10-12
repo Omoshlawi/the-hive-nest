@@ -5,7 +5,7 @@
 // source: property.message.proto
 
 /* eslint-disable */
-import { QueryBuilder } from "./common.message";
+import { QueryBuilder, RequestContext } from "./common.message";
 import {
   Property,
   PropertyAmenity,
@@ -27,6 +27,7 @@ export interface QueryRelationshipRequest {
   includeVoided?: boolean | undefined;
   startDate?: string | undefined;
   endDate?: string | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface QueryRelationshipResponse {
@@ -41,6 +42,7 @@ export interface CreateRelationshipRequest {
   startDate: string;
   endDate?: string | undefined;
   typeId: string;
+  context?: RequestContext | undefined;
 }
 
 export interface UpdateRelationshipRequest {
@@ -51,11 +53,13 @@ export interface UpdateRelationshipRequest {
   endDate?: string | undefined;
   typeId?: string | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetRelationshipRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetRelationshipResponse {
@@ -67,6 +71,7 @@ export interface DeleteRelationshipRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
   purge?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 /** Property status history */
@@ -77,6 +82,7 @@ export interface QueryPropertyStatusHistoryRequest {
   changedBy?: string | undefined;
   previousStatus?: string | undefined;
   newStatus?: string | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface QueryPropertyStatusHistoryResponse {
@@ -91,11 +97,13 @@ export interface CreatePropertyStatusHistoryRequest {
   reason: string;
   previousStatus: string;
   newStatus: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetPropertyStatusHistoryRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetPropertyStatusHistoryResponse {
@@ -107,6 +115,7 @@ export interface DeletePropertyStatusHistoryRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
   purge?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 /** Property media */
@@ -118,6 +127,7 @@ export interface QueryPropertyMediaRequest {
   size?: number | undefined;
   mimeType?: string | undefined;
   includeVoided?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface QueryPropertyMediaResponse {
@@ -137,6 +147,7 @@ export interface CreatePropertyMediaRequest {
   /** size ,memeType,id,e.t.c */
   metadata: { [key: string]: string };
   order: number;
+  context?: RequestContext | undefined;
 }
 
 export interface CreatePropertyMediaRequest_MetadataEntry {
@@ -154,6 +165,7 @@ export interface UpdatePropertyMediaRequest {
   metadata: { [key: string]: string };
   order?: number | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface UpdatePropertyMediaRequest_MetadataEntry {
@@ -164,6 +176,7 @@ export interface UpdatePropertyMediaRequest_MetadataEntry {
 export interface GetPropertyMediaRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetPropertyMediaResponse {
@@ -175,6 +188,7 @@ export interface DeletePropertyMediaRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
   purge?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 /** Property attribute */
@@ -184,6 +198,7 @@ export interface QueryPropertyAttributeRequest {
   propertyId?: string | undefined;
   attributeId?: string | undefined;
   includeVoided?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface QueryPropertyAttributeResponse {
@@ -196,6 +211,7 @@ export interface CreatePropertyAttributeRequest {
   propertyId: string;
   attributeId: string;
   value: string;
+  context?: RequestContext | undefined;
 }
 
 export interface UpdatePropertyAttributeRequest {
@@ -204,11 +220,13 @@ export interface UpdatePropertyAttributeRequest {
   attributeId?: string | undefined;
   value?: string | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetPropertyAttributeRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetPropertyAttributeResponse {
@@ -220,6 +238,7 @@ export interface DeletePropertyAttributeRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
   purge?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 /** Property Amenity */
@@ -228,6 +247,7 @@ export interface QueryPropertyAmenityRequest {
   propertyId?: string | undefined;
   amenityId?: string | undefined;
   includeVoided?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface QueryPropertyAmenityResponse {
@@ -239,6 +259,7 @@ export interface CreatePropertyAmenityRequest {
   queryBuilder: QueryBuilder | undefined;
   propertyId: string;
   amenityId: string;
+  context?: RequestContext | undefined;
 }
 
 export interface UpdatePropertyAmenityRequest {
@@ -246,11 +267,13 @@ export interface UpdatePropertyAmenityRequest {
   propertyId?: string | undefined;
   amenityId?: string | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetPropertyAmenityRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetPropertyAmenityResponse {
@@ -262,6 +285,7 @@ export interface DeletePropertyAmenityRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
   purge?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 /** Property category */
@@ -270,6 +294,7 @@ export interface QueryPropertyCategoryRequest {
   propertyId?: string | undefined;
   categoryId?: string | undefined;
   includeVoided?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface QueryPropertyCategoryResponse {
@@ -281,6 +306,7 @@ export interface CreatePropertyCategoryRequest {
   queryBuilder: QueryBuilder | undefined;
   propertyId: string;
   categoryId: string;
+  context?: RequestContext | undefined;
 }
 
 export interface UpdatePropertyCategoryRequest {
@@ -288,11 +314,13 @@ export interface UpdatePropertyCategoryRequest {
   propertyId?: string | undefined;
   categoryId?: string | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetPropertyCategoryRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetPropertyCategoryResponse {
@@ -304,13 +332,13 @@ export interface DeletePropertyCategoryRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
   purge?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 /** Property */
 export interface QueryPropertyRequest {
   queryBuilder: QueryBuilder | undefined;
   search?: string | undefined;
-  organizationId?: string | undefined;
   includeVoided?: boolean | undefined;
   status?: string | undefined;
   addressId?: string | undefined;
@@ -318,6 +346,7 @@ export interface QueryPropertyRequest {
   attributeIds: string[];
   amenityIds: string[];
   categoryIds: string[];
+  context?: RequestContext | undefined;
 }
 
 export interface QueryPropertyResponse {
@@ -339,6 +368,7 @@ export interface CreatePropertyRequest {
   attributes: string;
   amenityIds: string[];
   categoryIds: string[];
+  context?: RequestContext | undefined;
 }
 
 export interface UpdatePropertyRequest {
@@ -358,11 +388,13 @@ export interface UpdatePropertyRequest {
   amenityIds: string[];
   categoryIds: string[];
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetPropertyRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetPropertyResponse {
@@ -374,6 +406,7 @@ export interface DeletePropertyRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
   purge?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export const _PACKAGE_NAME = "";

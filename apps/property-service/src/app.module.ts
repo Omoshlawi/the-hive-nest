@@ -22,6 +22,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { PropertiesModule } from './properties/properties.module';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     CategoriesModule,
     AttributeTypesModule,
     RelationshipTypesModule,
+    PropertiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

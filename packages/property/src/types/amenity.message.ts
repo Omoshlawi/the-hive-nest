@@ -5,7 +5,7 @@
 // source: amenity.message.proto
 
 /* eslint-disable */
-import { Icon, QueryBuilder } from "./common.message";
+import { Icon, QueryBuilder, RequestContext } from "./common.message";
 import { Amenity } from "./property.models";
 
 export const protobufPackage = "";
@@ -15,6 +15,7 @@ export interface QueryAmenityRequest {
   search?: string | undefined;
   organizationId?: string | undefined;
   includeVoided?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface QueryAmenityResponse {
@@ -27,6 +28,7 @@ export interface CreateAmenityRequest {
   name: string;
   organizationId?: string | undefined;
   icon: Icon | undefined;
+  context?: RequestContext | undefined;
 }
 
 export interface UpdateAmenityRequest {
@@ -34,11 +36,13 @@ export interface UpdateAmenityRequest {
   name?: string | undefined;
   icon?: Icon | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetAmenityRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
+  context?: RequestContext | undefined;
 }
 
 export interface GetAmenityResponse {
@@ -53,6 +57,7 @@ export interface DeleteAmenityRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
   purge?: boolean | undefined;
+  context?: RequestContext | undefined;
 }
 
 export const _PACKAGE_NAME = "";

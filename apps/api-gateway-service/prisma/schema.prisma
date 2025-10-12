@@ -37,10 +37,27 @@ model User {
   invitations     Invitation[]
 
   teammembers TeamMember[]
+  person      Person?
 
   @@unique([email])
   @@unique([username])
   @@map("user")
+}
+
+model Person {
+  id          String    @id @db.Uuid
+  userId      String?   @unique
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  firstName   String
+  lastName    String
+  surname     String?
+  email       String
+  phoneNumber String
+  dateOfBirth DateTime? @db.Date
+  gender      Gender    @default(Unknown)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  voided      Boolean   @default(false)
 }
 
 model Session {
@@ -207,4 +224,10 @@ model OrganizationRole {
   updatedAt      DateTime?    @updatedAt
 
   @@map("organizationRole")
+}
+
+enum Gender {
+  Male
+  Female
+  Unknown
 }

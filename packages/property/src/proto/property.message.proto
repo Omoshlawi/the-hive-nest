@@ -14,6 +14,8 @@ message QueryRelationshipRequest {
     optional bool include_voided = 6;
     optional string start_date = 7;
     optional string end_date = 8;
+    optional RequestContext context = 9;
+
 }
 message QueryRelationshipResponse {
     repeated Relationship data = 1;
@@ -26,6 +28,8 @@ message CreateRelationshipRequest {
     string start_date = 4;
     optional string end_date = 5;
     string type_id = 6;
+    optional RequestContext context = 7;
+
 }
 message UpdateRelationshipRequest {
     QueryBuilder query_builder = 1;
@@ -35,10 +39,12 @@ message UpdateRelationshipRequest {
     optional string end_date = 5;
     optional string type_id = 6;
     string id = 7;
+    optional RequestContext context = 8;
 }
 message GetRelationshipRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
+    optional RequestContext context = 3;
 }
 message GetRelationshipResponse {
     Relationship data = 1;
@@ -48,6 +54,7 @@ message DeleteRelationshipRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
+    optional RequestContext context = 4;
 }
 // Property status history
 message QueryPropertyStatusHistoryRequest {
@@ -57,6 +64,8 @@ message QueryPropertyStatusHistoryRequest {
     optional string changed_by = 4;
     optional string previous_status = 5;
     optional string new_status = 6;
+    optional RequestContext context = 7;
+
 }
 
 message QueryPropertyStatusHistoryResponse {
@@ -71,11 +80,13 @@ message CreatePropertyStatusHistoryRequest {
     string reason = 4;
     string previous_status = 5;
     string new_status = 6;
+    optional RequestContext context = 7;
 }
 
 message GetPropertyStatusHistoryRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
+    optional RequestContext context = 3;
 }
 message GetPropertyStatusHistoryResponse {
     PropertyStatusHistory data = 1;
@@ -85,6 +96,7 @@ message DeletePropertyStatusHistoryRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
+    optional RequestContext context = 4;
 }
 
 // Property media
@@ -96,6 +108,7 @@ message QueryPropertyMediaRequest {
     optional int32 size = 5;
     optional string mime_type = 6;
     optional bool include_voided = 7;
+    optional RequestContext context = 8;
 }
 message QueryPropertyMediaResponse {
     repeated PropertyMedia data = 1;
@@ -111,6 +124,7 @@ message CreatePropertyMediaRequest {
     optional string description = 6;
     map<string, string> metadata = 7; // size ,memeType,id,e.t.c
     int32 order = 8;
+    optional RequestContext context = 9;
 }
 
 message UpdatePropertyMediaRequest {
@@ -123,10 +137,12 @@ message UpdatePropertyMediaRequest {
     map<string, string> metadata = 7; 
     optional int32 order = 8;
     string id = 9;
+    optional RequestContext context = 10;
 }
 message GetPropertyMediaRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
+    optional RequestContext context = 3;
 }
 message GetPropertyMediaResponse {
     PropertyMedia data = 1;
@@ -136,6 +152,7 @@ message DeletePropertyMediaRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
+    optional RequestContext context = 4;
 }
 // Property attribute
 message QueryPropertyAttributeRequest {
@@ -144,6 +161,7 @@ message QueryPropertyAttributeRequest {
     optional string property_id = 3;
     optional string attribute_id = 4;
     optional bool include_voided = 5;
+    optional RequestContext context = 6;
 }
 
 message QueryPropertyAttributeResponse {
@@ -156,6 +174,7 @@ message CreatePropertyAttributeRequest {
     string property_id = 2;
     string attribute_id = 3;
     string value = 4;
+    optional RequestContext context = 5;
 }
 message UpdatePropertyAttributeRequest {
     QueryBuilder query_builder = 1;
@@ -163,10 +182,12 @@ message UpdatePropertyAttributeRequest {
     optional string attribute_id = 3;
     optional string value = 4;
     string id = 5;
+    optional RequestContext context = 6;
 }
 message GetPropertyAttributeRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
+    optional RequestContext context = 3;
 }
 message GetPropertyAttributeResponse {
     PropertyAttribute data = 1;
@@ -176,6 +197,7 @@ message DeletePropertyAttributeRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
+    optional RequestContext context = 4;
 }
 // Property Amenity
 message QueryPropertyAmenityRequest {
@@ -183,6 +205,7 @@ message QueryPropertyAmenityRequest {
     optional string property_id = 2;
     optional string amenity_id = 3;
     optional bool include_voided = 4;
+    optional RequestContext context = 5;
 }
 
 message QueryPropertyAmenityResponse {
@@ -193,16 +216,19 @@ message CreatePropertyAmenityRequest {
     QueryBuilder query_builder = 1;
     string property_id = 2;
     string amenity_id = 3;
+    optional RequestContext context = 4;
 }
 message UpdatePropertyAmenityRequest {
     QueryBuilder query_builder = 1;
     optional string property_id = 2;
     optional string amenity_id = 3;
     string id = 4;
+    optional RequestContext context = 5;
 }
 message GetPropertyAmenityRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
+    optional RequestContext context = 3;
 }
 message GetPropertyAmenityResponse {
     PropertyAmenity data = 1;
@@ -212,6 +238,7 @@ message DeletePropertyAmenityRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
+    optional RequestContext context = 4;
 }
 // Property category
 message QueryPropertyCategoryRequest {
@@ -219,6 +246,7 @@ message QueryPropertyCategoryRequest {
     optional string property_id = 2;
     optional string category_id = 3;
     optional bool include_voided = 4;
+    optional RequestContext context = 5;
 }
 message QueryPropertyCategoryResponse {
     repeated PropertyCategory data = 1;
@@ -228,16 +256,19 @@ message CreatePropertyCategoryRequest {
     QueryBuilder query_builder = 1;
     string property_id = 2;
     string category_id = 3;
+    optional RequestContext context = 4;
 }
 message UpdatePropertyCategoryRequest {
     QueryBuilder query_builder = 1;
     optional string property_id = 2;
     optional string category_id = 3;
     string id = 4;
+    optional RequestContext context = 5;
 }
 message GetPropertyCategoryRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
+    optional RequestContext context = 3;
 }
 message GetPropertyCategoryResponse {
     PropertyCategory data = 1;
@@ -247,12 +278,12 @@ message DeletePropertyCategoryRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
+    optional RequestContext context = 4;
 }
 // Property
 message QueryPropertyRequest {
     QueryBuilder query_builder = 1;
     optional string search = 2;
-    optional string organization_id = 3;
     optional bool include_voided = 4;
     optional string status = 5;
     optional string address_id = 6;
@@ -260,6 +291,8 @@ message QueryPropertyRequest {
     repeated string attribute_ids = 8;
     repeated string amenity_ids = 9;
     repeated string category_ids = 10;
+    optional RequestContext context = 11;
+
 }
 message QueryPropertyResponse {
     repeated Property data = 1;
@@ -278,6 +311,7 @@ message CreatePropertyRequest {
     string attributes = 10; // json string
     repeated string amenity_ids = 11;
     repeated string category_ids = 12;
+    optional RequestContext context = 13;
 }
 message UpdatePropertyRequest {
     QueryBuilder query_builder = 1;
@@ -293,11 +327,12 @@ message UpdatePropertyRequest {
     repeated string amenity_ids = 11;
     repeated string category_ids = 12;
     string id = 13;
-
+    optional RequestContext context = 14;
 }
 message GetPropertyRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
+    optional RequestContext context = 3;
 }
 message GetPropertyResponse {
     Property data = 1;
@@ -307,4 +342,5 @@ message DeletePropertyRequest {
     QueryBuilder query_builder = 1;
     string id = 2;
     optional bool purge = 3;
+    optional RequestContext context = 4;
 }

@@ -1,0 +1,20 @@
+{
+  "recommendations": [
+    // NestJS & TypeScript
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "firsttris.vscode-jest-runner",
+    
+    // Prisma
+    "prisma.prisma",
+    
+    // General productivity
+    "editorconfig.editorconfig",
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense",
+    "christian-kohler.npm-intellisense"
+  ],
+  "unwantedRecommendations": [
+    // Extensions that conflict with your setup
+  ]
+}

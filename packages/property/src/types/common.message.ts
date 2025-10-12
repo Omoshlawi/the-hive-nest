@@ -41,4 +41,9 @@ export interface DeleteRequest {
   purge?: boolean | undefined;
 }
 
+export interface RequestContext {
+  userId?: string | undefined;
+  organizationId?: string | undefined;
+}
+
 export const _PACKAGE_NAME = "";
