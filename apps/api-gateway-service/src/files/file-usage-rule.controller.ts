@@ -50,6 +50,7 @@ export class FileUsageRuleController {
       modelName: query.modelName,
       purpose: query.purpose,
       search: query.search,
+      scopeId: query.scopeId,
     });
   }
   @Get('/:id')

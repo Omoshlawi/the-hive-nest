@@ -22,7 +22,7 @@ model FileBlob {
   storagePath String
   storageUrl  String?
   metadata    String? @db.Text
-  filename     String // Name file is saved with
+  filename    String // Name file is saved with
 
   // Reference count for cleanup
   references FileMetadata[]
@@ -99,6 +99,29 @@ model FileUsageRule {
   maxFiles  Int
   voided    Boolean        @default(false)
   createdAt DateTime       @default(now())
+  // tier      String 
 
   @@map("file_usage_rules")
 }
+
+/**
+ * // Example: Different limits per subscription tier
+ * FileUsageScope {
+ * modelName: "User"
+ * purpose: "avatar"
+ * rules: [
+ * { tier: "free", maxFiles: 1 },
+ * { tier: "pro", maxFiles: 5 },
+ * { tier: "enterprise", maxFiles: 20 }
+ * ]
+ * }
+ * FileUsageScope {
+ * modelName: "Property"
+ * purpose: "gallery"
+ * rules: [
+ * { tier: "basic", maxFiles: 10 },
+ * { tier: "premium", maxFiles: 50 },
+ * { tier: "enterprise", maxFiles: 200 }
+ * ]
+ * }
+ */
