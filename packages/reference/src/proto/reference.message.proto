@@ -26,7 +26,18 @@ message CreateIdentifierSequenceRequest {
 
 }
 
+message GeneratedIdentifier {
+    IdentifierSequence identity_sequence = 1;
+    string identifier = 2;
+    string prefix = 3;
+    int32 width = 4;
+}
+message CreateIdentifierSequenceResponse {
+    string metadata = 1; 
+    GeneratedIdentifier data = 2;
+}
+
 message GetIdentifierSequenceResponse {
-    IdentifierSequence data = 1;
-    string metadata = 2; 
+    string metadata = 1; 
+    IdentifierSequence data = 2;
 }

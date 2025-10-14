@@ -10,6 +10,7 @@ import { Observable } from "rxjs";
 import { DeleteRequest } from "./common.message";
 import {
   CreateIdentifierSequenceRequest,
+  CreateIdentifierSequenceResponse,
   GetIdentifierSequenceResponse,
   QueryIdentifierSequenceRequest,
   QueryIdentifierSequenceResponse,
@@ -24,7 +25,7 @@ export interface ReferencesClient {
 
   queryIdentifierSequence(request: QueryIdentifierSequenceRequest): Observable<QueryIdentifierSequenceResponse>;
 
-  createIdentifierSequence(request: CreateIdentifierSequenceRequest): Observable<GetIdentifierSequenceResponse>;
+  createIdentifierSequence(request: CreateIdentifierSequenceRequest): Observable<CreateIdentifierSequenceResponse>;
 
   deleteIdentifierSequence(request: DeleteRequest): Observable<GetIdentifierSequenceResponse>;
 }
@@ -41,7 +42,10 @@ export interface ReferencesController {
 
   createIdentifierSequence(
     request: CreateIdentifierSequenceRequest,
-  ): Promise<GetIdentifierSequenceResponse> | Observable<GetIdentifierSequenceResponse> | GetIdentifierSequenceResponse;
+  ):
+    | Promise<CreateIdentifierSequenceResponse>
+    | Observable<CreateIdentifierSequenceResponse>
+    | CreateIdentifierSequenceResponse;
 
   deleteIdentifierSequence(
     request: DeleteRequest,

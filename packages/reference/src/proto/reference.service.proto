@@ -8,6 +8,6 @@ package hive.reference.v1;
 service References {
   // Scope
   rpc QueryIdentifierSequence(QueryIdentifierSequenceRequest) returns (QueryIdentifierSequenceResponse){};
-  rpc CreateIdentifierSequence(CreateIdentifierSequenceRequest) returns (GetIdentifierSequenceResponse){};
+  rpc CreateIdentifierSequence(CreateIdentifierSequenceRequest) returns (CreateIdentifierSequenceResponse){};
   rpc DeleteIdentifierSequence(DeleteRequest) returns (GetIdentifierSequenceResponse){};
 }

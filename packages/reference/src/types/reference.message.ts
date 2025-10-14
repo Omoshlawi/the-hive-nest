@@ -31,9 +31,21 @@ export interface CreateIdentifierSequenceRequest {
   context?: RequestContext | undefined;
 }
 
-export interface GetIdentifierSequenceResponse {
-  data: IdentifierSequence | undefined;
+export interface GeneratedIdentifier {
+  identitySequence: IdentifierSequence | undefined;
+  identifier: string;
+  prefix: string;
+  width: number;
+}
+
+export interface CreateIdentifierSequenceResponse {
   metadata: string;
+  data: GeneratedIdentifier | undefined;
+}
+
+export interface GetIdentifierSequenceResponse {
+  metadata: string;
+  data: IdentifierSequence | undefined;
 }
 
 export const _PACKAGE_NAME = "";

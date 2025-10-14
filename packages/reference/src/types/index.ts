@@ -3,6 +3,7 @@ export {
   GetIdentifierSequenceResponse,
   QueryIdentifierSequenceRequest,
   QueryIdentifierSequenceResponse,
+  CreateIdentifierSequenceResponse
 } from './reference.message';
 export { IdentifierSequence } from './reference.model';
 export {
@@ -12,3 +13,11 @@ export {
   ReferencesController,
   ReferencesControllerMethods,
 } from './reference.service';
+export {
+  DeleteRequest,
+  Empty,
+  GetRequest,
+  QueryBuilder,
+  RequestContext,
+  
+} from './common.message';
