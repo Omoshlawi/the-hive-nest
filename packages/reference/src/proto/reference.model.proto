@@ -1,0 +1,9 @@
+syntax = 'proto3';
+
+
+message IdentifierSequence {
+    string id = 1;
+    string data_model  = 2;
+    string last_number = 3;
+    string updated_at  = 4;
+}

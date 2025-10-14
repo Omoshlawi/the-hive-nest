@@ -1,0 +1,13 @@
+syntax = 'proto3';
+
+import "reference.message.proto";
+import "common.message.proto";
+
+package hive.reference.v1;
+
+service References {
+  // Scope
+  rpc QueryIdentifierSequence(QueryIdentifierSequenceRequest) returns (QueryIdentifierSequenceResponse){};
+  rpc CreateIdentifierSequence(CreateIdentifierSequenceRequest) returns (GetIdentifierSequenceResponse){};
+  rpc DeleteIdentifierSequence(DeleteRequest) returns (GetIdentifierSequenceResponse){};
+}

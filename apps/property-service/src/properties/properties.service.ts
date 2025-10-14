@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   CustomRepresentationService,
   FunctionFirstArgument,
@@ -34,11 +35,19 @@ export class PropertyService {
           {
             voided: query?.includeVoided ? undefined : false,
             status: query?.status as Prisma.EnumPropertyStatusFilter,
-            // organizationId: ,
+            organizationId: query?.context?.organizationId ?? undefined,
+            addressId: query?.addressId ?? undefined,
+            isVirtual: query?.isVirtual,
+            amenities: query?.amenityIds?.length
+              ? { some: { amenityId: { in: query?.amenityIds } } }
+              : undefined,
+            categories: query?.categoryIds?.length
+              ? { some: { categoryId: { in: query?.categoryIds } } }
+              : undefined,
           },
           {
             OR: query.search
-              ? [{ name: { contains: query.search } }]
+              ? [{ name: { contains: query.search, mode: 'insensitive' } }]
               : undefined,
           },
         ],
@@ -75,9 +84,9 @@ export class PropertyService {
   }
 
   async create(query: CreatePropertyRequest) {
-    const { queryBuilder, ...props } = query;
+    const { queryBuilder,context: _, ...props } = query;
     const data = await this.prismaService.property.create({
-      data: props as unknown as Prisma.PropertyCreateInput,
+      data: props,
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
