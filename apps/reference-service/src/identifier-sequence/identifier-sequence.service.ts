@@ -16,7 +16,8 @@ import {
 import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
-import { IdentifierSequence } from '../../generated/prisma';
+import { IdentifierSequence as IdentifierSequenceModel } from '../../generated/prisma';
+import type { IdentifierSequence } from '@hive/reference';
 
 @Injectable()
 export class IdentifierSequenceService {
@@ -53,37 +54,32 @@ export class IdentifierSequenceService {
       this.prismaService.identifierSequence.count(pick(dbQuery, 'where')),
     ]);
     return {
-      data: data as Array<
-        IdentifierSequence & { updatedAt: string; lastNumber: string }
-      >,
+      data: data as Array<IdentifierSequence & IdentifierSequenceModel>,
       metadata: JSON.stringify({ totalCount: totalCount }),
     };
   }
 
   async create(query: CreateIdentifierSequenceRequest) {
     const { dataModel, prefix, width } = query;
-    let sequence = await this.prismaService.identifierSequence.findFirst({
+    let sequence = (await this.prismaService.identifierSequence.findFirst({
       where: { dataModel },
-    });
+    })) as IdentifierSequence & IdentifierSequenceModel;
     if (!sequence) {
-      sequence = await this.prismaService.identifierSequence.create({
+      sequence = (await this.prismaService.identifierSequence.create({
         data: { dataModel },
-      });
+      })) as IdentifierSequence & IdentifierSequenceModel;
     }
-    const identifier = `${prefix}-${this.padNumber(sequence.lastNumber + 1, width)}`;
+    const identifier = `${prefix}-${this.padNumber(parseInt(sequence.lastNumber) + 1, width)}`;
 
     // Increment after generation
-    await this.prismaService.identifierSequence.update({
+    sequence = (await this.prismaService.identifierSequence.update({
       where: { dataModel },
       data: { lastNumber: { increment: 1 } },
-    });
+    })) as IdentifierSequence & IdentifierSequenceModel;
 
     return {
       data: {
-        identitySequence: sequence as IdentifierSequence & {
-          updatedAt: string;
-          lastNumber: string;
-        },
+        identitySequence: sequence,
         identifier,
         prefix,
         width,
@@ -94,18 +90,15 @@ export class IdentifierSequenceService {
 
   async delete(query: DeleteRequest) {
     const { id, purge, queryBuilder } = query;
-    const data = await this.prismaService.identifierSequence.delete({
+    const data = (await this.prismaService.identifierSequence.delete({
       where: { id },
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
-    });
+    })) as IdentifierSequence & IdentifierSequenceModel;
 
     return {
-      data: data as IdentifierSequence & {
-        updatedAt: string;
-        lastNumber: string;
-      },
+      data: data,
       metadata: JSON.stringify({}),
     };
   }

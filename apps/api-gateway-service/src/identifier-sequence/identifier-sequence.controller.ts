@@ -2,12 +2,27 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
+  CreatIdentifierSequenceDto,
   HiveReferencesServiceClient,
   QueryIdentifierSequenceDto,
 } from '@hive/reference';
-import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
-import { ApiListTransformInterceptor } from '../app.interceptors';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
+import {
+  ApiDetailTransformInterceptor,
+  ApiListTransformInterceptor,
+} from '../app.interceptors';
 import { ApiOperation } from '@nestjs/swagger';
+import { CustomRepresentationQueryDto, DeleteQueryDto } from '@hive/common';
 
 @Controller('identifier-sequence')
 export class IdentifierSequenceController {
@@ -22,6 +37,35 @@ export class IdentifierSequenceController {
       dataModel: query?.dataModel,
       updatedAtTo: query.updatedAtTo,
       updatedAtFrom: query?.updatedAtFrom,
+    });
+  }
+
+  @Post('/')
+  @UseInterceptors(ApiDetailTransformInterceptor)
+  @ApiOperation({ summary: 'Create Idenfier sequence' })
+  createCategory(
+    @Body() createCategoryDto: CreatIdentifierSequenceDto,
+    @Query() query: CustomRepresentationQueryDto,
+  ) {
+    return this.referencesService.identifierSequence.createIdentifierSequence({
+      queryBuilder: {
+        v: query.v,
+      },
+      ...createCategoryDto,
+    });
+  }
+
+  @Delete('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
+  @ApiOperation({ summary: 'Delete Identifier Sequence' })
+  deleteCategory(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: DeleteQueryDto,
+  ) {
+    return this.referencesService.identifierSequence.deleteIdentifierSequence({
+      id,
+      queryBuilder: { v: query.v },
+      purge: query.purge,
     });
   }
 }
