@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Module } from '@nestjs/common';
-import { PropertiesService } from './properties.service';
-import { PropertiesController } from './properties.controller';
+import { IdentifierSequenceController } from './identifier-sequence.controller';
 import { HiveServiceModule } from '@hive/registry';
 import { HiveReferencesServiceClient } from '@hive/reference';
 
 @Module({
   imports: [HiveServiceModule.forFeature([HiveReferencesServiceClient])],
-  providers: [PropertiesService],
-  controllers: [PropertiesController],
+  controllers: [IdentifierSequenceController],
 })
-export class PropertiesModule {}
+export class IdentifierSequenceModule {}

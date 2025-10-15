@@ -1,10 +1,4 @@
 import {
-  IDENTITY_HTTP_SERVER_CONFIG_TOKEN,
-  IDENTITY_RPC_SERVER_CONFIG_TOKEN,
-  IdentityHTTPServerConfigProvider,
-  IdentityRPCServerConfigProvider,
-} from '@hive/identity';
-import {
   Endpoint,
   HiveServiceModule,
   RegistryClientConfig,
@@ -18,6 +12,12 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { IdentifierSequenceModule } from './identifier-sequence/identifier-sequence.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { QueryBuilderModule } from '@hive/common';
+import {
+  REFERENCE_HTTP_SERVER_CONFIG_TOKEN,
+  REFERENCE_RPC_SERVER_CONFIG_TOKEN,
+  ReferenceHTTPServerConfigProvider,
+  ReferenceRPCServerConfigProvider,
+} from '@hive/reference';
 
 @Module({
   imports: [
@@ -68,12 +68,12 @@ import { QueryBuilderModule } from '@hive/common';
         },
         inject: [
           RegistryClientConfig,
-          IDENTITY_HTTP_SERVER_CONFIG_TOKEN,
-          IDENTITY_RPC_SERVER_CONFIG_TOKEN,
+          REFERENCE_HTTP_SERVER_CONFIG_TOKEN,
+          REFERENCE_RPC_SERVER_CONFIG_TOKEN,
         ],
         providers: [
-          IdentityHTTPServerConfigProvider,
-          IdentityRPCServerConfigProvider,
+          ReferenceHTTPServerConfigProvider,
+          ReferenceRPCServerConfigProvider,
         ],
       },
     }),

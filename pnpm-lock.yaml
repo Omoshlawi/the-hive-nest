@@ -65,6 +65,9 @@ importers:
       '@hive/property':
         specifier: workspace:*
         version: link:../../packages/property
+      '@hive/reference':
+        specifier: workspace:*
+        version: link:../../packages/reference
       '@hive/registry':
         specifier: workspace:*
         version: link:../../packages/registry
@@ -310,6 +313,9 @@ importers:
       '@hive/property':
         specifier: workspace:*
         version: link:../../packages/property
+      '@hive/reference':
+        specifier: workspace:*
+        version: link:../../packages/reference
       '@hive/registry':
         specifier: workspace:*
         version: link:../../packages/registry

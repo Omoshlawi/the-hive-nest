@@ -8,6 +8,7 @@ import { DeleteRequest } from '../types/common.message';
 import { HIVE_REFERENCE_SERVICE_NAME, REFERENCE_PACKAGE } from '../constants';
 import {
   CreateIdentifierSequenceRequest,
+  CreateIdentifierSequenceResponse,
   GetIdentifierSequenceResponse,
   QueryIdentifierSequenceRequest,
   QueryIdentifierSequenceResponse,
@@ -22,7 +23,9 @@ import {
   serviceName: REFERENCES_SERVICE_NAME,
   name: HIVE_REFERENCE_SERVICE_NAME,
 })
-export class HiveFileServiceClient implements OnModuleInit, OnModuleDestroy {
+export class HiveReferencesServiceClient
+  implements OnModuleInit, OnModuleDestroy
+{
   constructor(private client: HiveServiceClient) {}
 
   readonly identifierSequence: ReferencesClient = {
@@ -32,7 +35,7 @@ export class HiveFileServiceClient implements OnModuleInit, OnModuleDestroy {
       this.loadBalance().queryIdentifierSequence(request),
     createIdentifierSequence: (
       request: CreateIdentifierSequenceRequest,
-    ): Observable<GetIdentifierSequenceResponse> =>
+    ): Observable<CreateIdentifierSequenceResponse> =>
       this.loadBalance().createIdentifierSequence(request),
     deleteIdentifierSequence: (
       request: DeleteRequest,

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { DynamicModule, Module, Provider, Type } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ClientsModule, Transport } from '@nestjs/microservices';

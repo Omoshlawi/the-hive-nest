@@ -28,6 +28,7 @@ import { IdentityModule } from './identity/identity.module';
 import { AuthModule } from './auth/auth.module';
 import { RegistryModule } from './registry/registry.module';
 import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
+import { IdentifierSequenceModule } from './identifier-sequence/identifier-sequence.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { RelationshipTypesModule } from './relationship-types/relationship-types
     AttributeTypesModule,
     RelationshipTypesModule,
     FilesModule,
+    IdentifierSequenceModule,
   ],
   controllers: [AppController],
   providers: [

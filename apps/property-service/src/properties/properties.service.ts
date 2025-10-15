@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   CustomRepresentationService,
@@ -16,14 +19,17 @@ import { Injectable } from '@nestjs/common';
 import { Property, Prisma } from '../../generated/prisma';
 import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
+import { HiveReferencesServiceClient } from '@hive/reference';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
-export class PropertyService {
+export class PropertiesService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly sortService: SortService,
     private readonly paginationService: PaginationService,
     private readonly representationService: CustomRepresentationService,
+    private readonly referencesService: HiveReferencesServiceClient,
   ) {}
 
   async getAll(query: QueryPropertyRequest) {
@@ -84,9 +90,23 @@ export class PropertyService {
   }
 
   async create(query: CreatePropertyRequest) {
-    const { queryBuilder,context: _, ...props } = query;
+    const { queryBuilder, context: _, ...props } = query;
+    // TODO: fINISH IMPLEMETATION
+    const { data: identifier } = await lastValueFrom(
+      this.referencesService.identifierSequence.createIdentifierSequence({
+        dataModel: 'Property',
+        prefix: 'PRT',
+        width: 6,
+        queryBuilder: undefined,
+      }),
+    );
     const data = await this.prismaService.property.create({
-      data: props,
+      data: {
+        ...props,
+        propertyNumber: identifier?.identifier as string,
+        status: 'DRAFT',
+        attributes: {},
+      },
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),

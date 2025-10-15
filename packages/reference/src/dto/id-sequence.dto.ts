@@ -14,8 +14,8 @@ export const IdentifierSequenceSchema = z.object({
 export const QueryIdentifierSequenceSchema = z.object({
   ...QueryBuilderSchema.shape,
   dataModel: z.string().optional(),
-  updatedAtFrom: z.coerce.date().optional(),
-  updatedAtTo: z.coerce.date().optional(),
+  updatedAtFrom: z.iso.date().optional(),
+  updatedAtTo: z.iso.date().optional(),
 });
 
 export class QueryIdentifierSequenceDto extends createZodDto(

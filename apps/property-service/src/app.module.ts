@@ -29,6 +29,7 @@ import { PropertiesModule } from './properties/properties.module';
     ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
     ScheduleModule.forRoot(),
     HiveServiceModule.forRoot({
+      global: true,
       enableHeartbeat: true,
       services: [HiveIdentityClientService],
       client: {
