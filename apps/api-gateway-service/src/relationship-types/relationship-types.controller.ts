@@ -1,8 +1,16 @@
-import { CustomRepresentationQueryDto, DeleteQueryDto } from '@hive/common';
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+import {
+  ApiErrorsResponse,
+  CustomRepresentationQueryDto,
+  DeleteQueryDto,
+} from '@hive/common';
 import {
   CreatRelationshipTypeDto,
+  GetRelationshipTypeResponseDto,
   HivePropertyServiceClient,
   QueryRelationshipTypeDto,
+  QueryRelationshipTypeResponseDto,
   UpdateRelationshipTypeDto,
 } from '@hive/property';
 import {
@@ -17,7 +25,11 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
@@ -28,6 +40,8 @@ export class RelationshipTypesController {
   @Get('/')
   @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query Relationship types' })
+  @ApiOkResponse({ type: QueryRelationshipTypeResponseDto })
+  @ApiErrorsResponse()
   queryRelationshipType(@Query() query: QueryRelationshipTypeDto) {
     return this.propertyservice.relationshipTypes.queryRelationshipType({
       queryBuilder: {
@@ -44,6 +58,8 @@ export class RelationshipTypesController {
   @Post('/')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create RelationshipType' })
+  @ApiCreatedResponse({ type: GetRelationshipTypeResponseDto })
+  @ApiErrorsResponse({ badRequest: true })
   createRelationshipType(
     @Body() createRelationshipTypeDto: CreatRelationshipTypeDto,
     @Query() query: CustomRepresentationQueryDto,
@@ -58,6 +74,8 @@ export class RelationshipTypesController {
   @Get('/:id')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get RelationshipType' })
+  @ApiOkResponse({ type: GetRelationshipTypeResponseDto })
+  @ApiErrorsResponse()
   getRelationshipType(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
@@ -70,6 +88,8 @@ export class RelationshipTypesController {
   @Patch('/:id')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update RelationshipType' })
+  @ApiOkResponse({ type: GetRelationshipTypeResponseDto })
+  @ApiErrorsResponse({ badRequest: true })
   updateRelationshipType(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateRelationshipTypeDto: UpdateRelationshipTypeDto,
@@ -84,6 +104,8 @@ export class RelationshipTypesController {
   @Delete('/:id')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete RelationshipType' })
+  @ApiOkResponse({ type: GetRelationshipTypeResponseDto })
+  @ApiErrorsResponse()
   deleteRelationshipType(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,

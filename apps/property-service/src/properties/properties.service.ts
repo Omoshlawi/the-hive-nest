@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -90,8 +91,10 @@ export class PropertiesService {
   }
 
   async create(query: CreatePropertyRequest) {
-    const { queryBuilder, context: _, ...props } = query;
-    // TODO: fINISH IMPLEMETATION
+    const { queryBuilder, context, amenityIds, categoryIds, ...props } = query;
+    // TODO Validate address
+
+    // Generate identifier
     const { data: identifier } = await lastValueFrom(
       this.referencesService.identifierSequence.createIdentifierSequence({
         dataModel: 'Property',
@@ -104,8 +107,25 @@ export class PropertiesService {
       data: {
         ...props,
         propertyNumber: identifier?.identifier as string,
-        status: 'DRAFT',
+        status: props?.status as any,
+        organizationId: context!.organizationId!,
+        createdBy: context!.userId!,
+        amenities: {
+          createMany: {
+            skipDuplicates: true,
+            data: (amenityIds ?? []).map((amenityId) => ({ amenityId })),
+          },
+        },
+        // attributes: {
+        //   createMany: { skipDuplicates: true, data: attributes ?? [] },
+        // },
         attributes: {},
+        categories: {
+          createMany: {
+            skipDuplicates: true,
+            data: (categoryIds ?? []).map((categoryId) => ({ categoryId })),
+          },
+        },
       },
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,

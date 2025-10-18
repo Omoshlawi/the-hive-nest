@@ -1,4 +1,5 @@
 import { QueryBuilderSchema } from '@hive/common';
+import { ApiProperty } from '@nestjs/swagger';
 import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
 export const QueryRelationshipTypeSchema = z.object({
@@ -13,11 +14,6 @@ export const QueryRelationshipTypeSchema = z.object({
     .default(false),
 });
 
-// IconSchema
-const IconSchema = z.object({
-  name: z.string().min(1, 'Required'),
-  family: z.string().min(1, 'Required'),
-});
 // RelationshipType
 export const RelationshipTypeSchema = z.object({
   aIsToB: z.string().nonempty('Required'),
@@ -34,3 +30,23 @@ export class CreatRelationshipTypeDto extends createZodDto(
 export class UpdateRelationshipTypeDto extends createZodDto(
   RelationshipTypeSchema.partial(),
 ) {}
+
+export class GetRelationshipTypeResponseDto extends CreatRelationshipTypeDto {
+  @ApiProperty()
+  id: string;
+  @ApiProperty()
+  voided: boolean;
+  @ApiProperty()
+  createdAt: string;
+  @ApiProperty()
+  updatedAt: string;
+  @ApiProperty({ isArray: true, type: 'string' })
+  assignedProperties?: Array<string>;
+}
+
+export class QueryRelationshipTypeResponseDto {
+  @ApiProperty({ isArray: true, type: GetRelationshipTypeResponseDto })
+  results: GetRelationshipTypeResponseDto[];
+  @ApiProperty()
+  totalCount: number;
+}

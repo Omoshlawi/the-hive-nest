@@ -1,8 +1,16 @@
-import { CustomRepresentationQueryDto, DeleteQueryDto } from '@hive/common';
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import {
+  ApiErrorsResponse,
+  CustomRepresentationQueryDto,
+  DeleteQueryDto,
+} from '@hive/common';
 import {
   CreatAttributeTypeDto,
+  GetAttributeTypeResponseDto,
   HivePropertyServiceClient,
   QueryAttributeTypeDto,
+  QueryAttributeTypeResponseDto,
   UpdateAttributeTypeDto,
 } from '@hive/property';
 import {
@@ -17,7 +25,11 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
@@ -29,6 +41,8 @@ export class AttributeTypesController {
   @Get('/')
   @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query attribute types' })
+  @ApiOkResponse({ type: QueryAttributeTypeResponseDto })
+  @ApiErrorsResponse()
   queryAttributeType(@Query() query: QueryAttributeTypeDto) {
     return this.propertyservice.attributeTypes.queryAttributeTypes({
       queryBuilder: {
@@ -45,6 +59,8 @@ export class AttributeTypesController {
   @Post('/')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create AttributeType' })
+  @ApiCreatedResponse({ type: GetAttributeTypeResponseDto })
+  @ApiErrorsResponse({ badRequest: true })
   createAttributeType(
     @Body() createAttributeTypeDto: CreatAttributeTypeDto,
     @Query() query: CustomRepresentationQueryDto,
@@ -59,6 +75,8 @@ export class AttributeTypesController {
   @Get('/:id')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get AttributeType' })
+  @ApiOkResponse({ type: GetAttributeTypeResponseDto })
+  @ApiErrorsResponse()
   getAttributeType(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
@@ -71,6 +89,8 @@ export class AttributeTypesController {
   @Patch('/:id')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update AttributeType' })
+  @ApiOkResponse({ type: GetAttributeTypeResponseDto })
+  @ApiErrorsResponse({ badRequest: true })
   updateAttributeType(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateAttributeTypeDto: UpdateAttributeTypeDto,
@@ -85,6 +105,8 @@ export class AttributeTypesController {
   @Delete('/:id')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete AttributeType' })
+  @ApiOkResponse({ type: GetAttributeTypeResponseDto })
+  @ApiErrorsResponse()
   deleteAttributeType(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,

@@ -1,8 +1,16 @@
-import { CustomRepresentationQueryDto, DeleteQueryDto } from '@hive/common';
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+import {
+  ApiErrorsResponse,
+  CustomRepresentationQueryDto,
+  DeleteQueryDto,
+} from '@hive/common';
 import {
   CreatCategoryDto,
+  GetCategoryResponseDto,
   HivePropertyServiceClient,
   QueryCategoryDto,
+  QueryCategoryResponseDto,
   UpdateCategoryDto,
 } from '@hive/property';
 import {
@@ -17,7 +25,11 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
@@ -28,6 +40,8 @@ export class CategoriesController {
   @Get('/')
   @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query Categories' })
+  @ApiOkResponse({ type: QueryCategoryResponseDto })
+  @ApiErrorsResponse()
   queryCategory(@Query() query: QueryCategoryDto) {
     return this.propertyservice.categories.queryCategories({
       queryBuilder: {
@@ -44,6 +58,8 @@ export class CategoriesController {
   @Post('/')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create Category' })
+  @ApiCreatedResponse({ type: GetCategoryResponseDto })
+  @ApiErrorsResponse({ badRequest: true })
   createCategory(
     @Body() createCategoryDto: CreatCategoryDto,
     @Query() query: CustomRepresentationQueryDto,
@@ -58,6 +74,8 @@ export class CategoriesController {
   @Get('/:id')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get Category' })
+  @ApiOkResponse({ type: GetCategoryResponseDto })
+  @ApiErrorsResponse()
   getCategory(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
@@ -70,6 +88,8 @@ export class CategoriesController {
   @Patch('/:id')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update Category' })
+  @ApiOkResponse({ type: GetCategoryResponseDto })
+  @ApiErrorsResponse({ badRequest: true })
   updateCategory(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -84,6 +104,8 @@ export class CategoriesController {
   @Delete('/:id')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete Category' })
+  @ApiOkResponse({ type: GetCategoryResponseDto })
+  @ApiErrorsResponse()
   deleteCategory(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,

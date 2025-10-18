@@ -1,1 +1,1 @@
-export class CommondDto {}
+export * from './errors.dto';

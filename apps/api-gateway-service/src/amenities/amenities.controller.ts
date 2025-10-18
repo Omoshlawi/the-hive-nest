@@ -1,8 +1,16 @@
-import { CustomRepresentationQueryDto, DeleteQueryDto } from '@hive/common';
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import {
+  ApiErrorsResponse,
+  CustomRepresentationQueryDto,
+  DeleteQueryDto,
+} from '@hive/common';
 import {
   CreatAmenityDto,
+  GetAmenityResponseDto,
   HivePropertyServiceClient,
   QueryAmenityDto,
+  QueryAmenityResponseDto,
   UpdateAmenityDto,
 } from '@hive/property';
 import {
@@ -17,7 +25,11 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
@@ -29,6 +41,8 @@ export class AmenitiesController {
   @Get('/')
   @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query Amenities' })
+  @ApiOkResponse({ type: QueryAmenityResponseDto })
+  @ApiErrorsResponse()
   queryAmenity(@Query() query: QueryAmenityDto) {
     return this.propertyservice.amenities.queryAmenities({
       queryBuilder: {
@@ -45,6 +59,8 @@ export class AmenitiesController {
   @Post('/')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create Amenity' })
+  @ApiCreatedResponse({ type: GetAmenityResponseDto })
+  @ApiErrorsResponse({ badRequest: true })
   createAmenity(
     @Body() createAmenityDto: CreatAmenityDto,
     @Query() query: CustomRepresentationQueryDto,
@@ -59,6 +75,8 @@ export class AmenitiesController {
   @Get('/:id')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get Amenity' })
+  @ApiOkResponse({ type: GetAmenityResponseDto })
+  @ApiErrorsResponse()
   getAmenity(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: CustomRepresentationQueryDto,
@@ -71,6 +89,8 @@ export class AmenitiesController {
   @Patch('/:id')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update Amenity' })
+  @ApiOkResponse({ type: GetAmenityResponseDto })
+  @ApiErrorsResponse({ badRequest: true })
   updateAmenity(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateAmenityDto: UpdateAmenityDto,
@@ -85,6 +105,8 @@ export class AmenitiesController {
   @Delete('/:id')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete Amenity' })
+  @ApiOkResponse({ type: GetAmenityResponseDto })
+  @ApiErrorsResponse()
   deleteAmenity(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: DeleteQueryDto,
