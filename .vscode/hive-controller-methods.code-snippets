@@ -1,0 +1,122 @@
+{
+  "NestJS Query Method": {
+    "prefix": "nest-query",
+    "body": [
+      "@Get('/')",
+      "@UseInterceptors(ApiListTransformInterceptor)",
+      "@ApiOperation({ summary: 'Query ${1:Entity}' })",
+      "@ApiOkResponse({ type: Query${1:Entity}ResponseDto })",
+      "@ApiErrorsResponse()",
+      "query${1:Entity}(@Query() query: Query${1:Entity}Dto) {",
+      "  return this.${2:serviceInstance}.${3:entityService}.query${1:Entity}({",
+      "    queryBuilder: {",
+      "      limit: query.limit,",
+      "      orderBy: query.orderBy,",
+      "      page: query.page,",
+      "      v: query.v,",
+      "    },",
+      "    includeVoided: query.includeVoided,",
+      "    search: query.search,",
+      "  });",
+      "}"
+    ],
+    "description": "NestJS GET / (query/list) method"
+  },
+  "NestJS Create Method": {
+    "prefix": "nest-create",
+    "body": [
+      "@Post('/')",
+      "@UseInterceptors(ApiDetailTransformInterceptor)",
+      "@ApiOperation({ summary: 'Create ${1:Entity}' })",
+      "@ApiCreatedResponse({ type: Get${1:Entity}ResponseDto })",
+      "@ApiErrorsResponse({ badRequest: true })",
+      "create${1:Entity}(",
+      "  @Body() create${1:Entity}Dto: Create${1:Entity}Dto,",
+      "  @Query() query: CustomRepresentationQueryDto,",
+      ") {",
+      "  return this.${2:serviceInstance}.${3:entityService}.create${1:Entity}({",
+      "    queryBuilder: {",
+      "      v: query.v,",
+      "    },",
+      "    ...create${1:Entity}Dto,",
+      "  });",
+      "}"
+    ],
+    "description": "NestJS POST / (create) method"
+  },
+  "NestJS Get By ID Method": {
+    "prefix": "nest-get",
+    "body": [
+      "@Get('/:id')",
+      "@UseInterceptors(ApiDetailTransformInterceptor)",
+      "@ApiOperation({ summary: 'Get ${1:Entity}' })",
+      "@ApiOkResponse({ type: Get${1:Entity}ResponseDto })",
+      "@ApiErrorsResponse()",
+      "get${1:Entity}(",
+      "  @Param('id', ParseUUIDPipe) id: string,",
+      "  @Query() query: CustomRepresentationQueryDto,",
+      ") {",
+      "  return this.${2:serviceInstance}.${3:entityService}.get${1:Entity}({",
+      "    id,",
+      "    queryBuilder: query,",
+      "  });",
+      "}"
+    ],
+    "description": "NestJS GET /:id (get by ID) method"
+  },
+  "NestJS Update Method": {
+    "prefix": "nest-update",
+    "body": [
+      "@Patch('/:id')",
+      "@UseInterceptors(ApiDetailTransformInterceptor)",
+      "@ApiOperation({ summary: 'Update ${1:Entity}' })",
+      "@ApiOkResponse({ type: Get${1:Entity}ResponseDto })",
+      "@ApiErrorsResponse({ badRequest: true })",
+      "update${1:Entity}(",
+      "  @Param('id', ParseUUIDPipe) id: string,",
+      "  @Body() update${1:Entity}Dto: Update${1:Entity}Dto,",
+      "  @Query() query: CustomRepresentationQueryDto,",
+      ") {",
+      "  return this.${2:serviceInstance}.${3:entityService}.update${1:Entity}({",
+      "    id,",
+      "    queryBuilder: { v: query?.v },",
+      "    ...update${1:Entity}Dto,",
+      "  });",
+      "}"
+    ],
+    "description": "NestJS PATCH /:id (update) method"
+  },
+  "NestJS Delete Method": {
+    "prefix": "nest-delete",
+    "body": [
+      "@Delete('/:id')",
+      "@UseInterceptors(ApiDetailTransformInterceptor)",
+      "@ApiOperation({ summary: 'Delete ${1:Entity}' })",
+      "@ApiOkResponse({ type: Get${1:Entity}ResponseDto })",
+      "@ApiErrorsResponse()",
+      "delete${1:Entity}(",
+      "  @Param('id', ParseUUIDPipe) id: string,",
+      "  @Query() query: DeleteQueryDto,",
+      ") {",
+      "  return this.${2:serviceInstance}.${3:entityService}.delete${1:Entity}({",
+      "    id,",
+      "    queryBuilder: { v: query.v },",
+      "    purge: query.purge,",
+      "  });",
+      "}"
+    ],
+    "description": "NestJS DELETE /:id (delete) method"
+  },
+  "NestJS Controller Class": {
+    "prefix": "nest-controller-class",
+    "body": [
+      "@Controller('${1:entities}')",
+      "export class ${2:Entity}Controller {",
+      "  constructor(private ${3:serviceInstance}: Hive${4:Service}ServiceClient) {}",
+      "",
+      "  $0",
+      "}"
+    ],
+    "description": "NestJS controller class skeleton"
+  }
+}

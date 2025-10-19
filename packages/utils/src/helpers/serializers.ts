@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 type NestedObject = { [key: string]: any };
-type FlattenedArray = (string | string)[]; // Changed to string | string since all values will be stringified
+type FlattenedArray = string[]; // Changed to string | string since all values will be stringified
 
 export function flattenObject(
   obj: NestedObject,
@@ -37,14 +40,14 @@ export function unflattenArray(arr: FlattenedArray): UnflattenedObject {
   const result: UnflattenedObject = {};
 
   for (let i = 0; i < arr.length; i += 2) {
-    const accessor = arr[i] as string;
-    const stringifiedValue = arr[i + 1] as string;
+    const accessor = arr[i];
+    const stringifiedValue = arr[i + 1];
 
     // Parse stringified value to restore its original type
     let value;
     try {
       value = JSON.parse(stringifiedValue);
-    } catch (e) {
+    } catch (_) {
       // If parsing fails, use the original string value
       value = stringifiedValue;
     }
@@ -65,3 +68,4 @@ export function unflattenArray(arr: FlattenedArray): UnflattenedObject {
 
   return result;
 }
+

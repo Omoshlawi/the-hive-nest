@@ -1,0 +1,224 @@
+{
+  "NestJS Complete DTO File": {
+    "prefix": "nest-dto-full",
+    "body": [
+      "import { QueryBuilderSchema } from '@hive/common';",
+      "import { ApiProperty } from '@nestjs/swagger';",
+      "import { createZodDto } from 'nestjs-zod';",
+      "import z from 'zod';",
+      "",
+      "export const Query${1:Entity}Schema = z.object({",
+      "  ...QueryBuilderSchema.shape,",
+      "  search: z.string().optional(),",
+      "  includeVoided: z",
+      "    .stringbool({",
+      "      truthy: ['true', '1'],",
+      "      falsy: ['false', '0'],",
+      "    })",
+      "    .optional()",
+      "    .default(false),",
+      "});",
+      "",
+      "export const ${1:Entity}Schema = z.object({",
+      "  ${2:fieldName}: z.string().nonempty('Required'),",
+      "  ${3:description}: z.string().optional(),",
+      "});",
+      "",
+      "export class Query${1:Entity}Dto extends createZodDto(",
+      "  Query${1:Entity}Schema,",
+      ") {}",
+      "",
+      "export class Create${1:Entity}Dto extends createZodDto(",
+      "  ${1:Entity}Schema,",
+      ") {}",
+      "",
+      "export class Update${1:Entity}Dto extends createZodDto(",
+      "  ${1:Entity}Schema.partial(),",
+      ") {}",
+      "",
+      "export class Get${1:Entity}ResponseDto extends Create${1:Entity}Dto {",
+      "  @ApiProperty()",
+      "  id: string;",
+      "",
+      "  @ApiProperty()",
+      "  voided: boolean;",
+      "",
+      "  @ApiProperty()",
+      "  createdAt: string;",
+      "",
+      "  @ApiProperty()",
+      "  updatedAt: string;",
+      "}",
+      "",
+      "export class Query${1:Entity}ResponseDto {",
+      "  @ApiProperty({ isArray: true, type: Get${1:Entity}ResponseDto })",
+      "  results: Get${1:Entity}ResponseDto[];",
+      "",
+      "  @ApiProperty()",
+      "  totalCount: number;",
+      "}",
+      ""
+    ],
+    "description": "Complete NestJS DTO file with Zod schemas"
+  },
+  "NestJS Zod Schema": {
+    "prefix": "nest-zod-schema",
+    "body": [
+      "export const ${1:Entity}Schema = z.object({",
+      "  ${2:fieldName}: z.string().nonempty('Required'),",
+      "  ${3:description}: z.string().optional(),",
+      "});",
+      ""
+    ],
+    "description": "Zod schema definition"
+  },
+  "NestJS Query Schema": {
+    "prefix": "nest-query-schema",
+    "body": [
+      "export const Query${1:Entity}Schema = z.object({",
+      "  ...QueryBuilderSchema.shape,",
+      "  search: z.string().optional(),",
+      "  includeVoided: z",
+      "    .stringbool({",
+      "      truthy: ['true', '1'],",
+      "      falsy: ['false', '0'],",
+      "    })",
+      "    .optional()",
+      "    .default(false),",
+      "});",
+      ""
+    ],
+    "description": "Query schema with QueryBuilder fields"
+  },
+  "NestJS Create DTO": {
+    "prefix": "nest-create-dto",
+    "body": [
+      "export class Create${1:Entity}Dto extends createZodDto(",
+      "  ${1:Entity}Schema,",
+      ") {}",
+      ""
+    ],
+    "description": "Create DTO from Zod schema"
+  },
+  "NestJS Update DTO": {
+    "prefix": "nest-update-dto",
+    "body": [
+      "export class Update${1:Entity}Dto extends createZodDto(",
+      "  ${1:Entity}Schema.partial(),",
+      ") {}",
+      ""
+    ],
+    "description": "Update DTO with partial schema"
+  },
+  "NestJS Query DTO": {
+    "prefix": "nest-query-dto",
+    "body": [
+      "export class Query${1:Entity}Dto extends createZodDto(",
+      "  Query${1:Entity}Schema,",
+      ") {}",
+      ""
+    ],
+    "description": "Query DTO from query schema"
+  },
+  "NestJS Get Response DTO": {
+    "prefix": "nest-get-response",
+    "body": [
+      "export class Get${1:Entity}ResponseDto extends Create${1:Entity}Dto {",
+      "  @ApiProperty()",
+      "  id: string;",
+      "",
+      "  @ApiProperty()",
+      "  voided: boolean;",
+      "",
+      "  @ApiProperty()",
+      "  createdAt: string;",
+      "",
+      "  @ApiProperty()",
+      "  updatedAt: string;",
+      "}",
+      ""
+    ],
+    "description": "Get response DTO with standard fields"
+  },
+  "NestJS Query Response DTO": {
+    "prefix": "nest-query-response",
+    "body": [
+      "export class Query${1:Entity}ResponseDto {",
+      "  @ApiProperty({ isArray: true, type: Get${1:Entity}ResponseDto })",
+      "  results: Get${1:Entity}ResponseDto[];",
+      "",
+      "  @ApiProperty()",
+      "  totalCount: number;",
+      "}",
+      ""
+    ],
+    "description": "Query response DTO with results array"
+  },
+  "Zod String Field Required": {
+    "prefix": "zod-string-req",
+    "body": [
+      "${1:fieldName}: z.string().nonempty('Required'),"
+    ],
+    "description": "Zod required string field"
+  },
+  "Zod String Field Optional": {
+    "prefix": "zod-string-opt",
+    "body": [
+      "${1:fieldName}: z.string().optional(),"
+    ],
+    "description": "Zod optional string field"
+  },
+  "Zod Number Field": {
+    "prefix": "zod-number",
+    "body": [
+      "${1:fieldName}: z.number()${2:.optional()},"
+    ],
+    "description": "Zod number field"
+  },
+  "Zod Boolean Field": {
+    "prefix": "zod-boolean",
+    "body": [
+      "${1:fieldName}: z.boolean()${2:.optional()},"
+    ],
+    "description": "Zod boolean field"
+  },
+  "Zod Array Field": {
+    "prefix": "zod-array",
+    "body": [
+      "${1:fieldName}: z.array(z.${2:string}())${3:.optional()},"
+    ],
+    "description": "Zod array field"
+  },
+  "Zod Enum Field": {
+    "prefix": "zod-enum",
+    "body": [
+      "${1:fieldName}: z.enum([${2:'value1', 'value2'}])${3:.optional()},"
+    ],
+    "description": "Zod enum field"
+  },
+  "Zod Date Field": {
+    "prefix": "zod-date",
+    "body": [
+      "${1:fieldName}: z.string().datetime()${2:.optional()},"
+    ],
+    "description": "Zod datetime field"
+  },
+  "ApiProperty Decorator": {
+    "prefix": "api-property",
+    "body": [
+      "@ApiProperty(${1})",
+      "${2:fieldName}: ${3:string};",
+      ""
+    ],
+    "description": "ApiProperty decorator"
+  },
+  "ApiProperty Array": {
+    "prefix": "api-property-array",
+    "body": [
+      "@ApiProperty({ isArray: true, type: ${1:'string'} })",
+      "${2:fieldName}: Array<${3:string}>;",
+      ""
+    ],
+    "description": "ApiProperty for array field"
+  }
+}
