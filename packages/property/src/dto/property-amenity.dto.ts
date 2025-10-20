@@ -3,14 +3,29 @@ import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
 import { Property, PropertyAmenity } from '../types';
 import { GetAmenityResponseDto } from './amenities.dto';
+import { QueryBuilderSchema } from '@hive/common';
+
+export const QueryPropertyAmenitySchema = z.object({
+  ...QueryBuilderSchema.shape,
+  includeVoided: z
+    .stringbool({
+      truthy: ['true', '1'],
+      falsy: ['false', '0'],
+    })
+    .optional()
+    .default(false),
+});
 
 // Property Amenity
 export const PropertyAmenitySchema = z.object({
   propertyId: z.uuid(),
   amenityId: z.uuid(),
 });
+export class QueryPropertyAmenityDto extends createZodDto(
+  QueryPropertyAmenitySchema,
+) {}
 
-export class CreatPropertyAmenityDto extends createZodDto(
+export class CreatePropertyAmenityDto extends createZodDto(
   PropertyAmenitySchema,
 ) {}
 

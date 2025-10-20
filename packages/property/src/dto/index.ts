@@ -6,3 +6,6 @@ export * from './property-amenity.dto';
 export * from './property-attributes.dto';
 export * from './property-category.dto';
 export * from './property.dto';
+export * from './property-media.dto';
+export * from './property-relationship.dto';
+export * from './property-status.dto';

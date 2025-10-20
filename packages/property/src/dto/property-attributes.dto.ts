@@ -3,6 +3,7 @@ import { createZodDto } from 'nestjs-zod';
 import { Property, PropertyAttribute } from '../types';
 import z from 'zod';
 import { GetAttributeTypeResponseDto } from './attribute-types.dto';
+import { QueryBuilderSchema } from '@hive/common';
 
 // Property attribute
 export const PropertyAttributeSchema = z.object({
@@ -10,7 +11,22 @@ export const PropertyAttributeSchema = z.object({
   value: z.string().min(1, 'Required'),
 });
 
-export class CreatPropertyAttributeDto extends createZodDto(
+export const QueryPropertyAttributeSchema = z.object({
+  ...QueryBuilderSchema.shape,
+  includeVoided: z
+    .stringbool({
+      truthy: ['true', '1'],
+      falsy: ['false', '0'],
+    })
+    .optional()
+    .default(false),
+});
+
+export class QueryPropertyAttributeDto extends createZodDto(
+  QueryPropertyAttributeSchema,
+) {}
+
+export class CreatePropertyAttributeDto extends createZodDto(
   PropertyAttributeSchema,
 ) {}
 

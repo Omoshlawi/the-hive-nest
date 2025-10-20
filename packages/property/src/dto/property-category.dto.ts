@@ -3,6 +3,7 @@ import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
 import { GetCategoryResponseDto } from './category.dto';
 import { Property, PropertyCategory } from '../types';
+import { QueryBuilderSchema } from '@hive/common';
 
 // property category
 export const PropertyCategorySchema = z.object({
@@ -10,7 +11,22 @@ export const PropertyCategorySchema = z.object({
   categoryId: z.uuid(),
 });
 
-export class CreatPropertyCategoryDto extends createZodDto(
+export const QueryPropertyCategorySchema = z.object({
+  ...QueryBuilderSchema.shape,
+  includeVoided: z
+    .stringbool({
+      truthy: ['true', '1'],
+      falsy: ['false', '0'],
+    })
+    .optional()
+    .default(false),
+});
+
+export class QueryPropertyCategoryDto extends createZodDto(
+  QueryPropertyCategorySchema,
+) {}
+
+export class CreatePropertyCategoryDto extends createZodDto(
   PropertyCategorySchema,
 ) {}
 
