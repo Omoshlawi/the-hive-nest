@@ -1,6 +1,7 @@
 import { QueryBuilderSchema } from '@hive/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { createZodDto } from 'nestjs-zod';
+import { AttributeType, Icon, PropertyAttribute } from '../types';
 import z from 'zod';
 export const QueryAttributeTypeSchema = z.object({
   ...QueryBuilderSchema.shape,
@@ -35,7 +36,14 @@ export class UpdateAttributeTypeDto extends createZodDto(
   AttributeTypeSchema.omit({ organizationId: true }).partial(),
 ) {}
 
-export class GetAttributeTypeResponseDto extends CreatAttributeTypeDto {
+export class GetAttributeTypeResponseDto implements AttributeType {
+  assignedProperties: PropertyAttribute[];
+  @ApiProperty()
+  name: string;
+  @ApiProperty()
+  organizationId?: string | undefined;
+  @ApiProperty()
+  icon: Icon | undefined;
   @ApiProperty()
   id: string;
   @ApiProperty()
@@ -44,8 +52,6 @@ export class GetAttributeTypeResponseDto extends CreatAttributeTypeDto {
   createdAt: string;
   @ApiProperty()
   updatedAt: string;
-  @ApiProperty({ isArray: true, type: 'string' })
-  assignedProperties?: Array<string>;
 }
 
 export class QueryAttributeTypeResponseDto {

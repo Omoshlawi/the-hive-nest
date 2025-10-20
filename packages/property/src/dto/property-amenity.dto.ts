@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
+import { Property, PropertyAmenity } from '../types';
 import { GetAmenityResponseDto } from './amenities.dto';
 
 // Property Amenity
@@ -17,7 +18,13 @@ export class UpdatePropertyAmenityDto extends createZodDto(
   PropertyAmenitySchema.partial(),
 ) {}
 
-export class GetPropertyAmenityResponseDto extends CreatPropertyAmenityDto {
+export class GetPropertyAmenityResponseDto implements PropertyAmenity {
+  @ApiProperty()
+  propertyId: string;
+  @ApiProperty()
+  amenityId: string;
+  @ApiProperty()
+  property?: Property | undefined;
   @ApiProperty()
   id: string;
   @ApiProperty({ type: GetAmenityResponseDto })

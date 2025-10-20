@@ -1,6 +1,7 @@
 import { QueryBuilderSchema } from '@hive/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { createZodDto } from 'nestjs-zod';
+import { Amenity, Icon, PropertyAmenity } from '../types';
 import z from 'zod';
 export const QueryAmenitySchema = z.object({
   ...QueryBuilderSchema.shape,
@@ -33,7 +34,14 @@ export class UpdateAmenityDto extends createZodDto(
   AmenitySchema.omit({ organizationId: true }).partial(),
 ) {}
 
-export class GetAmenityResponseDto extends CreatAmenityDto {
+export class GetAmenityResponseDto implements Amenity {
+  assignedProperties: PropertyAmenity[];
+  @ApiProperty()
+  name: string;
+  @ApiProperty()
+  organizationId?: string | undefined;
+  @ApiProperty()
+  icon: Icon | undefined;
   @ApiProperty()
   id: string;
   @ApiProperty()
@@ -42,8 +50,6 @@ export class GetAmenityResponseDto extends CreatAmenityDto {
   createdAt: string;
   @ApiProperty()
   updatedAt: string;
-  @ApiProperty({ isArray: true, type: 'string' })
-  assignedProperties?: Array<string>;
 }
 
 export class QueryAmenityResponseDto {

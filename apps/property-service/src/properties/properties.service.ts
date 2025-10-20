@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   CustomRepresentationService,
@@ -17,7 +14,7 @@ import {
   UpdatePropertyRequest,
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
-import { Property, Prisma } from '../../generated/prisma';
+import { Property, Prisma, PropertyMediaType } from '../../generated/prisma';
 import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
 import { HiveReferencesServiceClient } from '@hive/reference';
@@ -43,15 +40,71 @@ export class PropertiesService {
             voided: query?.includeVoided ? undefined : false,
             status: query?.status as Prisma.EnumPropertyStatusFilter,
             organizationId: query?.context?.organizationId ?? undefined,
-            addressId: query?.addressId ?? undefined,
             isVirtual: query?.isVirtual,
-            amenities: query?.amenityIds?.length
-              ? { some: { amenityId: { in: query?.amenityIds } } }
+            amenities: query?.amenities?.length
+              ? { some: { amenityId: { in: query?.amenities } } }
               : undefined,
-            categories: query?.categoryIds?.length
-              ? { some: { categoryId: { in: query?.categoryIds } } }
+            categories: query?.categories?.length
+              ? { some: { categoryId: { in: query?.categories } } }
+              : undefined,
+            attributes: {
+              some: {
+                AND: Object.entries(query.attributes ?? {}).map((attr) => ({
+                  OR: [
+                    { attribute: { name: attr[0] } },
+                    { attributeId: attr[0] },
+                  ],
+                  value: attr[1],
+                })),
+              },
+            },
+          },
+          // Address
+          // {
+          //   OR: query.address
+          //     ? [
+          //         { addressId: query.address },
+          //         {
+          //           address: {
+          //             path: [""],
+          //           },
+          //         },
+          //       ]
+          //     : undefined,
+          // },
+          // Amenities
+          {
+            OR: query?.amenities?.length
+              ? [
+                  {
+                    amenities: { some: { amenityId: { in: query.amenities } } },
+                  },
+                  {
+                    amenities: {
+                      some: { amenity: { name: { in: query.amenities } } },
+                    },
+                  },
+                ]
               : undefined,
           },
+          // categories
+          {
+            OR: query?.categories?.length
+              ? [
+                  {
+                    categories: {
+                      some: { categoryId: { in: query.categories } },
+                    },
+                  },
+                  {
+                    categories: {
+                      some: { category: { name: { in: query.categories } } },
+                    },
+                  },
+                ]
+              : undefined,
+          },
+          // seach
           {
             OR: query.search
               ? [{ name: { contains: query.search, mode: 'insensitive' } }]
@@ -107,7 +160,6 @@ export class PropertiesService {
       data: {
         ...props,
         propertyNumber: identifier?.identifier as string,
-        status: props?.status as any,
         organizationId: context!.organizationId!,
         createdBy: context!.userId!,
         amenities: {
@@ -126,6 +178,17 @@ export class PropertiesService {
             data: (categoryIds ?? []).map((categoryId) => ({ categoryId })),
           },
         },
+        addressId: query.addressId,
+        media: {
+          createMany: {
+            skipDuplicates: true,
+            data: props?.media?.map((media) => ({
+              ...media,
+              type: media.type as PropertyMediaType,
+              metadata: media.metadata ? JSON.parse(media.metadata) : undefined,
+            })),
+          },
+        },
       },
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
@@ -139,7 +202,7 @@ export class PropertiesService {
   }
 
   async update(query: UpdatePropertyRequest) {
-    const { queryBuilder, id, ...props } = query;
+    const { queryBuilder, id, context, ...props } = query;
     const data = await this.prismaService.property.update({
       where: { id },
       data: props as Prisma.PropertyUpdateInput,

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { createZodDto } from 'nestjs-zod';
-import z, { string } from 'zod';
+import { Property, PropertyAttribute } from '../types';
+import z from 'zod';
 import { GetAttributeTypeResponseDto } from './attribute-types.dto';
 
 // Property attribute
@@ -17,19 +18,31 @@ export class UpdatePropertyAttributeDto extends createZodDto(
   PropertyAttributeSchema.partial(),
 ) {}
 
-export class GetPropertyAttributeResponseDto extends CreatPropertyAttributeDto {
+export class GetPropertyAttributeResponseDto implements PropertyAttribute {
+  @ApiProperty()
+  attributeId: string;
+
+  @ApiProperty()
+  value: string;
+
+  @ApiProperty()
+  property?: Property | undefined;
+
   @ApiProperty()
   id: string;
+
   @ApiProperty({ type: GetAttributeTypeResponseDto })
   attribute: GetAttributeTypeResponseDto;
+
   @ApiProperty()
   propertyId: string;
-  @ApiProperty({ type: string })
-  property: string;
+
   @ApiProperty()
   voided: boolean;
+
   @ApiProperty()
   createdAt: string;
+
   @ApiProperty()
   updatedAt: string;
 }

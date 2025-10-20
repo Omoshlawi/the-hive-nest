@@ -341,12 +341,17 @@ export interface QueryPropertyRequest {
   search?: string | undefined;
   includeVoided?: boolean | undefined;
   status?: string | undefined;
-  addressId?: string | undefined;
+  address?: string | undefined;
   isVirtual?: boolean | undefined;
-  attributeIds: string[];
-  amenityIds: string[];
-  categoryIds: string[];
+  attributes: { [key: string]: string };
+  amenities: string[];
+  categories: string[];
   context?: RequestContext | undefined;
+}
+
+export interface QueryPropertyRequest_AttributesEntry {
+  key: string;
+  value: string;
 }
 
 export interface QueryPropertyResponse {
@@ -354,39 +359,44 @@ export interface QueryPropertyResponse {
   metadata: string;
 }
 
+export interface CreatePropertyNestedAttribute {
+  attributeId: string;
+  value: string;
+}
+
+export interface CreatePropertyNestedMedia {
+  type: string;
+  url: string;
+  title?: string | undefined;
+  description?: string | undefined;
+  order?:
+    | number
+    | undefined;
+  /** JSON Stringified metadata */
+  metadata?: string | undefined;
+}
+
 export interface CreatePropertyRequest {
   queryBuilder: QueryBuilder | undefined;
   name: string;
-  organizationId: string;
   addressId: string;
-  createdBy: string;
-  status: string;
   description?: string | undefined;
   thumbnail?: string | undefined;
   isVirtual: boolean;
-  /** json string */
-  attributes: string;
+  attributes: CreatePropertyNestedAttribute[];
   amenityIds: string[];
   categoryIds: string[];
   context?: RequestContext | undefined;
+  media: CreatePropertyNestedMedia[];
 }
 
 export interface UpdatePropertyRequest {
   queryBuilder: QueryBuilder | undefined;
   name?: string | undefined;
-  organizationId?: string | undefined;
   addressId?: string | undefined;
-  createdBy?: string | undefined;
-  status?: string | undefined;
   description?: string | undefined;
   thumbnail?: string | undefined;
-  isVirtual?:
-    | boolean
-    | undefined;
-  /** json string */
-  attributes?: string | undefined;
-  amenityIds: string[];
-  categoryIds: string[];
+  isVirtual?: boolean | undefined;
   id: string;
   context?: RequestContext | undefined;
 }

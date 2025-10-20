@@ -1,6 +1,7 @@
 import { QueryBuilderSchema } from '@hive/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { createZodDto } from 'nestjs-zod';
+import { Relationship, RelationshipType } from '../types';
 import z from 'zod';
 export const QueryRelationshipTypeSchema = z.object({
   ...QueryBuilderSchema.shape,
@@ -31,17 +32,29 @@ export class UpdateRelationshipTypeDto extends createZodDto(
   RelationshipTypeSchema.partial(),
 ) {}
 
-export class GetRelationshipTypeResponseDto extends CreatRelationshipTypeDto {
+export class GetRelationshipTypeResponseDto implements RelationshipType {
+  relationships: Relationship[];
+  
+  @ApiProperty()
+  description?: string | undefined;
+
+  @ApiProperty()
+  aIsToB: string;
+
+  @ApiProperty()
+  bIsToA: string;
+
   @ApiProperty()
   id: string;
+
   @ApiProperty()
   voided: boolean;
+
   @ApiProperty()
   createdAt: string;
+
   @ApiProperty()
   updatedAt: string;
-  @ApiProperty({ isArray: true, type: 'string' })
-  assignedProperties?: Array<string>;
 }
 
 export class QueryRelationshipTypeResponseDto {

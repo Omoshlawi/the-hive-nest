@@ -286,11 +286,11 @@ message QueryPropertyRequest {
     optional string search = 2;
     optional bool include_voided = 4;
     optional string status = 5;
-    optional string address_id = 6;
+    optional string address = 6;
     optional bool is_virtual = 7;
-    repeated string attribute_ids = 8;
-    repeated string amenity_ids = 9;
-    repeated string category_ids = 10;
+    map<string, string> attributes = 8;
+    repeated string amenities = 9;
+    repeated string categories = 10;
     optional RequestContext context = 11;
 
 }
@@ -298,36 +298,42 @@ message QueryPropertyResponse {
     repeated Property data = 1;
     string metadata = 2; 
 }
+
+message CreatePropertyNestedAttribute {
+    string attributeId = 1;
+    string value = 2;
+}
+
+message CreatePropertyNestedMedia {
+    string type = 1;
+    string url = 2;
+    optional string title = 3;
+    optional string description = 4;
+    optional int32 order = 5;
+    optional string metadata = 6; // JSON Stringified metadata
+}
 message CreatePropertyRequest {
     QueryBuilder query_builder = 1;
     string name = 2;
-    string organization_id = 3;
-    string address_id = 4;
-    string created_by = 5;
-    string status = 6;
-    optional string description = 7;
-    optional string thumbnail = 8;
-    bool is_virtual = 9;
-    string attributes = 10; // json string
-    repeated string amenity_ids = 11;
-    repeated string category_ids = 12;
-    optional RequestContext context = 13;
+    string address_id = 3;
+    optional string description = 4;
+    optional string thumbnail = 5;
+    bool is_virtual = 6;
+    repeated CreatePropertyNestedAttribute attributes = 7; 
+    repeated string amenity_ids = 8;
+    repeated string category_ids = 9;
+    optional RequestContext context = 10;
+    repeated CreatePropertyNestedMedia media = 11; 
 }
 message UpdatePropertyRequest {
     QueryBuilder query_builder = 1;
     optional string name = 2;
-    optional string organization_id = 3;
-    optional string address_id = 4;
-    optional string created_by = 5;
-    optional string status = 6;
-    optional string description = 7;
-    optional string thumbnail = 8;
-    optional bool is_virtual = 9;
-    optional string attributes = 10; // json string
-    repeated string amenity_ids = 11;
-    repeated string category_ids = 12;
-    string id = 13;
-    optional RequestContext context = 14;
+    optional string address_id = 3;
+    optional string description = 4;
+    optional string thumbnail = 5;
+    optional bool is_virtual = 6;
+    string id = 7;
+    optional RequestContext context = 8;
 }
 message GetPropertyRequest {
     QueryBuilder query_builder = 1;

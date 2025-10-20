@@ -1,6 +1,7 @@
 import { QueryBuilderSchema } from '@hive/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { createZodDto } from 'nestjs-zod';
+import { Category, Icon, PropertyCategory } from '../types';
 import z from 'zod';
 export const QueryCategorySchema = z.object({
   ...QueryBuilderSchema.shape,
@@ -33,7 +34,14 @@ export class UpdateCategoryDto extends createZodDto(
   CategorySchema.omit({ organizationId: true }).partial(),
 ) {}
 
-export class GetCategoryResponseDto extends CreatCategoryDto {
+export class GetCategoryResponseDto implements Category {
+  properties: PropertyCategory[];
+  @ApiProperty()
+  name: string;
+  @ApiProperty()
+  organizationId?: string | undefined;
+  @ApiProperty()
+  icon: Icon | undefined;
   @ApiProperty()
   id: string;
   @ApiProperty()
@@ -42,8 +50,6 @@ export class GetCategoryResponseDto extends CreatCategoryDto {
   createdAt: string;
   @ApiProperty()
   updatedAt: string;
-  @ApiProperty({ isArray: true, type: 'string' })
-  properties?: Array<string>;
 }
 
 export class QueryCategoryResponseDto {

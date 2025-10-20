@@ -1,11 +1,23 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { QueryBuilderSchema } from '@hive/common';
 import { QueryParamsUtils } from '@hive/utils';
 import { ApiProperty } from '@nestjs/swagger';
 import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
+import {
+  Address,
+  Icon,
+  Organization,
+  Property,
+  PropertyStatusHistory,
+  Relationship,
+} from '../types';
+import { GetPropertyAmenityResponseDto } from './property-amenity.dto';
+import { GetPropertyAttributeResponseDto } from './property-attributes.dto';
+import { GetPropertyCategoryResponseDto } from './property-category.dto';
+import {
+  GetPropertyMediaResponseDto,
+  PropertyMediaSchema,
+} from './property-media.dto';
 
 export const QueryPropertySchema = z.object({
   ...QueryBuilderSchema.shape,
@@ -78,20 +90,6 @@ export const QueryPropertySchema = z.object({
     .default(false),
 });
 
-export const PropertyMediaSchema = z.object({
-  // propertyId: z.string().uuid(),
-  type: z.enum(['IMAGE', 'VIDEO', 'DOCUMENT', 'TOUR_3D']),
-  url: z.string().min(1, 'Required'),
-  title: z.string().min(1, 'Required').optional(),
-  description: z.string().min(1, 'Required').optional(),
-  order: z.coerce.number().int().nonnegative().optional(),
-  metadata: z.object({
-    size: z.coerce.number(),
-    memeType: z.string().min(1, 'Required').optional(),
-    id: z.uuid().optional(),
-  }),
-});
-
 export const PropertySchema = z.object({
   name: z.string().nonempty('Required'),
   thumbnail: z.string().optional(),
@@ -117,7 +115,80 @@ export class CreatePropertyDto extends createZodDto(PropertySchema) {}
 
 export class UpdatePropertyDto extends createZodDto(PropertySchema.partial()) {}
 
-export class GetPropertyResponseDto extends CreatePropertyDto {
+export class GetPropertyResponseDto implements Property {
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty({ required: false })
+  description?: string | undefined;
+
+  @ApiProperty({ required: false })
+  thumbnail?: string | undefined;
+
+  @ApiProperty()
+  isVirtual: boolean;
+
+  @ApiProperty({
+    isArray: true,
+    required: false,
+    type: GetPropertyAttributeResponseDto,
+  })
+  attributes: GetPropertyAttributeResponseDto[];
+
+  @ApiProperty({
+    isArray: true,
+    required: false,
+    type: GetPropertyMediaResponseDto,
+  })
+  media: GetPropertyMediaResponseDto[];
+
+  @ApiProperty({
+    isArray: true,
+    required: false,
+    type: GetPropertyAmenityResponseDto,
+  })
+  amenities: GetPropertyAmenityResponseDto[];
+
+  @ApiProperty({
+    isArray: true,
+    required: false,
+    type: GetPropertyCategoryResponseDto,
+  })
+  categories: GetPropertyCategoryResponseDto[];
+
+  @ApiProperty()
+  addressId: string;
+
+  @ApiProperty()
+  propertyNumber: string;
+
+  @ApiProperty()
+  organizationId: string;
+
+  @ApiProperty()
+  icon: Icon;
+
+  @ApiProperty()
+  status: string;
+
+  @ApiProperty()
+  relationshipsAsA: Relationship[];
+
+  @ApiProperty()
+  relationshipsAsB: Relationship[];
+
+  @ApiProperty()
+  address?: Address;
+
+  @ApiProperty()
+  organization?: Organization;
+
+  @ApiProperty()
+  createdBy: string;
+
+  @ApiProperty()
+  statusHistory: PropertyStatusHistory[];
+
   @ApiProperty()
   id: string;
 

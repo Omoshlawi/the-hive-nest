@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   ApiErrorsResponse,
   CustomRepresentationQueryDto,
@@ -54,14 +52,13 @@ export class PropertiesController {
       },
       includeVoided: query.includeVoided,
       search: query.search,
-      attributeIds: [],
-      //   attributeIds: query.attributes,
-      amenityIds: query.amenities ?? [],
-      categoryIds: query.categories ?? [],
-      addressId: query.address,
+      attributes: query.attributes,
+      amenities: query.amenities,
+      categories: query.categories ?? [],
+      address: query.address,
       context: {},
       isVirtual: query.isVirtual,
-      status: '',
+      status: query.status,
     });
   }
 
@@ -78,15 +75,22 @@ export class PropertiesController {
       queryBuilder: {
         v: query.v,
       },
-      organizationId: '',
-      createdBy: '',
-      status: '',
-      amenityIds: [],
-      categoryIds: [],
+      name: createPropertyDto.name,
+      addressId: createPropertyDto.addressId,
       isVirtual: false,
-      name: '',
-      addressId: '',
-      attributes: '',
+      attributes: createPropertyDto.attributes ?? [],
+      amenityIds: createPropertyDto?.amenities ?? [],
+      categoryIds: createPropertyDto?.categories ?? [],
+      media: (createPropertyDto?.media ?? []).map((media) => ({
+        ...media,
+        metadata: JSON.stringify(media.metadata),
+      })),
+      context: {
+        organizationId: '',
+        userId: '',
+      },
+      description: createPropertyDto.description,
+      thumbnail: createPropertyDto.thumbnail,
     });
   }
 
@@ -118,8 +122,15 @@ export class PropertiesController {
     return this.propertiesService.properties.updateProperty({
       id,
       queryBuilder: { v: query?.v },
-      amenityIds: [],
-      categoryIds: [],
+      addressId: updatePropertyDto.addressId,
+      context: {
+        organizationId: '',
+        userId: '',
+      },
+      description: updatePropertyDto.description,
+      isVirtual: updatePropertyDto.isVirtual,
+      name: updatePropertyDto.name,
+      thumbnail: updatePropertyDto.thumbnail,
     });
   }
 
