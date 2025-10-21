@@ -98,7 +98,7 @@ export const protobufPackage = "hive.property.v1";
 
 export const HIVE_PROPERTY_V1_PACKAGE_NAME = "hive.property.v1";
 
-export interface PropertyClient {
+export interface PropertiesClient {
   /** amenities */
 
   queryAmenities(request: QueryAmenityRequest): Observable<QueryAmenityResponse>;
@@ -236,7 +236,7 @@ export interface PropertyClient {
   deletePropertyCategory(request: DeletePropertyCategoryRequest): Observable<GetPropertyCategoryResponse>;
 }
 
-export interface PropertyController {
+export interface PropertiesController {
   /** amenities */
 
   queryAmenities(
@@ -491,7 +491,7 @@ export interface PropertyController {
   ): Promise<GetPropertyCategoryResponse> | Observable<GetPropertyCategoryResponse> | GetPropertyCategoryResponse;
 }
 
-export function PropertyControllerMethods() {
+export function PropertiesControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
       "queryAmenities",
@@ -551,14 +551,14 @@ export function PropertyControllerMethods() {
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("Property", method)(constructor.prototype[method], method, descriptor);
+      GrpcMethod("Properties", method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("Property", method)(constructor.prototype[method], method, descriptor);
+      GrpcStreamMethod("Properties", method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
 
-export const PROPERTY_SERVICE_NAME = "Property";
+export const PROPERTIES_SERVICE_NAME = "Properties";

@@ -144,8 +144,16 @@ export class PropertiesService {
   }
 
   async create(query: CreatePropertyRequest) {
-    const { queryBuilder, context, amenityIds, categoryIds, ...props } = query;
-    // TODO Validate address
+    const {
+      queryBuilder,
+      context,
+      amenityIds,
+      categoryIds,
+      attributes,
+      addressId,
+      ...props
+    } = query;
+    // TODO Validate address and cache address details
 
     // Generate identifier
     const { data: identifier } = await lastValueFrom(
@@ -168,17 +176,18 @@ export class PropertiesService {
             data: (amenityIds ?? []).map((amenityId) => ({ amenityId })),
           },
         },
-        // attributes: {
-        //   createMany: { skipDuplicates: true, data: attributes ?? [] },
-        // },
-        attributes: {},
+        attributes: {
+          createMany: { skipDuplicates: true, data: attributes ?? [] },
+        },
+
         categories: {
           createMany: {
             skipDuplicates: true,
             data: (categoryIds ?? []).map((categoryId) => ({ categoryId })),
           },
         },
-        addressId: query.addressId,
+        addressId,
+
         media: {
           createMany: {
             skipDuplicates: true,

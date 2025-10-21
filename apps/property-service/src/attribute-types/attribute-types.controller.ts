@@ -3,7 +3,7 @@ import {
   DeleteAttributeTypeRequest,
   GetAttributeTypeRequest,
   GetAttributeTypeResponse,
-  PROPERTY_SERVICE_NAME,
+  PROPERTIES_SERVICE_NAME,
   QueryAttributeTypeRequest,
   QueryAttributeTypeResponse,
   UpdateAttributeTypeRequest,
@@ -15,7 +15,7 @@ import { AttributeTypesService } from './attribute-types.service';
 @Controller('attribute-types')
 export class AttributeTypesController {
   constructor(private readonly attributeTypeService: AttributeTypesService) {}
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'queryAttributeTypes')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'queryAttributeTypes')
   queryAttributeTypes(
     request: QueryAttributeTypeRequest,
   ): Promise<QueryAttributeTypeResponse> {
@@ -23,7 +23,7 @@ export class AttributeTypesController {
       request,
     ) as unknown as Promise<QueryAttributeTypeResponse>;
   }
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'getAttributeType')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'getAttributeType')
   async getAttributeType(
     request: GetAttributeTypeRequest,
   ): Promise<GetAttributeTypeResponse> {
@@ -32,7 +32,7 @@ export class AttributeTypesController {
       throw new RpcException(new NotFoundException('Attributetype not found'));
     return res as unknown as GetAttributeTypeResponse;
   }
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'createAttributeType')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'createAttributeType')
   createAttributeType(
     request: CreateAttributeTypeRequest,
   ): Promise<GetAttributeTypeResponse> {
@@ -40,7 +40,7 @@ export class AttributeTypesController {
       request,
     ) as unknown as Promise<GetAttributeTypeResponse>;
   }
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'updateAttributeType')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'updateAttributeType')
   updateAttributeType(
     request: UpdateAttributeTypeRequest,
   ): Promise<GetAttributeTypeResponse> {
@@ -48,7 +48,7 @@ export class AttributeTypesController {
       request,
     ) as unknown as Promise<GetAttributeTypeResponse>;
   }
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'deleteAttributeType')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'deleteAttributeType')
   deleteAttributeType(
     request: DeleteAttributeTypeRequest,
   ): Promise<GetAttributeTypeResponse> {

@@ -3,7 +3,7 @@ import {
   DeleteRelationshipTypeRequest,
   GetRelationshipTypeRequest,
   GetRelationshipTypeResponse,
-  PROPERTY_SERVICE_NAME,
+  PROPERTIES_SERVICE_NAME,
   QueryRelationshipTypeRequest,
   QueryRelationshipTypeResponse,
   UpdateRelationshipTypeRequest,
@@ -18,7 +18,7 @@ export class RelationshipTypesController {
     private readonly relationshipTypeService: RelationshipTypesService,
   ) {}
 
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'queryRelationshipType')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'queryRelationshipType')
   queryRelationshipType(
     request: QueryRelationshipTypeRequest,
   ): Promise<QueryRelationshipTypeResponse> {
@@ -26,7 +26,7 @@ export class RelationshipTypesController {
       request,
     ) as unknown as Promise<QueryRelationshipTypeResponse>;
   }
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'getRelationshipType')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'getRelationshipType')
   async getRelationshipType(
     request: GetRelationshipTypeRequest,
   ): Promise<GetRelationshipTypeResponse> {
@@ -35,7 +35,7 @@ export class RelationshipTypesController {
       throw new RpcException(new NotFoundException('Amenity not found'));
     return res as unknown as GetRelationshipTypeResponse;
   }
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'createRelationshipType')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'createRelationshipType')
   createRelationshipType(
     request: CreateRelationshipTypeRequest,
   ): Promise<GetRelationshipTypeResponse> {
@@ -43,7 +43,7 @@ export class RelationshipTypesController {
       request,
     ) as unknown as Promise<GetRelationshipTypeResponse>;
   }
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'updateRelationshipType')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'updateRelationshipType')
   updateRelationshipType(
     request: UpdateRelationshipTypeRequest,
   ): Promise<GetRelationshipTypeResponse> {
@@ -51,7 +51,7 @@ export class RelationshipTypesController {
       request,
     ) as unknown as Promise<GetRelationshipTypeResponse>;
   }
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'deleteRelationshipType')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'deleteRelationshipType')
   deleteRelationshipType(
     request: DeleteRelationshipTypeRequest,
   ): Promise<GetRelationshipTypeResponse> {

@@ -3,7 +3,7 @@ import {
   DeleteAmenityRequest,
   GetAmenityRequest,
   GetAmenityResponse,
-  PROPERTY_SERVICE_NAME,
+  PROPERTIES_SERVICE_NAME,
   QueryAmenityRequest,
   QueryAmenityResponse,
   UpdateAmenityRequest,
@@ -16,32 +16,32 @@ import { AmenitiesService } from './amenities.service';
 export class AmenitiesController {
   constructor(private readonly amenitiesService: AmenitiesService) {}
 
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'queryAmenities')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'queryAmenities')
   queryAmenities(request: QueryAmenityRequest): Promise<QueryAmenityResponse> {
     return this.amenitiesService.getAll(
       request,
     ) as unknown as Promise<QueryAmenityResponse>;
   }
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'getAmenity')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'getAmenity')
   async getAmenity(request: GetAmenityRequest): Promise<GetAmenityResponse> {
     const res = await this.amenitiesService.getById(request);
     if (!res.data)
       throw new RpcException(new NotFoundException('Amenity not found'));
     return res as unknown as GetAmenityResponse;
   }
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'createAmenity')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'createAmenity')
   createAmenity(request: CreateAmenityRequest): Promise<GetAmenityResponse> {
     return this.amenitiesService.create(
       request,
     ) as unknown as Promise<GetAmenityResponse>;
   }
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'updateAmenity')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'updateAmenity')
   updateAmenity(request: UpdateAmenityRequest): Promise<GetAmenityResponse> {
     return this.amenitiesService.update(
       request,
     ) as unknown as Promise<GetAmenityResponse>;
   }
-  @GrpcMethod(PROPERTY_SERVICE_NAME, 'deleteAmenity')
+  @GrpcMethod(PROPERTIES_SERVICE_NAME, 'deleteAmenity')
   deleteAmenity(request: DeleteAmenityRequest): Promise<GetAmenityResponse> {
     return this.amenitiesService.delete(
       request,

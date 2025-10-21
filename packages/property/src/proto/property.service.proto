@@ -9,7 +9,7 @@ import "relationship-type.message.proto";
 
 package hive.property.v1;
 
-service Property {
+service Properties {
     // amenities
     rpc QueryAmenities(QueryAmenityRequest) returns (QueryAmenityResponse){};
     rpc GetAmenity(GetAmenityRequest) returns (GetAmenityResponse){};

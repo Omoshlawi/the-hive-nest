@@ -21,6 +21,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -32,7 +33,9 @@ import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
+import { AuthGuard } from '@thallesp/nestjs-better-auth';
 
+@UseGuards(AuthGuard)
 @Controller('properties')
 export class PropertiesController {
   constructor(private propertiesService: HivePropertyServiceClient) {}

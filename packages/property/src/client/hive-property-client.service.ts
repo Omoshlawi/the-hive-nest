@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { HiveService, HiveServiceClient } from '@hive/registry';
 import { HIVE_PROPERTY_SERVICE_NAME, PROPERTY_PACKAGE } from '../constants';
 import {
@@ -17,8 +19,8 @@ import {
   GetCategoryResponse,
   GetPropertyRequest,
   GetPropertyResponse,
-  PROPERTY_SERVICE_NAME,
-  PropertyClient,
+  PROPERTIES_SERVICE_NAME,
+  PropertiesClient,
   QueryAmenityRequest,
   QueryAmenityResponse,
   QueryAttributeTypeRequest,
@@ -90,7 +92,7 @@ import {
   package: PROPERTY_PACKAGE.V1.NAME,
   protoPath: PROPERTY_PACKAGE.V1.PROTO_PATH,
   version: '0.0.1',
-  serviceName: PROPERTY_SERVICE_NAME,
+  serviceName: PROPERTIES_SERVICE_NAME,
   name: HIVE_PROPERTY_SERVICE_NAME,
 })
 export class HivePropertyServiceClient
@@ -98,7 +100,7 @@ export class HivePropertyServiceClient
 {
   constructor(private client: HiveServiceClient) {}
   private loadBalance() {
-    const property = this.client.getService<PropertyClient>();
+    const property = this.client.getService<PropertiesClient>();
     if (!property) throw new Error('No service instance');
     return property;
   }
