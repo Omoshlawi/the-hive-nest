@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   ApiErrorsResponse,
   CustomRepresentationQueryDto,
@@ -34,11 +32,14 @@ import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
+import { OptionalAuth } from '@thallesp/nestjs-better-auth';
+import { RequireSystemPermission } from '../auth/auth.decorators';
 
 @Controller('amenities')
 export class AmenitiesController {
   constructor(private propertyservice: HivePropertyServiceClient) {}
   @Get('/')
+  @OptionalAuth()
   @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query Amenities' })
   @ApiOkResponse({ type: QueryAmenityResponseDto })
@@ -57,6 +58,7 @@ export class AmenitiesController {
     });
   }
   @Post('/')
+  @RequireSystemPermission({ amenity: ['create'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create Amenity' })
   @ApiCreatedResponse({ type: GetAmenityResponseDto })
@@ -73,6 +75,7 @@ export class AmenitiesController {
     });
   }
   @Get('/:id')
+  @OptionalAuth()
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get Amenity' })
   @ApiOkResponse({ type: GetAmenityResponseDto })
@@ -87,6 +90,7 @@ export class AmenitiesController {
     });
   }
   @Patch('/:id')
+  @RequireSystemPermission({ amenity: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update Amenity' })
   @ApiOkResponse({ type: GetAmenityResponseDto })
@@ -103,6 +107,7 @@ export class AmenitiesController {
     });
   }
   @Delete('/:id')
+  @RequireSystemPermission({ amenity: ['delete'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete Amenity' })
   @ApiOkResponse({ type: GetAmenityResponseDto })

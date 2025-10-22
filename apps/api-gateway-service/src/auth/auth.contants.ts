@@ -17,3 +17,5 @@ export const organizationConfig = {
 } as const;
 
 export const adminConfig = { ac: adminPluginAcl, roles: adminPluginRoles };
+export const REQUIRE_ACTIVE_ORGANIZATION_KEY = 'REQUIRE_ACTIVE_ORGANIZATION';
+

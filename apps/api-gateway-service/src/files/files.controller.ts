@@ -27,7 +27,6 @@ import {
   Query,
   UploadedFile,
   UploadedFiles,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -36,20 +35,16 @@ import {
   FilesInterceptor,
 } from '@nestjs/platform-express';
 import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
-import { AuthGuard, Session } from '@thallesp/nestjs-better-auth';
+import { OptionalAuth, Session } from '@thallesp/nestjs-better-auth';
 import { createHash } from 'crypto';
 import { lastValueFrom, map } from 'rxjs';
-import { UserSession } from '../auth/auth.types';
-import { S3Service } from '../s3/s3.service';
 import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
+import { UserSession } from '../auth/auth.types';
+import { S3Service } from '../s3/s3.service';
 
-// TODO: implement deduplication of files by generating file hash and cross checking on dab if exist then retuern reference
-// Also implement methods to validate before uploading to bucket
-
-@UseGuards(AuthGuard)
 @Controller('files')
 export class FilesController {
   private readonly logger = new Logger(FilesController.name);
@@ -105,6 +100,7 @@ export class FilesController {
   }
 
   @Get('/hash')
+  @OptionalAuth()
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get FileBlob by hash' })
   getFileByHash(

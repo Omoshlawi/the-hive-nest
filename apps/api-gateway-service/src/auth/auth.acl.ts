@@ -63,7 +63,7 @@ const organizationOwnerRole = organizationPluginAcl.newRole({
 
 const organizationMemberRole = organizationPluginAcl.newRole({
   file: ['list'],
-  property: ['read'],
+  property: [],
   listing: ['read'],
   ...memberAc.statements,
 });

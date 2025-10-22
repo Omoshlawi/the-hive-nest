@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   ApiErrorsResponse,
   CustomRepresentationQueryDto,
@@ -34,10 +32,13 @@ import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
+import { OptionalAuth } from '@thallesp/nestjs-better-auth';
+import { RequireSystemPermission } from '../auth/auth.decorators';
 @Controller('categories')
 export class CategoriesController {
   constructor(private propertyservice: HivePropertyServiceClient) {}
   @Get('/')
+  @OptionalAuth()
   @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query Categories' })
   @ApiOkResponse({ type: QueryCategoryResponseDto })
@@ -56,6 +57,7 @@ export class CategoriesController {
     });
   }
   @Post('/')
+  @RequireSystemPermission({ category: ['create'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create Category' })
   @ApiCreatedResponse({ type: GetCategoryResponseDto })
@@ -72,6 +74,7 @@ export class CategoriesController {
     });
   }
   @Get('/:id')
+  @OptionalAuth()
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get Category' })
   @ApiOkResponse({ type: GetCategoryResponseDto })
@@ -86,6 +89,7 @@ export class CategoriesController {
     });
   }
   @Patch('/:id')
+  @RequireSystemPermission({ category: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update Category' })
   @ApiOkResponse({ type: GetCategoryResponseDto })
@@ -102,6 +106,7 @@ export class CategoriesController {
     });
   }
   @Delete('/:id')
+  @RequireSystemPermission({ category: ['delete'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete Category' })
   @ApiOkResponse({ type: GetCategoryResponseDto })

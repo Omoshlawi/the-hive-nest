@@ -21,7 +21,6 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -29,18 +28,18 @@ import {
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
+import { RequireOrganizationPermission } from 'src/auth/auth.decorators';
 import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
-import { AuthGuard } from '@thallesp/nestjs-better-auth';
 
-@UseGuards(AuthGuard)
 @Controller('properties')
 export class PropertiesController {
   constructor(private propertiesService: HivePropertyServiceClient) {}
 
   @Get('/')
+  @RequireOrganizationPermission({ property: ['read'] })
   @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query Property' })
   @ApiOkResponse({ type: QueryPropertyResponseDto })

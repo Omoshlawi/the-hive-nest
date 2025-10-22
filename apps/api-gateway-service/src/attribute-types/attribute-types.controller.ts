@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   ApiErrorsResponse,
   CustomRepresentationQueryDto,
@@ -34,11 +32,14 @@ import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
+import { OptionalAuth } from '@thallesp/nestjs-better-auth';
+import { RequireSystemPermission } from '../auth/auth.decorators';
 
 @Controller('attribute-types')
 export class AttributeTypesController {
   constructor(private propertyservice: HivePropertyServiceClient) {}
   @Get('/')
+  @OptionalAuth()
   @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query attribute types' })
   @ApiOkResponse({ type: QueryAttributeTypeResponseDto })
@@ -57,6 +58,7 @@ export class AttributeTypesController {
     });
   }
   @Post('/')
+  @RequireSystemPermission({ attributeType: ['create'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create AttributeType' })
   @ApiCreatedResponse({ type: GetAttributeTypeResponseDto })
@@ -73,6 +75,7 @@ export class AttributeTypesController {
     });
   }
   @Get('/:id')
+  @OptionalAuth()
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Get AttributeType' })
   @ApiOkResponse({ type: GetAttributeTypeResponseDto })
@@ -87,6 +90,7 @@ export class AttributeTypesController {
     });
   }
   @Patch('/:id')
+  @RequireSystemPermission({ attributeType: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update AttributeType' })
   @ApiOkResponse({ type: GetAttributeTypeResponseDto })
@@ -103,6 +107,7 @@ export class AttributeTypesController {
     });
   }
   @Delete('/:id')
+  @RequireSystemPermission({ attributeType: ['delete'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete AttributeType' })
   @ApiOkResponse({ type: GetAttributeTypeResponseDto })

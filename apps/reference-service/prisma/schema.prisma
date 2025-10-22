@@ -20,3 +20,51 @@ model IdentifierSequence {
   lastNumber Int      @default(0)
   updatedAt  DateTime @updatedAt
 }
+
+model County {
+  code     String  @id @unique
+  name     String
+  capital  String?
+  metadata Json?
+
+  voided      Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  subCounties SubCounty[]
+  wards       Ward[]
+
+  @@index([code, name])
+}
+
+model SubCounty {
+  code String @id @unique
+  name String
+
+  countyCode String
+  county     County @relation(fields: [countyCode], references: [code], onDelete: Cascade)
+  metadata   Json?
+
+  voided    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  wards     Ward[]
+
+  @@index([countyCode, name])
+}
+
+model Ward {
+  code String @id @unique
+  name String
+
+  countyCode    String
+  county        County    @relation(fields: [countyCode], references: [code], onDelete: Cascade)
+  subCountyCode String
+  subCounty     SubCounty @relation(fields: [subCountyCode], references: [code], onDelete: Cascade)
+  metadata      Json?
+
+  voided    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([subCountyCode, name])
+}

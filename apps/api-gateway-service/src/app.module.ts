@@ -25,11 +25,17 @@ import { CategoriesModule } from './categories/categories.module';
 import { FilesModule } from './files/files.module';
 import { IdentityModule } from './identity/identity.module';
 
+import { APP_GUARD } from '@nestjs/core';
+import {
+  RequireActiveOrganizationGuard,
+  RequireOrganizationPermissionsGuard,
+  RequireSystemPermissionsGuard,
+} from './auth/auth.guards';
 import { AuthModule } from './auth/auth.module';
-import { RegistryModule } from './registry/registry.module';
-import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
 import { IdentifierSequenceModule } from './identifier-sequence/identifier-sequence.module';
 import { PropertiesModule } from './properties/properties.module';
+import { RegistryModule } from './registry/registry.module';
+import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
 
 @Module({
   imports: [
@@ -90,6 +96,9 @@ import { PropertiesModule } from './properties/properties.module';
     GlobalZodValidationPipe,
     GlobalZodExceptionFilter,
     GlobalRpcExceptionInterceptor,
+    { provide: APP_GUARD, useClass: RequireActiveOrganizationGuard },
+    { provide: APP_GUARD, useClass: RequireOrganizationPermissionsGuard },
+    { provide: APP_GUARD, useClass: RequireSystemPermissionsGuard },
   ],
   exports: [],
 })

@@ -6,12 +6,6 @@ import {
   UpdateFileUsageScopeDto,
 } from '@hive/files';
 import {
-  AuthGuard,
-  Public,
-  Session,
-  UserSession,
-} from '@thallesp/nestjs-better-auth';
-import {
   Body,
   Controller,
   Delete,
@@ -21,16 +15,15 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { Public, Session, UserSession } from '@thallesp/nestjs-better-auth';
 import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
 
-@UseGuards(AuthGuard)
 @Controller('files/usage-scope')
 export class FileUsageScopeController {
   constructor(private readonly fileService: HiveFileServiceClient) {}
