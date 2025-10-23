@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { S3Module as NestS3Module } from 'nestjs-s3';
-import { S3Config } from 'src/config/s3.config';
+import { S3Config } from '../config/s3.config';
 import { S3Service } from './s3.service';
 @Module({
   providers: [S3Service],

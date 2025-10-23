@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   ApiErrorsResponse,
   CustomRepresentationQueryDto,
@@ -35,6 +33,7 @@ import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
+import { RequireOrganizationPermission } from '../auth/auth.decorators';
 
 @Controller('properties/:propertyId/categories')
 @ApiTags('Properties', 'Property Categories')
@@ -59,6 +58,7 @@ export class PropertyCategoryController {
   }
 
   @Post('/')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create PropertyCategory' })
   @ApiCreatedResponse({ type: GetPropertyCategoryResponseDto })
@@ -91,6 +91,7 @@ export class PropertyCategoryController {
   }
 
   @Patch('/:id')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update PropertyCategory' })
   @ApiOkResponse({ type: GetPropertyCategoryResponseDto })
@@ -108,6 +109,7 @@ export class PropertyCategoryController {
   }
 
   @Delete('/:id')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete PropertyCategory' })
   @ApiOkResponse({ type: GetPropertyCategoryResponseDto })

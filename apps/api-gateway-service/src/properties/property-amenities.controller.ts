@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   ApiErrorsResponse,
   CustomRepresentationQueryDto,
@@ -35,6 +33,7 @@ import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
+import { RequireOrganizationPermission } from '../auth/auth.decorators';
 
 @Controller('properties/:propertyId/amenities')
 @ApiTags('Properties', 'Property Amenities')
@@ -59,6 +58,7 @@ export class PropertyAmenityController {
   }
 
   @Post('/')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create PropertyAmenity' })
   @ApiCreatedResponse({ type: GetPropertyAmenityResponseDto })
@@ -91,6 +91,7 @@ export class PropertyAmenityController {
   }
 
   @Patch('/:id')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update PropertyAmenity' })
   @ApiOkResponse({ type: GetPropertyAmenityResponseDto })
@@ -108,6 +109,7 @@ export class PropertyAmenityController {
   }
 
   @Delete('/:id')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete PropertyAmenity' })
   @ApiOkResponse({ type: GetPropertyAmenityResponseDto })

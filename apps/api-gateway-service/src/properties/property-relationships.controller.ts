@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   ApiErrorsResponse,
   CustomRepresentationQueryDto,
@@ -35,6 +33,7 @@ import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
+import { RequireOrganizationPermission } from '../auth/auth.decorators';
 
 @Controller('properties/:propertyId/relationships')
 @ApiTags('Properties', 'Property Relationships')
@@ -60,6 +59,7 @@ export class PropertyRelationshipController {
   }
 
   @Post('/')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create PropertyRelationship' })
   @ApiCreatedResponse({ type: GetPropertyRelationshipResponseDto })
@@ -92,6 +92,7 @@ export class PropertyRelationshipController {
   }
 
   @Patch('/:id')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update PropertyRelationship' })
   @ApiOkResponse({ type: GetPropertyRelationshipResponseDto })
@@ -109,6 +110,7 @@ export class PropertyRelationshipController {
   }
 
   @Delete('/:id')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete PropertyRelationship' })
   @ApiOkResponse({ type: GetPropertyRelationshipResponseDto })

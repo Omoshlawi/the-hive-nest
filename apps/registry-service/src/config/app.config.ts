@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Configuration, Value } from '@itgorillaz/configify';
-import { StorageStrategy } from 'src/storage/storage.interfaces';
+import { StorageStrategy } from '../storage/storage.interfaces';
 import z from 'zod';
 
 @Configuration()

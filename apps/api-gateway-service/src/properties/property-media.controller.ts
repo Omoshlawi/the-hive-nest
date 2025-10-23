@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   ApiErrorsResponse,
   CustomRepresentationQueryDto,
@@ -35,6 +33,7 @@ import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
+import { RequireOrganizationPermission } from '../auth/auth.decorators';
 
 @Controller('properties/:propertyId/media')
 @ApiTags('Properties', 'Property Media')
@@ -63,13 +62,12 @@ export class PropertyMediaController {
       size: query.size,
       type: query.type,
       memeType: query.memeType,
-      context: {
-
-      }
+      context: {},
     });
   }
 
   @Post('/')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create PropertyMedia' })
   @ApiCreatedResponse({ type: GetPropertyMediaResponseDto })
@@ -83,7 +81,6 @@ export class PropertyMediaController {
         v: query.v,
       },
       ...createPropertyMediaDto,
-      
     });
   }
 
@@ -103,6 +100,7 @@ export class PropertyMediaController {
   }
 
   @Patch('/:id')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update PropertyMedia' })
   @ApiOkResponse({ type: GetPropertyMediaResponseDto })
@@ -120,6 +118,7 @@ export class PropertyMediaController {
   }
 
   @Delete('/:id')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete PropertyMedia' })
   @ApiOkResponse({ type: GetPropertyMediaResponseDto })

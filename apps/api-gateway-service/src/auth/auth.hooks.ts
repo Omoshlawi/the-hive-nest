@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/require-await */
 import { Injectable } from '@nestjs/common';
 import { Hook, AuthHookContext, AfterHook } from '@thallesp/nestjs-better-auth';
 import { Invitation } from 'better-auth/plugins';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Hook()
 @Injectable()

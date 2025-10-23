@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   ApiErrorsResponse,
   CustomRepresentationQueryDto,
@@ -36,6 +33,7 @@ import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
+import { RequireOrganizationPermission } from '../auth/auth.decorators';
 
 @Controller('properties/:propertyId/attributes')
 @ApiTags('Properties', 'Property Attributes')
@@ -60,6 +58,7 @@ export class PropertyAttributeController {
   }
 
   @Post('/')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create PropertyAttribute' })
   @ApiCreatedResponse({ type: GetPropertyAttributeResponseDto })
@@ -92,6 +91,7 @@ export class PropertyAttributeController {
   }
 
   @Patch('/:id')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update PropertyAttribute' })
   @ApiOkResponse({ type: GetPropertyAttributeResponseDto })
@@ -109,6 +109,7 @@ export class PropertyAttributeController {
   }
 
   @Delete('/:id')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete PropertyAttribute' })
   @ApiOkResponse({ type: GetPropertyAttributeResponseDto })

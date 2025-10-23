@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 // Updated RedisStorage to provide complete service data on expiration
 
 import { Injectable } from '@nestjs/common';
 import { ServiceRegistration, BaseStorage } from '@hive/registry';
 import { RedisService } from './redis.service';
-import { AppConfig } from 'src/config/app.config';
+import { AppConfig } from '../config/app.config';
 
 @Injectable()
 export class RedisStorage extends BaseStorage {
@@ -37,7 +41,7 @@ export class RedisStorage extends BaseStorage {
 
   private setupServiceExpirationListener(): void {
     this.redisService.addExpirationListener(
-      async (expiredKey: string, channel: string, db: number) => {
+      async (expiredKey: string, _channel: string, _db: number) => {
         // Only handle main service keys (not backup keys)
         if (
           expiredKey.startsWith(this.keyPrefix) &&
@@ -53,7 +57,9 @@ export class RedisStorage extends BaseStorage {
             const serviceData = await this.redisService.get(backupKey);
 
             if (serviceData) {
-              const service: ServiceRegistration = JSON.parse(serviceData);
+              const service: ServiceRegistration = JSON.parse(
+                serviceData,
+              ) as ServiceRegistration;
 
               // Clean up backup key
               await this.redisService.del(backupKey);

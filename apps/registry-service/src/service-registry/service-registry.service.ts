@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   BaseStorage,
   HeartbeatResponse,
@@ -19,8 +21,8 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { Observable, Subject } from 'rxjs';
-import { AppConfig } from 'src/config/app.config';
-import { RedisStorage } from 'src/storage/storage.redis.service';
+import { AppConfig } from '../config/app.config';
+import { RedisStorage } from '../storage/storage.redis.service';
 
 @Injectable()
 export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
@@ -153,7 +155,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
       `Retrieved ${allServices.length} total services from storage`,
     );
 
-    let filteredServices = ServiceUtils.filterServices(allServices, query);
+    const filteredServices = ServiceUtils.filterServices(allServices, query);
     // Log final results with service details
     if (filteredServices.length > 0) {
       const servicesSummary = filteredServices
@@ -315,5 +317,4 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
       this.logger.error(`Cleanup failed: ${error.message}`);
     }
   }
-
 }

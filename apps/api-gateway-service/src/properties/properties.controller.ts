@@ -28,7 +28,7 @@ import {
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
-import { RequireOrganizationPermission } from 'src/auth/auth.decorators';
+import { RequireOrganizationPermission } from '../auth/auth.decorators';
 import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
@@ -39,7 +39,6 @@ export class PropertiesController {
   constructor(private propertiesService: HivePropertyServiceClient) {}
 
   @Get('/')
-  @RequireOrganizationPermission({ property: ['read'] })
   @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query Property' })
   @ApiOkResponse({ type: QueryPropertyResponseDto })
@@ -65,6 +64,7 @@ export class PropertiesController {
   }
 
   @Post('/')
+  @RequireOrganizationPermission({ property: ['create'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create Property' })
   @ApiCreatedResponse({ type: GetPropertyResponseDto })
@@ -112,6 +112,7 @@ export class PropertiesController {
   }
 
   @Patch('/:id')
+  @RequireOrganizationPermission({ property: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update Property' })
   @ApiOkResponse({ type: GetPropertyResponseDto })
@@ -137,6 +138,7 @@ export class PropertiesController {
   }
 
   @Delete('/:id')
+  @RequireOrganizationPermission({ property: ['delete'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete Property' })
   @ApiOkResponse({ type: GetPropertyResponseDto })
