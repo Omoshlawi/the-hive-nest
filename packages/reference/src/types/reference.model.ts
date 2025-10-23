@@ -15,4 +15,87 @@ export interface IdentifierSequence {
   updatedAt: string;
 }
 
+export interface AddressHierarchy {
+  id: string;
+  country: string;
+  level: number;
+  parentId: string;
+  parent?: AddressHierarchy | undefined;
+  children: AddressHierarchy[];
+  code: string;
+  name: string;
+  nameLocal: string;
+  voided: boolean;
+}
+
+export interface User {
+}
+
+export interface Organization {
+}
+
+export interface Address {
+  id: string;
+  /** Polymorphic ownership */
+  userId?:
+    | string
+    | undefined;
+  /** minimal cached user profile */
+  user?: User | undefined;
+  organizationId?:
+    | string
+    | undefined;
+  /** minimal cached organization object */
+  organization?:
+    | Organization
+    | undefined;
+  /** Metadata */
+  type: string;
+  label?:
+    | string
+    | undefined;
+  /** Street-level details */
+  address1: string;
+  address2: string;
+  landmark?:
+    | string
+    | undefined;
+  /** Administrative hierarchy (flexible) */
+  level1: string;
+  level2?: string | undefined;
+  level3?: string | undefined;
+  level4?: string | undefined;
+  level5?:
+    | string
+    | undefined;
+  /** Legacy/common fields */
+  cityVillage?: string | undefined;
+  stateProvince?: string | undefined;
+  country: string;
+  postalCode?:
+    | string
+    | undefined;
+  /** Geolocation */
+  latitude?: number | undefined;
+  longitude?: number | undefined;
+  plusCode?:
+    | string
+    | undefined;
+  /** Temporal tracking */
+  startDate: string;
+  endDate?:
+    | string
+    | undefined;
+  /** Metadata */
+  preferred: boolean;
+  formatted?:
+    | string
+    | undefined;
+  /** Locale-specific configuration */
+  localeFormat?: string | undefined;
+  createdAt: string;
+  updatedAt: string;
+  voided: boolean;
+}
+
 export const _PACKAGE_NAME = "";

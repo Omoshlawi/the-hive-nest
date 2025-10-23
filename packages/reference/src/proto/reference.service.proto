@@ -2,12 +2,27 @@ syntax = 'proto3';
 
 import "reference.message.proto";
 import "common.message.proto";
+import "address.message.proto";
+import "address-hierarchy.message.proto";
+
 
 package hive.reference.v1;
 
 service References {
-  // Scope
+  // Identifier Sequence
   rpc QueryIdentifierSequence(QueryIdentifierSequenceRequest) returns (QueryIdentifierSequenceResponse){};
   rpc CreateIdentifierSequence(CreateIdentifierSequenceRequest) returns (CreateIdentifierSequenceResponse){};
   rpc DeleteIdentifierSequence(DeleteRequest) returns (GetIdentifierSequenceResponse){};
+
+  // Address Hierarchy
+  rpc QueryAddressHierarchy(QueryAddressHierarchyRequest) returns (QueryAddressHierarchyResponse){};
+  rpc GetAddressHierarchy(GetRequest) returns (GetAddressHierarchyResponse){};
+  rpc DeleteAddressHierarchy(DeleteRequest) returns (GetAddressHierarchyResponse){};
+
+  // Address
+  rpc QueryAddress(QueryAddressRequest) returns (QueryAddressResponse){};
+  rpc GetAddress(GetRequest) returns (GetAddressResponse){};
+  rpc CreateAddress(CreateAddressRequest) returns (GetAddressResponse){};
+  rpc UpdateAddress(UpdateAddressRequest) returns (GetAddressResponse){};
+  rpc DeleteAddress(DeleteRequest) returns (GetAddressResponse){};
 }

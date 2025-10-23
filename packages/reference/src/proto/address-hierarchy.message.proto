@@ -1,0 +1,24 @@
+syntax = 'proto3';
+
+
+import "common.message.proto";
+import "reference.model.proto";
+
+message QueryAddressHierarchyRequest {
+    QueryBuilder query_builder = 1;
+    optional string search = 2;
+    optional string model_name = 3;
+    optional string purpose = 4;
+    optional bool include_voided = 5;
+    optional RequestContext context = 6;
+}
+
+message QueryAddressHierarchyResponse {
+    repeated AddressHierarchy data = 1;
+    string metadata = 2; 
+}
+
+message GetAddressHierarchyResponse {
+    AddressHierarchy data = 1;
+    string metadata = 2; 
+}

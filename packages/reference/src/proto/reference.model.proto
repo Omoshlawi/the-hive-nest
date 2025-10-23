@@ -1,9 +1,84 @@
 syntax = 'proto3';
 
-
 message IdentifierSequence {
     string id = 1;
     string data_model  = 2;
     string last_number = 3;
     string updated_at  = 4;
+}
+
+message AddressHierarchy {
+    string id = 1;
+    string country = 2;
+    int32 level = 3;
+    string parent_id = 4;
+    optional AddressHierarchy parent = 5;
+    repeated AddressHierarchy children = 6;
+    string code = 7;
+    string name = 8;
+    string name_local = 9;
+    bool voided = 10;
+}
+
+message User {
+
+}
+
+message Organization {
+
+}
+
+message Address {
+    string id = 1;
+
+    // Polymorphic ownership
+    optional string user_id = 2;
+    optional User user = 3; // minimal cached user profile
+
+    optional string organization_id = 4;
+    optional Organization organization = 5; // minimal cached organization object
+
+    // Metadata
+    string type = 6;
+    optional string label = 7;
+
+    // Street-level details
+    string address1 = 8;
+    string address2 = 9;
+    optional string landmark = 10;
+
+    // Administrative hierarchy (flexible)
+    string level1 = 11;
+    optional string level2 = 12;
+    optional string level3 = 13;
+    optional string level4 = 14;
+    optional string level5 = 15;
+
+    // Legacy/common fields
+    optional string city_village = 16;
+    optional string state_province = 17;
+
+    string country = 18;
+    optional string postal_code = 19;
+
+    // Geolocation
+    optional double latitude = 20;
+    optional double longitude = 21;
+    optional string plus_code = 22;
+
+    // Temporal tracking
+    string start_date = 23;
+    optional string end_date = 24;
+
+    // Metadata
+    bool preferred = 25;
+    optional string formatted = 26;
+
+    // Locale-specific configuration
+    optional string locale_format = 27; // JSON Strinigied object
+
+    string created_at = 28;
+    string updated_at = 29;
+
+    bool voided = 30;
 }

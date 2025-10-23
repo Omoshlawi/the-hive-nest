@@ -1,0 +1,145 @@
+{
+  "NestJS Service - GetAll Method": {
+    "prefix": "nest-service-getall",
+    "body": [
+      "async getAll(query: Query${1:Entity}Request) {",
+      "  const dbQuery: FunctionFirstArgument<",
+      "    typeof this.prismaService.${2:${1/(.*)/${1:/downcase}/}}.findMany",
+      "  > = {",
+      "    where: {",
+      "      AND: [",
+      "        { voided: query?.includeVoided ? undefined : false },",
+      "        {",
+      "          OR: query.search",
+      "            ? [{ ${3:name}: { contains: query.search } }]",
+      "            : undefined,",
+      "        },",
+      "      ],",
+      "    },",
+      "    ...this.paginationService.buildPaginationQuery(query.queryBuilder),",
+      "    ...this.representationService.buildCustomRepresentationQuery(",
+      "      query.queryBuilder?.v,",
+      "    ),",
+      "    ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),",
+      "  };",
+      "  const [data, totalCount] = await Promise.all([",
+      "    this.prismaService.${2:${1/(.*)/${1:/downcase}/}}.findMany(dbQuery),",
+      "    this.prismaService.${2:${1/(.*)/${1:/downcase}/}}.count(pick(dbQuery, 'where')),",
+      "  ]);",
+      "  return {",
+      "    data,",
+      "    metadata: JSON.stringify({ totalCount: totalCount }),",
+      "  };",
+      "}"
+    ],
+    "description": "Generate getAll method for NestJS service with Prisma"
+  },
+
+  "NestJS Service - GetById Method": {
+    "prefix": "nest-service-getbyid",
+    "body": [
+      "async getById(query: Get${1:Entity}Request) {",
+      "  const data = await this.prismaService.${2:${1/(.*)/${1:/downcase}/}}.findUnique({",
+      "    where: {",
+      "      id: query.id,",
+      "    },",
+      "    ...this.representationService.buildCustomRepresentationQuery(",
+      "      query.queryBuilder?.v,",
+      "    ),",
+      "  });",
+      "  return {",
+      "    data,",
+      "    metadata: JSON.stringify({}),",
+      "  };",
+      "}"
+    ],
+    "description": "Generate getById method for NestJS service with Prisma"
+  },
+
+  "NestJS Service - Create Method": {
+    "prefix": "nest-service-create",
+    "body": [
+      "async create(query: Create${1:Entity}Request) {",
+      "  const { queryBuilder, context: _, ...props } = query;",
+      "  const data = await this.prismaService.${2:${1/(.*)/${1:/downcase}/}}.create({",
+      "    data: props as Prisma.${1:Entity}CreateInput,",
+      "    ...this.representationService.buildCustomRepresentationQuery(",
+      "      queryBuilder?.v,",
+      "    ),",
+      "  });",
+      "",
+      "  return {",
+      "    data,",
+      "    metadata: JSON.stringify({}),",
+      "  };",
+      "}"
+    ],
+    "description": "Generate create method for NestJS service with Prisma"
+  },
+
+  "NestJS Service - Update Method": {
+    "prefix": "nest-service-update",
+    "body": [
+      "async update(query: Update${1:Entity}Request) {",
+      "  const { queryBuilder, id, context: _, ...props } = query;",
+      "  const data = await this.prismaService.${2:${1/(.*)/${1:/downcase}/}}.update({",
+      "    where: { id },",
+      "    data: props as Prisma.${1:Entity}UpdateInput,",
+      "    ...this.representationService.buildCustomRepresentationQuery(",
+      "      queryBuilder?.v,",
+      "    ),",
+      "  });",
+      "",
+      "  return {",
+      "    data,",
+      "    metadata: JSON.stringify({}),",
+      "  };",
+      "}"
+    ],
+    "description": "Generate update method for NestJS service with Prisma"
+  },
+
+  "NestJS Service - Delete Method": {
+    "prefix": "nest-service-delete",
+    "body": [
+      "async delete(query: Delete${1:Entity}Request) {",
+      "  const { id, purge, queryBuilder } = query;",
+      "  let data: ${1:Entity};",
+      "  if (purge) {",
+      "    data = await this.prismaService.${2:${1/(.*)/${1:/downcase}/}}.delete({",
+      "      where: { id },",
+      "      ...this.representationService.buildCustomRepresentationQuery(",
+      "        queryBuilder?.v,",
+      "      ),",
+      "    });",
+      "  } else {",
+      "    data = await this.prismaService.${2:${1/(.*)/${1:/downcase}/}}.update({",
+      "      where: { id },",
+      "      data: { voided: true },",
+      "      ...this.representationService.buildCustomRepresentationQuery(",
+      "        queryBuilder?.v,",
+      "      ),",
+      "    });",
+      "  }",
+      "  return {",
+      "    data,",
+      "    metadata: JSON.stringify({}),",
+      "  };",
+      "}"
+    ],
+    "description": "Generate delete method for NestJS service with Prisma (soft delete with purge option)"
+  },
+
+  "NestJS Service - Constructor": {
+    "prefix": "nest-service-constructor",
+    "body": [
+      "constructor(",
+      "  private readonly prismaService: PrismaService,",
+      "  private readonly sortService: SortService,",
+      "  private readonly paginationService: PaginationService,",
+      "  private readonly representationService: CustomRepresentationService,",
+      ") {}"
+    ],
+    "description": "Generate constructor for NestJS CRUD service"
+  }
+}

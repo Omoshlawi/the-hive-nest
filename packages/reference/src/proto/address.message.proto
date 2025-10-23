@@ -1,0 +1,41 @@
+syntax = 'proto3';
+
+
+import "common.message.proto";
+import "reference.model.proto";
+
+message QueryAddressRequest {
+    QueryBuilder query_builder = 1;
+    optional string search = 2;
+    optional string model_name = 3;
+    optional string purpose = 4;
+    optional bool include_voided = 5;
+    optional RequestContext context = 6;
+}
+
+message QueryAddressResponse {
+    repeated Address data = 1;
+    string metadata = 2; 
+}
+
+message CreateAddressRequest {
+    QueryBuilder query_builder = 1;
+    string model_name = 2;
+    string purpose = 3;
+    optional string description = 4;
+    optional RequestContext context = 5;
+
+}
+message UpdateAddressRequest {
+    QueryBuilder query_builder = 1;
+    string id = 2;
+    optional string model_name = 3;
+    optional string purpose = 4;
+    optional string description = 5;
+    optional RequestContext context = 6;
+}
+
+message GetAddressResponse {
+    Address data = 1;
+    string metadata = 2; 
+}

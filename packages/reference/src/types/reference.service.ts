@@ -7,7 +7,19 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
-import { DeleteRequest } from "./common.message";
+import {
+  GetAddressHierarchyResponse,
+  QueryAddressHierarchyRequest,
+  QueryAddressHierarchyResponse,
+} from "./address-hierarchy.message";
+import {
+  CreateAddressRequest,
+  GetAddressResponse,
+  QueryAddressRequest,
+  QueryAddressResponse,
+  UpdateAddressRequest,
+} from "./address.message";
+import { DeleteRequest, GetRequest } from "./common.message";
 import {
   CreateIdentifierSequenceRequest,
   CreateIdentifierSequenceResponse,
@@ -21,17 +33,37 @@ export const protobufPackage = "hive.reference.v1";
 export const HIVE_REFERENCE_V1_PACKAGE_NAME = "hive.reference.v1";
 
 export interface ReferencesClient {
-  /** Scope */
+  /** Identifier Sequence */
 
   queryIdentifierSequence(request: QueryIdentifierSequenceRequest): Observable<QueryIdentifierSequenceResponse>;
 
   createIdentifierSequence(request: CreateIdentifierSequenceRequest): Observable<CreateIdentifierSequenceResponse>;
 
   deleteIdentifierSequence(request: DeleteRequest): Observable<GetIdentifierSequenceResponse>;
+
+  /** Address Hierarchy */
+
+  queryAddressHierarchy(request: QueryAddressHierarchyRequest): Observable<QueryAddressHierarchyResponse>;
+
+  getAddressHierarchy(request: GetRequest): Observable<GetAddressHierarchyResponse>;
+
+  deleteAddressHierarchy(request: DeleteRequest): Observable<GetAddressHierarchyResponse>;
+
+  /** Address */
+
+  queryAddress(request: QueryAddressRequest): Observable<QueryAddressResponse>;
+
+  getAddress(request: GetRequest): Observable<GetAddressResponse>;
+
+  createAddress(request: CreateAddressRequest): Observable<GetAddressResponse>;
+
+  updateAddress(request: UpdateAddressRequest): Observable<GetAddressResponse>;
+
+  deleteAddress(request: DeleteRequest): Observable<GetAddressResponse>;
 }
 
 export interface ReferencesController {
-  /** Scope */
+  /** Identifier Sequence */
 
   queryIdentifierSequence(
     request: QueryIdentifierSequenceRequest,
@@ -50,11 +82,57 @@ export interface ReferencesController {
   deleteIdentifierSequence(
     request: DeleteRequest,
   ): Promise<GetIdentifierSequenceResponse> | Observable<GetIdentifierSequenceResponse> | GetIdentifierSequenceResponse;
+
+  /** Address Hierarchy */
+
+  queryAddressHierarchy(
+    request: QueryAddressHierarchyRequest,
+  ): Promise<QueryAddressHierarchyResponse> | Observable<QueryAddressHierarchyResponse> | QueryAddressHierarchyResponse;
+
+  getAddressHierarchy(
+    request: GetRequest,
+  ): Promise<GetAddressHierarchyResponse> | Observable<GetAddressHierarchyResponse> | GetAddressHierarchyResponse;
+
+  deleteAddressHierarchy(
+    request: DeleteRequest,
+  ): Promise<GetAddressHierarchyResponse> | Observable<GetAddressHierarchyResponse> | GetAddressHierarchyResponse;
+
+  /** Address */
+
+  queryAddress(
+    request: QueryAddressRequest,
+  ): Promise<QueryAddressResponse> | Observable<QueryAddressResponse> | QueryAddressResponse;
+
+  getAddress(request: GetRequest): Promise<GetAddressResponse> | Observable<GetAddressResponse> | GetAddressResponse;
+
+  createAddress(
+    request: CreateAddressRequest,
+  ): Promise<GetAddressResponse> | Observable<GetAddressResponse> | GetAddressResponse;
+
+  updateAddress(
+    request: UpdateAddressRequest,
+  ): Promise<GetAddressResponse> | Observable<GetAddressResponse> | GetAddressResponse;
+
+  deleteAddress(
+    request: DeleteRequest,
+  ): Promise<GetAddressResponse> | Observable<GetAddressResponse> | GetAddressResponse;
 }
 
 export function ReferencesControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["queryIdentifierSequence", "createIdentifierSequence", "deleteIdentifierSequence"];
+    const grpcMethods: string[] = [
+      "queryIdentifierSequence",
+      "createIdentifierSequence",
+      "deleteIdentifierSequence",
+      "queryAddressHierarchy",
+      "getAddressHierarchy",
+      "deleteAddressHierarchy",
+      "queryAddress",
+      "getAddress",
+      "createAddress",
+      "updateAddress",
+      "deleteAddress",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("References", method)(constructor.prototype[method], method, descriptor);

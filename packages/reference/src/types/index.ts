@@ -3,9 +3,16 @@ export {
   GetIdentifierSequenceResponse,
   QueryIdentifierSequenceRequest,
   QueryIdentifierSequenceResponse,
-  CreateIdentifierSequenceResponse
+  CreateIdentifierSequenceResponse,
+  GeneratedIdentifier,
 } from './reference.message';
-export { IdentifierSequence } from './reference.model';
+export {
+  IdentifierSequence,
+  Address,
+  AddressHierarchy,
+  Organization,
+  User,
+} from './reference.model';
 export {
   HIVE_REFERENCE_V1_PACKAGE_NAME,
   REFERENCES_SERVICE_NAME,
@@ -19,5 +26,18 @@ export {
   GetRequest,
   QueryBuilder,
   RequestContext,
-  
 } from './common.message';
+
+export {
+  CreateAddressRequest,
+  GetAddressResponse,
+  QueryAddressRequest,
+  QueryAddressResponse,
+  UpdateAddressRequest,
+} from './address.message';
+
+export {
+  GetAddressHierarchyResponse,
+  QueryAddressHierarchyRequest,
+  QueryAddressHierarchyResponse,
+} from './address-hierarchy.message';

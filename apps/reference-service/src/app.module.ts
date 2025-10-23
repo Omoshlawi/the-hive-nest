@@ -18,6 +18,7 @@ import {
   ReferenceHTTPServerConfigProvider,
   ReferenceRPCServerConfigProvider,
 } from '@hive/reference';
+import { AddressHierarchyModule } from './address-hierarchy/address-hierarchy.module';
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import {
     IdentifierSequenceModule,
     PrismaModule,
     QueryBuilderModule.register({ global: true }),
+    AddressHierarchyModule,
   ],
   controllers: [AppController],
   providers: [AppService],
