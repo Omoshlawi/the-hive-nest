@@ -21,50 +21,97 @@ model IdentifierSequence {
   updatedAt  DateTime @updatedAt
 }
 
-model County {
-  code     String  @id @unique
-  name     String
-  capital  String?
-  metadata Json?
+// Universal Address Model with Hierarchical Support
+model Address {
+  id String @id @default(uuid())
 
-  voided      Boolean     @default(false)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  subCounties SubCounty[]
-  wards       Ward[]
+  // Polymorphic ownership
+  userId String?
+  user   Json? // Minimal cached user proper from auth service
 
-  @@index([code, name])
-}
+  organizationId String?
+  organization   Json? // Minimal cached organization object from tenancy-service
 
-model SubCounty {
-  code String @id @unique
-  name String
+  // Address metadata
+  type  AddressType @default(OTHER)
+  label String? // e.g., "Home", "Office", "Billing"
 
-  countyCode String
-  county     County @relation(fields: [countyCode], references: [code], onDelete: Cascade)
-  metadata   Json?
+  // Street-level details
+  address1 String // Building/house number and street
+  address2 String? // Apartment, suite, floor, etc.
+  landmark String? // Nearby landmark or directions
 
-  voided    Boolean  @default(false)
+  // Administrative Hierarchy (flexible for any country)
+  // These fields adapt to local naming conventions
+  level1 String // County (Kenya), State (US), Province (Canada)
+  level2 String? // Sub-County (Kenya), City (US), District
+  level3 String? // Ward (Kenya), Borough, Municipality  
+  level4 String? // Village/Estate (Kenya), Neighborhood
+  level5 String? // Additional granularity if needed
+
+  // Legacy/common fields (for backward compatibility)
+  cityVillage   String? // Maps to appropriate level
+  stateProvince String? // Maps to appropriate level
+
+  country    String // ISO 3166-1 alpha-2 code (KE, US, etc.)
+  postalCode String?
+
+  // Geolocation
+  latitude  Float?
+  longitude Float?
+  plusCode  String? // Google Plus Code for precise location
+
+  // Temporal tracking
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+
+  // Metadata
+  preferred Boolean @default(false)
+  formatted String? // Cached formatted address
+
+  // Locale-specific configuration
+  localeFormat Json? // Store hierarchy labels: {"level1": "County", "level2": "Sub-County"}
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  wards     Ward[]
 
-  @@index([countyCode, name])
+  voided Boolean @default(false)
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([userId, preferred])
+  @@index([organizationId, preferred])
+  @@index([country])
+  @@index([level1, level2, level3]) // For hierarchical queries
 }
 
-model Ward {
-  code String @id @unique
-  name String
+enum AddressType {
+  HOME
+  WORK
+  BILLING
+  SHIPPING
+  OFFICE
+  BRANCH
+  WAREHOUSE
+  OTHER
+}
 
-  countyCode    String
-  county        County    @relation(fields: [countyCode], references: [code], onDelete: Cascade)
-  subCountyCode String
-  subCounty     SubCounty @relation(fields: [subCountyCode], references: [code], onDelete: Cascade)
-  metadata      Json?
+// Optional: Address Hierarchy Configuration (for dropdowns/autocomplete)
+model AddressHierarchy {
+  id       String             @id @default(uuid())
+  country  String // ISO country code
+  level    Int // 1, 2, 3, 4, 5
+  parentId String? // Reference to parent level
+  parent   AddressHierarchy?  @relation("Hierarchy", fields: [parentId], references: [id])
+  children AddressHierarchy[] @relation("Hierarchy")
 
-  voided    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  code      String // Unique code (e.g., "KE-30" for Nairobi County)
+  name      String // Display name
+  nameLocal String? // Local language name
 
-  @@index([subCountyCode, name])
+  voided Boolean @default(false)
+
+  @@unique([country, code])
+  @@index([country, level])
+  @@index([parentId])
 }
