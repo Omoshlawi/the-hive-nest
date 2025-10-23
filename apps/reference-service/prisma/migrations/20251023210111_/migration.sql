@@ -2,43 +2,13 @@
 CREATE TYPE "public"."AddressType" AS ENUM ('HOME', 'WORK', 'BILLING', 'SHIPPING', 'OFFICE', 'BRANCH', 'WAREHOUSE', 'OTHER');
 
 -- CreateTable
-CREATE TABLE "public"."County" (
-    "code" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "capital" TEXT,
-    "metadata" JSONB,
-    "voided" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE "public"."IdentifierSequence" (
+    "id" TEXT NOT NULL,
+    "dataModel" TEXT NOT NULL,
+    "lastNumber" INTEGER NOT NULL DEFAULT 0,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "County_pkey" PRIMARY KEY ("code")
-);
-
--- CreateTable
-CREATE TABLE "public"."SubCounty" (
-    "code" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "countyCode" TEXT NOT NULL,
-    "metadata" JSONB,
-    "voided" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "SubCounty_pkey" PRIMARY KEY ("code")
-);
-
--- CreateTable
-CREATE TABLE "public"."Ward" (
-    "code" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "countyCode" TEXT NOT NULL,
-    "subCountyCode" TEXT NOT NULL,
-    "metadata" JSONB,
-    "voided" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Ward_pkey" PRIMARY KEY ("code")
+    CONSTRAINT "IdentifierSequence_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -92,22 +62,7 @@ CREATE TABLE "public"."AddressHierarchy" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "County_code_key" ON "public"."County"("code");
-
--- CreateIndex
-CREATE INDEX "County_code_name_idx" ON "public"."County"("code", "name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "SubCounty_code_key" ON "public"."SubCounty"("code");
-
--- CreateIndex
-CREATE INDEX "SubCounty_countyCode_name_idx" ON "public"."SubCounty"("countyCode", "name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Ward_code_key" ON "public"."Ward"("code");
-
--- CreateIndex
-CREATE INDEX "Ward_subCountyCode_name_idx" ON "public"."Ward"("subCountyCode", "name");
+CREATE UNIQUE INDEX "IdentifierSequence_dataModel_key" ON "public"."IdentifierSequence"("dataModel");
 
 -- CreateIndex
 CREATE INDEX "Address_userId_idx" ON "public"."Address"("userId");
@@ -135,15 +90,6 @@ CREATE INDEX "AddressHierarchy_parentId_idx" ON "public"."AddressHierarchy"("par
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AddressHierarchy_country_code_key" ON "public"."AddressHierarchy"("country", "code");
-
--- AddForeignKey
-ALTER TABLE "public"."SubCounty" ADD CONSTRAINT "SubCounty_countyCode_fkey" FOREIGN KEY ("countyCode") REFERENCES "public"."County"("code") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."Ward" ADD CONSTRAINT "Ward_countyCode_fkey" FOREIGN KEY ("countyCode") REFERENCES "public"."County"("code") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."Ward" ADD CONSTRAINT "Ward_subCountyCode_fkey" FOREIGN KEY ("subCountyCode") REFERENCES "public"."SubCounty"("code") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."AddressHierarchy" ADD CONSTRAINT "AddressHierarchy_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "public"."AddressHierarchy"("id") ON DELETE SET NULL ON UPDATE CASCADE;

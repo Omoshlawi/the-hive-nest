@@ -1,54 +1,60 @@
-const configify = require('@itgorillaz/configify');
+require('dotenv').config();
 const { PrismaClient } = require('./dist/generated/prisma');
 const prisma = new PrismaClient();
+
 async function seed() {
   try {
     console.log('🌍 Seeding Kenya Address Hierarchy...');
-    const COUNTRY_CODE = 'KE'; // Kenya
-
-    // Create counties first
+    const COUNTRY_CODE = 'KE';
     const counties = require('./assets/kenyan-counties-subcounties-wards.json');
+
     for (const county of counties) {
+      const countyCode = `${COUNTRY_CODE}-${county.code}`;
+
       // Level 1: County
       const countyRecord = await prisma.addressHierarchy.upsert({
-        where: { code_country: { code: county.code, country: COUNTRY_CODE } },
-        update: { name: county.name, active: true },
+        where: { country_code: { country: COUNTRY_CODE, code: countyCode } },
+        update: { name: county.name },
         create: {
           country: COUNTRY_CODE,
           level: 1,
-          code: county.code,
+          code: countyCode,
           name: county.name,
         },
       });
 
-      // Level 2: Sub-Counties
-      if (county.subCounties && county.subCounties.length > 0) {
+      // Level 2: Subcounties
+      if (county.subCounties?.length) {
         for (const sub of county.subCounties) {
+          const subCode = `${countyCode}-${sub.code}`;
+
           const subRecord = await prisma.addressHierarchy.upsert({
-            where: { code_country: { code: sub.code, country: COUNTRY_CODE } },
+            where: { country_code: { country: COUNTRY_CODE, code: subCode } },
             update: { name: sub.name, parentId: countyRecord.id },
             create: {
               country: COUNTRY_CODE,
               level: 2,
               parentId: countyRecord.id,
-              code: sub.code,
+              code: subCode,
               name: sub.name,
             },
           });
 
           // Level 3: Wards
-          if (sub.wards && sub.wards.length > 0) {
+          if (sub.wards?.length) {
             for (const ward of sub.wards) {
+              const wardCode = `${subCode}-${ward.code}`;
+
               await prisma.addressHierarchy.upsert({
                 where: {
-                  code_country: { code: ward.code, country: COUNTRY_CODE },
+                  country_code: { country: COUNTRY_CODE, code: wardCode },
                 },
                 update: { name: ward.name, parentId: subRecord.id },
                 create: {
                   country: COUNTRY_CODE,
                   level: 3,
                   parentId: subRecord.id,
-                  code: ward.code,
+                  code: wardCode,
                   name: ward.name,
                 },
               });
