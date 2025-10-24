@@ -13,10 +13,19 @@ export const protobufPackage = "";
 export interface QueryAddressHierarchyRequest {
   queryBuilder: QueryBuilder | undefined;
   search?: string | undefined;
-  modelName?: string | undefined;
-  purpose?: string | undefined;
+  country?: string | undefined;
+  level?: number | undefined;
   includeVoided?: boolean | undefined;
   context?: RequestContext | undefined;
+  parentId?: string | undefined;
+  code?: string | undefined;
+  name?: string | undefined;
+  nameLocal?: string | undefined;
+  parentCountry?: string | undefined;
+  parentLevel?: number | undefined;
+  parentCode?: string | undefined;
+  parentName?: string | undefined;
+  parentNameLocal?: string | undefined;
 }
 
 export interface QueryAddressHierarchyResponse {

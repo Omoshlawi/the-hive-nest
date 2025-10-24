@@ -1,5 +1,5 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient, Prisma } from '../../generated/prisma';
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Prisma, PrismaClient } from '../../generated/prisma';
 
 @Injectable()
 export class PrismaService
@@ -36,6 +36,40 @@ const timestampExtension = Prisma.defineExtension({
           return data.updatedAt instanceof Date
             ? data.updatedAt.toISOString()
             : data.updatedAt;
+        },
+      },
+    },
+    address: {
+      createdAt: {
+        needs: { createdAt: true },
+        compute(data) {
+          return data.createdAt instanceof Date
+            ? data.createdAt.toISOString()
+            : data.createdAt;
+        },
+      },
+      updatedAt: {
+        needs: { updatedAt: true },
+        compute(data) {
+          return data.updatedAt instanceof Date
+            ? data.updatedAt.toISOString()
+            : data.updatedAt;
+        },
+      },
+      startDate: {
+        needs: { startDate: true },
+        compute(data) {
+          return data.startDate instanceof Date
+            ? data.startDate.toISOString()
+            : data.startDate;
+        },
+      },
+      endDate: {
+        needs: { endDate: true },
+        compute(data) {
+          return data.endDate instanceof Date
+            ? data.endDate.toISOString()
+            : data.endDate;
         },
       },
     },

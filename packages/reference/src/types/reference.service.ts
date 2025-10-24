@@ -45,8 +45,6 @@ export interface ReferencesClient {
 
   queryAddressHierarchy(request: QueryAddressHierarchyRequest): Observable<QueryAddressHierarchyResponse>;
 
-  getAddressHierarchy(request: GetRequest): Observable<GetAddressHierarchyResponse>;
-
   deleteAddressHierarchy(request: DeleteRequest): Observable<GetAddressHierarchyResponse>;
 
   /** Address */
@@ -89,10 +87,6 @@ export interface ReferencesController {
     request: QueryAddressHierarchyRequest,
   ): Promise<QueryAddressHierarchyResponse> | Observable<QueryAddressHierarchyResponse> | QueryAddressHierarchyResponse;
 
-  getAddressHierarchy(
-    request: GetRequest,
-  ): Promise<GetAddressHierarchyResponse> | Observable<GetAddressHierarchyResponse> | GetAddressHierarchyResponse;
-
   deleteAddressHierarchy(
     request: DeleteRequest,
   ): Promise<GetAddressHierarchyResponse> | Observable<GetAddressHierarchyResponse> | GetAddressHierarchyResponse;
@@ -125,7 +119,6 @@ export function ReferencesControllerMethods() {
       "createIdentifierSequence",
       "deleteIdentifierSequence",
       "queryAddressHierarchy",
-      "getAddressHierarchy",
       "deleteAddressHierarchy",
       "queryAddress",
       "getAddress",

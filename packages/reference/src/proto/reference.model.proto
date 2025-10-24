@@ -75,7 +75,7 @@ message Address {
     optional string formatted = 26;
 
     // Locale-specific configuration
-    optional string locale_format = 27; // JSON Strinigied object
+    map<string, string> locale_format = 27; 
 
     string created_at = 28;
     string updated_at = 29;

@@ -19,6 +19,7 @@ import {
   ReferenceRPCServerConfigProvider,
 } from '@hive/reference';
 import { AddressHierarchyModule } from './address-hierarchy/address-hierarchy.module';
+import { AddressModule } from './address/address.module';
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { AddressHierarchyModule } from './address-hierarchy/address-hierarchy.mo
     PrismaModule,
     QueryBuilderModule.register({ global: true }),
     AddressHierarchyModule,
+    AddressModule,
   ],
   controllers: [AppController],
   providers: [AppService],

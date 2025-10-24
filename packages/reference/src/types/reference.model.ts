@@ -92,10 +92,15 @@ export interface Address {
     | string
     | undefined;
   /** Locale-specific configuration */
-  localeFormat?: string | undefined;
+  localeFormat: { [key: string]: string };
   createdAt: string;
   updatedAt: string;
   voided: boolean;
+}
+
+export interface Address_LocaleFormatEntry {
+  key: string;
+  value: string;
 }
 
 export const _PACKAGE_NAME = "";

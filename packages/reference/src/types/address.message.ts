@@ -13,10 +13,24 @@ export const protobufPackage = "";
 export interface QueryAddressRequest {
   queryBuilder: QueryBuilder | undefined;
   search?: string | undefined;
-  modelName?: string | undefined;
-  purpose?: string | undefined;
+  userId?: string | undefined;
+  organizationId?: string | undefined;
   includeVoided?: boolean | undefined;
   context?: RequestContext | undefined;
+  type?: string | undefined;
+  level1?: string | undefined;
+  level2?: string | undefined;
+  level3?: string | undefined;
+  level4?: string | undefined;
+  level5?: string | undefined;
+  country?: string | undefined;
+  postalCode?: string | undefined;
+  startDateFrom?: string | undefined;
+  startDateTo?: string | undefined;
+  endDateFrom?: string | undefined;
+  endDateTo?: string | undefined;
+  createdAtFrom?: string | undefined;
+  createdAtTo?: string | undefined;
 }
 
 export interface QueryAddressResponse {
@@ -26,19 +40,69 @@ export interface QueryAddressResponse {
 
 export interface CreateAddressRequest {
   queryBuilder: QueryBuilder | undefined;
-  modelName: string;
-  purpose: string;
-  description?: string | undefined;
+  userId: string;
+  isOrganizationAddress: boolean;
+  type: string;
+  label?: string | undefined;
+  address1: string;
+  address2?: string | undefined;
+  landmark?: string | undefined;
+  level1: string;
+  level2?: string | undefined;
+  level3?: string | undefined;
+  level4?: string | undefined;
+  level5?: string | undefined;
+  cityVillage?: string | undefined;
+  stateProvince?: string | undefined;
+  country: string;
+  postalCode?: string | undefined;
+  latitude?: string | undefined;
+  longitude?: string | undefined;
+  plusCode?: string | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+  prefered?: boolean | undefined;
+  formatted?: string | undefined;
+  localeFormat: { [key: string]: string };
   context?: RequestContext | undefined;
+}
+
+export interface CreateAddressRequest_LocaleFormatEntry {
+  key: string;
+  value: string;
 }
 
 export interface UpdateAddressRequest {
   queryBuilder: QueryBuilder | undefined;
   id: string;
-  modelName?: string | undefined;
-  purpose?: string | undefined;
-  description?: string | undefined;
   context?: RequestContext | undefined;
+  type?: string | undefined;
+  label?: string | undefined;
+  address1?: string | undefined;
+  address2?: string | undefined;
+  landmark?: string | undefined;
+  level1?: string | undefined;
+  level2?: string | undefined;
+  level3?: string | undefined;
+  level4?: string | undefined;
+  level5?: string | undefined;
+  cityVillage?: string | undefined;
+  stateProvince?: string | undefined;
+  country?: string | undefined;
+  postalCode?: string | undefined;
+  latitude?: string | undefined;
+  longitude?: string | undefined;
+  plusCode?: string | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+  prefered?: boolean | undefined;
+  formatted?: string | undefined;
+  localeFormat: { [key: string]: string };
+}
+
+export interface UpdateAddressRequest_LocaleFormatEntry {
+  key: string;
+  value: string;
 }
 
 export interface GetAddressResponse {

@@ -16,7 +16,6 @@ service References {
 
   // Address Hierarchy
   rpc QueryAddressHierarchy(QueryAddressHierarchyRequest) returns (QueryAddressHierarchyResponse){};
-  rpc GetAddressHierarchy(GetRequest) returns (GetAddressHierarchyResponse){};
   rpc DeleteAddressHierarchy(DeleteRequest) returns (GetAddressHierarchyResponse){};
 
   // Address

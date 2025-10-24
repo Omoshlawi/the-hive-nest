@@ -7,10 +7,19 @@ import "reference.model.proto";
 message QueryAddressHierarchyRequest {
     QueryBuilder query_builder = 1;
     optional string search = 2;
-    optional string model_name = 3;
-    optional string purpose = 4;
+    optional string country = 3;
+    optional int32 level = 4;
     optional bool include_voided = 5;
     optional RequestContext context = 6;
+    optional string parent_id = 7;
+    optional string code = 8;
+    optional string name = 9;
+    optional string nameLocal = 10;
+    optional string parent_country = 11;
+    optional int32 parent_level = 12;
+    optional string parent_code = 13;
+    optional string parent_name = 14;
+    optional string parent_name_local = 15;
 }
 
 message QueryAddressHierarchyResponse {
