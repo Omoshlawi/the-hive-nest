@@ -3,10 +3,10 @@ import {
   DeleteRequest,
   GetAddressResponse,
   GetRequest,
+  IAddressController,
   QueryAddressRequest,
   QueryAddressResponse,
   REFERENCES_SERVICE_NAME,
-  ReferencesController,
   UpdateAddressRequest,
 } from '@hive/reference';
 import { Controller, NotFoundException } from '@nestjs/common';
@@ -14,17 +14,7 @@ import { AddressService } from './address.service';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 
 @Controller('address')
-export class AddressController
-  implements
-    Pick<
-      ReferencesController,
-      | 'queryAddress'
-      | 'getAddress'
-      | 'createAddress'
-      | 'updateAddress'
-      | 'deleteAddress'
-    >
-{
+export class AddressController implements IAddressController {
   constructor(private readonly addressService: AddressService) {}
   @GrpcMethod(REFERENCES_SERVICE_NAME)
   queryAddress(request: QueryAddressRequest): Promise<QueryAddressResponse> {

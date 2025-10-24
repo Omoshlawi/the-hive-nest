@@ -11,7 +11,9 @@ import {
 import { IdentifierSequenceService } from './identifier-sequence.service';
 import { GrpcMethod } from '@nestjs/microservices';
 @Controller('identifier-sequence')
-export class IdentifierSequenceController {
+export class IdentifierSequenceController
+  implements IdentifierSequenceController
+{
   constructor(
     private readonly identifierSequenceservice: IdentifierSequenceService,
   ) {}

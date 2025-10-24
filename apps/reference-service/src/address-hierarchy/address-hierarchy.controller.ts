@@ -1,23 +1,17 @@
 import {
   DeleteRequest,
   GetAddressHierarchyResponse,
+  IAddressHierarchyController,
   QueryAddressHierarchyRequest,
   QueryAddressHierarchyResponse,
   REFERENCES_SERVICE_NAME,
-  ReferencesController,
 } from '@hive/reference';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { AddressHierarchyService } from './address-hierarchy.service';
 
 @Controller('address-hierarchy')
-export class AddressHierarchyController
-  implements
-    Pick<
-      ReferencesController,
-      'queryAddressHierarchy' | 'deleteAddressHierarchy'
-    >
-{
+export class AddressHierarchyController implements IAddressHierarchyController {
   constructor(
     private readonly addressHierarchyService: AddressHierarchyService,
   ) {}

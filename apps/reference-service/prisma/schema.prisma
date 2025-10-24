@@ -94,6 +94,7 @@ enum AddressType {
   BRANCH
   WAREHOUSE
   OTHER
+
 }
 
 // Optional: Address Hierarchy Configuration (for dropdowns/autocomplete)

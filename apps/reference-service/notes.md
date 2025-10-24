@@ -256,26 +256,27 @@ Kenya, 00100
 ```
 
 3. 📝 Example 3: US Address (Different Hierarchy)
+
 - User Story: Sarah lives in New York City.
 
 ```ts
 {
   userId: "sarah-789",
   type: "HOME",
-  
+
   address1: "350 5th Avenue",
   address2: "Suite 4210",
   landmark: "Empire State Building",
-  
+
   // US uses different hierarchy names
   level1: "New York",         // STATE (not county!)
   level2: "New York City",    // CITY
   level3: "Manhattan",        // BOROUGH
   level4: "Midtown",          // NEIGHBORHOOD
-  
+
   country: "US",
   postalCode: "10118",
-  
+
   // Different labels for US
   localeFormat: {
     level1: "State",
@@ -285,9 +286,11 @@ Kenya, 00100
   }
 }
 ```
+
 Same fields, different meanings! The model adapts.
 
 4. 🏢 Example 4: Organization Address
+
 - User Story: A company has a branch office in Mombasa.
 
 ```ts
@@ -295,20 +298,20 @@ Same fields, different meanings! The model adapts.
   // ORGANIZATION owns this (not a user)
   organizationId: "acme-corp",
   userId: null,  // No user - it's a company address
-  
+
   type: "BRANCH",
   label: "Mombasa Regional Office",
-  
+
   address1: "Nkrumah Road, ABC Place",
   address2: "7th Floor",
-  
+
   level1: "Mombasa County",
-  level2: "Mvita Sub-County", 
+  level2: "Mvita Sub-County",
   level3: "Tononoka Ward",
-  
+
   country: "KE",
   postalCode: "80100",
-  
+
   preferred: false  // Not the main office
 }
 ```
@@ -346,4 +349,33 @@ enum AddressType {
   OTHER
 }
 
+```
+
+```json
+// Test address
+{
+  "isOrganizationAddress": true,
+  "type": "HOME",
+  "label": "My Apartment",
+  "address1": "Kimathi Street, Building 45",
+  "address2": "Floor 3, Apartment 302",
+  "landmark": "Next to Java House Westlands",
+
+  "level1": "Nairobi County",
+  "level2": "Westlands Sub-County",
+  "level3": "Parklands/Highridge Ward",
+  "level4": "Parklands Estate",
+  "level5": "Phase 2",
+
+  "country": "KE",
+  "postalCode": "00100",
+
+  "localeFormat": {
+    "level1": "County",
+    "level2": "Sub-County",
+    "level3": "Ward",
+    "level4": "Estate",
+    "level5": "Phase"
+  }
+}
 ```

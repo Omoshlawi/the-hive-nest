@@ -10,7 +10,7 @@ export class PrismaService
     super();
 
     let extendedClient = this.$extends(timestampExtension);
-    extendedClient = extendedClient.$extends(auditExtension);
+    // extendedClient = extendedClient.$extends(auditExtension);
     extendedClient = extendedClient.$extends(lastNumberToString);
 
     return extendedClient as this;

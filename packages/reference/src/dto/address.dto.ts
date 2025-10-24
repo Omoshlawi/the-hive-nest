@@ -8,7 +8,18 @@ export const QueryAddressSchema = z.object({
   search: z.string().optional(),
   userId: z.string().optional(),
   organizationId: z.string().optional(),
-  type: z.string().optional(),
+  type: z
+    .enum([
+      'HOME',
+      'WORK',
+      'BILLING',
+      'SHIPPING',
+      'OFFICE',
+      'BRANCH',
+      'WAREHOUSE',
+      'OTHER',
+    ])
+    .optional(),
   level1: z.string().optional(),
   level2: z.string().optional(),
   level3: z.string().optional(),
@@ -32,9 +43,17 @@ export const QueryAddressSchema = z.object({
 });
 
 export const AddressSchema = z.object({
-  userId: z.string(),
   isOrganizationAddress: z.boolean(),
-  type: z.string(),
+  type: z.enum([
+    'HOME',
+    'WORK',
+    'BILLING',
+    'SHIPPING',
+    'OFFICE',
+    'BRANCH',
+    'WAREHOUSE',
+    'OTHER',
+  ]),
   label: z.string().optional(),
   address1: z.string(),
   address2: z.string().optional(),
@@ -48,8 +67,8 @@ export const AddressSchema = z.object({
   stateProvince: z.string().optional(),
   country: z.string(),
   postalCode: z.string().optional(),
-  latitude: z.string().optional(),
-  longitude: z.string().optional(),
+  latitude: z.coerce.number().optional(),
+  longitude: z.coerce.number().optional(),
   plusCode: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
@@ -64,7 +83,9 @@ export class QueryAddressDto extends createZodDto(QueryAddressSchema) {}
 
 export class CreateAddressDto extends createZodDto(AddressSchema) {}
 
-export class UpdateAddressDto extends createZodDto(AddressSchema.partial()) {}
+export class UpdateAddressDto extends createZodDto(
+  AddressSchema.omit({ isOrganizationAddress: true }).partial(),
+) {}
 
 export class GetAddressResponseDto extends CreateAddressDto {
   @ApiProperty()

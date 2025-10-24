@@ -36,6 +36,8 @@ import { IdentifierSequenceModule } from './identifier-sequence/identifier-seque
 import { PropertiesModule } from './properties/properties.module';
 import { RegistryModule } from './registry/registry.module';
 import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
+import { AddressHierarchyModule } from './address-hierarchy/address-hierarchy.module';
+import { AddressModule } from './address/address.module';
 
 @Module({
   imports: [
@@ -89,6 +91,8 @@ import { RelationshipTypesModule } from './relationship-types/relationship-types
     FilesModule,
     IdentifierSequenceModule,
     PropertiesModule,
+    AddressHierarchyModule,
+    AddressModule,
   ],
   controllers: [AppController],
   providers: [

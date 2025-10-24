@@ -34,7 +34,7 @@ message QueryAddressResponse {
 
 message CreateAddressRequest {
     QueryBuilder query_builder = 1;
-    string user_id = 2;
+    optional RequestContext context = 2;
     bool is_organization_address  = 3;
     string type = 4;
     optional string label = 5;
@@ -50,8 +50,8 @@ message CreateAddressRequest {
     optional string state_province = 15;
     string country = 16;
     optional string postal_code = 17;
-    optional string latitude = 18;
-    optional string longitude = 19;
+    optional double latitude = 18;
+    optional double longitude = 19;
     optional string plus_code = 20;
     optional string start_date = 21;
     optional string end_date = 22;
@@ -59,7 +59,6 @@ message CreateAddressRequest {
     optional string formatted = 24;
     map<string,string> locale_format = 25; 
 
-    optional RequestContext context = 26;
 
 }
 message UpdateAddressRequest {
@@ -80,8 +79,8 @@ message UpdateAddressRequest {
     optional string state_province = 15;
     optional string country = 16;
     optional string postal_code = 17;
-    optional string latitude = 18;
-    optional string longitude = 19;
+    optional double latitude = 18;
+    optional double longitude = 19;
     optional string plus_code = 20;
     optional string start_date = 21;
     optional string end_date = 22;

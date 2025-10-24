@@ -40,7 +40,7 @@ export interface QueryAddressResponse {
 
 export interface CreateAddressRequest {
   queryBuilder: QueryBuilder | undefined;
-  userId: string;
+  context?: RequestContext | undefined;
   isOrganizationAddress: boolean;
   type: string;
   label?: string | undefined;
@@ -56,15 +56,14 @@ export interface CreateAddressRequest {
   stateProvince?: string | undefined;
   country: string;
   postalCode?: string | undefined;
-  latitude?: string | undefined;
-  longitude?: string | undefined;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
   plusCode?: string | undefined;
   startDate?: string | undefined;
   endDate?: string | undefined;
   prefered?: boolean | undefined;
   formatted?: string | undefined;
   localeFormat: { [key: string]: string };
-  context?: RequestContext | undefined;
 }
 
 export interface CreateAddressRequest_LocaleFormatEntry {
@@ -90,8 +89,8 @@ export interface UpdateAddressRequest {
   stateProvince?: string | undefined;
   country?: string | undefined;
   postalCode?: string | undefined;
-  latitude?: string | undefined;
-  longitude?: string | undefined;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
   plusCode?: string | undefined;
   startDate?: string | undefined;
   endDate?: string | undefined;

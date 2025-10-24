@@ -1,3 +1,5 @@
+import { ReferencesController } from './reference.service';
+
 export {
   CreateIdentifierSequenceRequest,
   GetIdentifierSequenceResponse,
@@ -41,3 +43,23 @@ export {
   QueryAddressHierarchyRequest,
   QueryAddressHierarchyResponse,
 } from './address-hierarchy.message';
+
+export type IAddressController = Pick<
+  ReferencesController,
+  | 'queryAddress'
+  | 'getAddress'
+  | 'createAddress'
+  | 'updateAddress'
+  | 'deleteAddress'
+>;
+
+export type IAddressHierarchyController = Pick<
+  ReferencesController,
+  'queryAddressHierarchy' | 'deleteAddressHierarchy'
+>;
+export type IIdentifierSequenceController = Pick<
+  ReferencesController,
+  | 'queryIdentifierSequence'
+  | 'createIdentifierSequence'
+  | 'deleteIdentifierSequence'
+>;
