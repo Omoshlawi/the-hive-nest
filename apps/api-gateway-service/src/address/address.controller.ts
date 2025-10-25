@@ -78,6 +78,7 @@ export class AddressController {
         organizationId: session.activeOrganizationId,
         userId: user.id,
       },
+      location: query.location,
     });
   }
 

@@ -26,7 +26,7 @@ export class AddressService {
     private readonly representationService: CustomRepresentationService,
   ) {}
 
-  async getAll(query: QueryAddressRequest) {
+  async getAll(query: QueryAddressRequest) {    
     const dbQuery: FunctionFirstArgument<
       typeof this.prismaService.address.findMany
     > = {
@@ -59,7 +59,59 @@ export class AddressService {
           },
           {
             OR: query.search
-              ? [{ label: { contains: query.search, mode: 'insensitive' } }]
+              ? [
+                  { label: { contains: query.search, mode: 'insensitive' } },
+                  {
+                    formatted: { contains: query.search, mode: 'insensitive' },
+                  },
+                ]
+              : undefined,
+          },
+          {
+            OR: query.location
+              ? [
+                  { label: { contains: query.location, mode: 'insensitive' } },
+                  { id: { contains: query.location, mode: 'insensitive' } },
+                  {
+                    address1: { contains: query.location, mode: 'insensitive' },
+                  },
+                  {
+                    address2: { contains: query.location, mode: 'insensitive' },
+                  },
+                  {
+                    cityVillage: {
+                      contains: query.location,
+                      mode: 'insensitive',
+                    },
+                  },
+                  {
+                    country: { contains: query.location, mode: 'insensitive' },
+                  },
+                  {
+                    formatted: {
+                      contains: query.location,
+                      mode: 'insensitive',
+                    },
+                  },
+                  { label: { contains: query.location, mode: 'insensitive' } },
+                  {
+                    landmark: { contains: query.location, mode: 'insensitive' },
+                  },
+                  { level1: { contains: query.location, mode: 'insensitive' } },
+                  { level2: { contains: query.location, mode: 'insensitive' } },
+                  { level3: { contains: query.location, mode: 'insensitive' } },
+                  { level4: { contains: query.location, mode: 'insensitive' } },
+                  { level5: { contains: query.location, mode: 'insensitive' } },
+                  {
+                    plusCode: { contains: query.location, mode: 'insensitive' },
+                  },
+                  {
+                    postalCode: {
+                      contains: query.location,
+                      mode: 'insensitive',
+                    },
+                  },
+                ]
               : undefined,
           },
         ],

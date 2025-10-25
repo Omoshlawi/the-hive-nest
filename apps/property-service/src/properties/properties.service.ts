@@ -13,15 +13,21 @@ import {
   QueryPropertyRequest,
   UpdatePropertyRequest,
 } from '@hive/property';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Property, Prisma, PropertyMediaType } from '../../generated/prisma';
 import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
-import { HiveReferencesServiceClient } from '@hive/reference';
+import {
+  Address,
+  GetAddressResponse,
+  HiveReferencesServiceClient,
+} from '@hive/reference';
 import { lastValueFrom } from 'rxjs';
+import { ZodValidationException } from 'nestjs-zod';
 
 @Injectable()
 export class PropertiesService {
+  private logger: Logger = new Logger(PropertiesService.name);
   constructor(
     private readonly prismaService: PrismaService,
     private readonly sortService: SortService,
@@ -30,7 +36,28 @@ export class PropertiesService {
     private readonly referencesService: HiveReferencesServiceClient,
   ) {}
 
+  private async queryaddress(address: string) {
+    try {
+      const addresses = await lastValueFrom(
+        this.referencesService.address.queryAddress({
+          location: address,
+          queryBuilder: { v: 'custom:select(id)' },
+          context: {},
+        }),
+      );
+      return (addresses.data ?? []).map((addr) => addr.id);
+    } catch (error) {
+      this.logger.error('Error querying address', error);
+      return [];
+    }
+  }
+
   async getAll(query: QueryPropertyRequest) {
+    const addressIds: string[] = [];
+    if (query.address) {
+      const ids = await this.queryaddress(query.address);
+      addressIds.push(...ids);
+    }
     const dbQuery: FunctionFirstArgument<
       typeof this.prismaService.property.findMany
     > = {
@@ -47,7 +74,12 @@ export class PropertiesService {
             categories: query?.categories?.length
               ? { some: { categoryId: { in: query?.categories } } }
               : undefined,
-            attributes: {
+            addressId: addressIds.length
+              ? {
+                  in: addressIds,
+                }
+              : undefined,
+            attributes: Object.keys(query.attributes ?? {}).length ? {
               some: {
                 AND: Object.entries(query.attributes ?? {}).map((attr) => ({
                   OR: [
@@ -57,21 +89,8 @@ export class PropertiesService {
                   value: attr[1],
                 })),
               },
-            },
+            }:undefined,
           },
-          // Address
-          // {
-          //   OR: query.address
-          //     ? [
-          //         { addressId: query.address },
-          //         {
-          //           address: {
-          //             path: [""],
-          //           },
-          //         },
-          //       ]
-          //     : undefined,
-          // },
           // Amenities
           {
             OR: query?.amenities?.length
@@ -118,6 +137,7 @@ export class PropertiesService {
       ),
       ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
     };
+    this.logger.log('Query: ' + JSON.stringify(dbQuery, null, 2));
     const [data, totalCount] = await Promise.all([
       this.prismaService.property.findMany(dbQuery),
       this.prismaService.property.count(pick(dbQuery, 'where')),
@@ -143,6 +163,31 @@ export class PropertiesService {
     };
   }
 
+  private async validateAddress(
+    addressId: string,
+  ): Promise<GetAddressResponse['data']> {
+    try {
+      const address = await lastValueFrom(
+        this.referencesService.address.getAddress({
+          id: addressId,
+          queryBuilder: {},
+          context: {},
+        }),
+      );
+      return address.data;
+    } catch (error: any) {
+      throw new ZodValidationException({
+        issues: [
+          {
+            code: 'custom',
+            message: 'Invalid address provided',
+            path: ['addressId'],
+          },
+        ],
+      });
+    }
+  }
+
   async create(query: CreatePropertyRequest) {
     const {
       queryBuilder,
@@ -151,10 +196,10 @@ export class PropertiesService {
       categoryIds,
       attributes,
       addressId,
+      media: propertyMedia = [],
       ...props
     } = query;
-    // TODO Validate address and cache address details
-
+    const address = await this.validateAddress(query.addressId);
     // Generate identifier
     const { data: identifier } = await lastValueFrom(
       this.referencesService.identifierSequence.createIdentifierSequence({
@@ -164,6 +209,8 @@ export class PropertiesService {
         queryBuilder: undefined,
       }),
     );
+    this.logger.log('Genrated Identifier: ' + identifier?.identifier);
+
     const data = await this.prismaService.property.create({
       data: {
         ...props,
@@ -187,11 +234,11 @@ export class PropertiesService {
           },
         },
         addressId,
-
+        address: address as Record<string, any>,
         media: {
           createMany: {
             skipDuplicates: true,
-            data: props?.media?.map((media) => ({
+            data: propertyMedia?.map((media) => ({
               ...media,
               type: media.type as PropertyMediaType,
               metadata: media.metadata ? JSON.parse(media.metadata) : undefined,
@@ -211,10 +258,11 @@ export class PropertiesService {
   }
 
   async update(query: UpdatePropertyRequest) {
+    if (query.addressId) await this.validateAddress(query.addressId);
     const { queryBuilder, id, context, ...props } = query;
     const data = await this.prismaService.property.update({
       where: { id },
-      data: props as Prisma.PropertyUpdateInput,
+      data: props,
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),

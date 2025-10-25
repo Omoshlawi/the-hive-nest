@@ -31,6 +31,7 @@ export interface QueryAddressRequest {
   endDateTo?: string | undefined;
   createdAtFrom?: string | undefined;
   createdAtTo?: string | undefined;
+  location?: string | undefined;
 }
 
 export interface QueryAddressResponse {

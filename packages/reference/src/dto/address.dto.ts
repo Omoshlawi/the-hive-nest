@@ -5,9 +5,16 @@ import z from 'zod';
 
 export const QueryAddressSchema = z.object({
   ...QueryBuilderSchema.shape,
-  search: z.string().optional(),
+  search: z
+    .string()
+    .optional()
+    .describe("Only search the 'label' and 'formatted' fields"),
   userId: z.string().optional(),
   organizationId: z.string().optional(),
+  location: z
+    .string()
+    .optional()
+    .describe('Keyword to search across address levels'),
   type: z
     .enum([
       'HOME',

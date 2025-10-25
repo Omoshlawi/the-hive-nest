@@ -33,6 +33,8 @@ import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
+import { Session } from '@thallesp/nestjs-better-auth';
+import { UserSession } from '../auth/auth.types';
 
 @Controller('properties')
 export class PropertiesController {
@@ -72,6 +74,7 @@ export class PropertiesController {
   createProperty(
     @Body() createPropertyDto: CreatePropertyDto,
     @Query() query: CustomRepresentationQueryDto,
+    @Session() { session, user }: UserSession,
   ) {
     return this.propertiesService.properties.createProperty({
       queryBuilder: {
@@ -88,8 +91,8 @@ export class PropertiesController {
         metadata: JSON.stringify(media.metadata),
       })),
       context: {
-        organizationId: '',
-        userId: '',
+        organizationId: session.activeOrganizationId,
+        userId: user.id,
       },
       description: createPropertyDto.description,
       thumbnail: createPropertyDto.thumbnail,

@@ -102,7 +102,7 @@ model Property {
   amenities        PropertyAmenity[]
   categories       PropertyCategory[]
 
-  createdBy     String                  @db.Uuid
+  createdBy     String
   voided        Boolean                 @default(false)
   createdAt     DateTime                @default(now())
   updatedAt     DateTime                @updatedAt
