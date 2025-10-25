@@ -15,7 +15,7 @@ datasource db {
 }
 
 model AttributeType {
-  id             String  @id @default(uuid()) @db.Uuid
+  id             String  @id @default(uuid())
   name           String  @unique
   organizationId String? // Nullable if global
   icon           Json // {name, family}
@@ -30,7 +30,7 @@ model AttributeType {
 }
 
 model Amenity {
-  id             String  @id @default(uuid()) @db.Uuid
+  id             String  @id @default(uuid())
   name           String
   organizationId String?
   icon           Json // {name, family}
@@ -45,7 +45,7 @@ model Amenity {
 }
 
 model Category {
-  id             String             @id @default(uuid()) @db.Uuid
+  id             String             @id @default(uuid())
   name           String
   organizationId String?
   icon           Json // {name, family}
@@ -69,8 +69,8 @@ enum PropertyStatus {
 }
 
 model PropertyStatusHistory {
-  id             String         @id @default(uuid()) @db.Uuid
-  propertyId     String         @db.Uuid
+  id             String         @id @default(uuid())
+  propertyId     String
   property       Property       @relation(fields: [propertyId], onDelete: Cascade, references: [id])
   previousStatus PropertyStatus
   newStatus      PropertyStatus
@@ -80,7 +80,7 @@ model PropertyStatusHistory {
 }
 
 model Property {
-  id             String  @id @default(uuid()) @db.Uuid
+  id             String  @id @default(uuid())
   propertyNumber String  @unique
   name           String
   description    String? @db.Text
@@ -110,7 +110,7 @@ model Property {
 }
 
 model RelationshipType {
-  id            String         @id @default(uuid()) @db.Uuid
+  id            String         @id @default(uuid())
   description   String?        @db.Text
   aIsToB        String         @unique // e.g., "is parent of", "contains", "has parking"
   bIsToA        String         @unique // e.g., "is child of", "is part of", "belongs to parking"
@@ -123,13 +123,13 @@ model RelationshipType {
 }
 
 model Relationship {
-  id          String    @id @default(uuid()) @db.Uuid
-  propertyAId String    @db.Uuid
-  propertyBId String    @db.Uuid
+  id          String    @id @default(uuid())
+  propertyAId String
+  propertyBId String
   startDate   DateTime
   endDate     DateTime?
 
-  typeId String           @db.Uuid
+  typeId String
   type   RelationshipType @relation(fields: [typeId], onDelete: Cascade, references: [id])
 
   propertyA Property @relation("PropertyARelationship", fields: [propertyAId], references: [id], onDelete: Cascade)
@@ -143,8 +143,8 @@ model Relationship {
 }
 
 model PropertyMedia {
-  id          String            @id @default(uuid()) @db.Uuid
-  propertyId  String            @db.Uuid
+  id          String            @id @default(uuid())
+  propertyId  String
   type        PropertyMediaType
   url         String
   title       String?
@@ -167,9 +167,9 @@ enum PropertyMediaType {
 }
 
 model PropertyAttribute {
-  id          String @id @default(uuid()) @db.Uuid
-  propertyId  String @db.Uuid
-  attributeId String @db.Uuid
+  id          String @id @default(uuid())
+  propertyId  String
+  attributeId String
   value       String // Custom value for this property
 
   property  Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
@@ -183,9 +183,9 @@ model PropertyAttribute {
 }
 
 model PropertyAmenity {
-  id         String @id @default(uuid()) @db.Uuid
-  propertyId String @db.Uuid
-  amenityId  String @db.Uuid
+  id         String @id @default(uuid())
+  propertyId String
+  amenityId  String
 
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   amenity  Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
@@ -198,9 +198,9 @@ model PropertyAmenity {
 }
 
 model PropertyCategory {
-  id         String @id @default(uuid()) @db.Uuid
-  propertyId String @db.Uuid
-  categoryId String @db.Uuid
+  id         String @id @default(uuid())
+  propertyId String
+  categoryId String
 
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
