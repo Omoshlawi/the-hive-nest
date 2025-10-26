@@ -24,37 +24,27 @@ export const QueryPropertySchema = z.object({
   search: z.string().optional(),
   amenities: z
     .string()
-    .describe('Comma seperated amenity uuids')
+    .describe('Comma seperated amenity uuids or names')
     .optional()
     .refine(
       (data) => {
         if (!data) return true;
-        return (
-          QueryParamsUtils.isValidArrayString(data) &&
-          QueryParamsUtils.parseArray(data).every(
-            (uuid) => z.uuid().safeParse(uuid).success,
-          )
-        );
+        return QueryParamsUtils.isValidArrayString(data);
       },
-      { error: 'Invalid uuids' },
+      { error: 'Invalid amenities' },
     )
     .transform((data) => (data ? data.split(',') : [])),
   address: z.uuid().optional(),
   categories: z
     .string()
-    .describe('Comma seperated category uuids')
+    .describe('Comma seperated category uuids or names')
     .optional()
     .refine(
       (data) => {
         if (!data) return true;
-        return (
-          QueryParamsUtils.isValidArrayString(data) &&
-          QueryParamsUtils.parseArray(data).every(
-            (uuid) => z.uuid().safeParse(uuid).success,
-          )
-        );
+        return QueryParamsUtils.isValidArrayString(data);
       },
-      { error: 'Invalid uuids' },
+      { error: 'Invalid categories' },
     )
     .transform((data) => (data ? data.split(',') : [])),
   attributes: z
@@ -113,7 +103,14 @@ export class QueryPropertyDto extends createZodDto(QueryPropertySchema) {}
 
 export class CreatePropertyDto extends createZodDto(PropertySchema) {}
 
-export class UpdatePropertyDto extends createZodDto(PropertySchema.partial()) {}
+export class UpdatePropertyDto extends createZodDto(
+  PropertySchema.omit({
+    attributes: true,
+    categories: true,
+    amenities: true,
+    media: true,
+  }).partial(),
+) {}
 
 export class GetPropertyResponseDto implements Property {
   @ApiProperty()

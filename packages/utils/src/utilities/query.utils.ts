@@ -27,8 +27,8 @@ export class QueryParamsUtils {
         return false;
       }
 
-      // Key should only contain alphanumeric, dots, and underscores
-      if (!/^[a-zA-Z0-9_.]+$/.test(key)) {
+      // Key should only contain alphanumeric, dots,hiphen and underscores
+      if (!/^[a-zA-Z0-9_\-.]+$/.test(key)) {
         return false;
       }
 

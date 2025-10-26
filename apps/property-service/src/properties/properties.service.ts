@@ -68,28 +68,24 @@ export class PropertiesService {
             status: query?.status as Prisma.EnumPropertyStatusFilter,
             organizationId: query?.context?.organizationId ?? undefined,
             isVirtual: query?.isVirtual,
-            amenities: query?.amenities?.length
-              ? { some: { amenityId: { in: query?.amenities } } }
-              : undefined,
-            categories: query?.categories?.length
-              ? { some: { categoryId: { in: query?.categories } } }
-              : undefined,
             addressId: addressIds.length
               ? {
                   in: addressIds,
                 }
               : undefined,
-            attributes: Object.keys(query.attributes ?? {}).length ? {
-              some: {
-                AND: Object.entries(query.attributes ?? {}).map((attr) => ({
-                  OR: [
-                    { attribute: { name: attr[0] } },
-                    { attributeId: attr[0] },
-                  ],
-                  value: attr[1],
-                })),
-              },
-            }:undefined,
+            attributes: Object.keys(query.attributes ?? {}).length
+              ? {
+                  some: {
+                    AND: Object.entries(query.attributes ?? {}).map((attr) => ({
+                      OR: [
+                        { attribute: { name: attr[0] } },
+                        { attributeId: attr[0] },
+                      ],
+                      value: attr[1],
+                    })),
+                  },
+                }
+              : undefined,
           },
           // Amenities
           {
