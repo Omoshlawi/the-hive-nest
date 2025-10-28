@@ -33,7 +33,7 @@ import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
-import { Session } from '@thallesp/nestjs-better-auth';
+import { OptionalAuth, Session } from '@thallesp/nestjs-better-auth';
 import { UserSession } from '../auth/auth.types';
 
 @Controller('properties')
@@ -41,11 +41,16 @@ export class PropertiesController {
   constructor(private propertiesService: HivePropertyServiceClient) {}
 
   @Get('/')
+  @OptionalAuth()
   @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query Property' })
   @ApiOkResponse({ type: QueryPropertyResponseDto })
   @ApiErrorsResponse()
-  queryProperty(@Query() query: QueryPropertyDto) {
+  queryProperty(
+    @Query() query: QueryPropertyDto,
+    @Session() userSession?: UserSession,
+  ) {
+    const { session } = userSession ?? {};
     return this.propertiesService.properties.queryProperties({
       queryBuilder: {
         limit: query.limit,
@@ -59,7 +64,12 @@ export class PropertiesController {
       amenities: query.amenities,
       categories: query.categories ?? [],
       address: query.address,
-      context: {},
+      context: {
+        organizationId:
+          query.organization && session?.activeOrganizationId
+            ? session.activeOrganizationId
+            : undefined,
+      },
       isVirtual: query.isVirtual,
       status: query.status,
     });

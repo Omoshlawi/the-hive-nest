@@ -71,6 +71,7 @@ export const QueryPropertySchema = z.object({
   isVirtual: z
     .stringbool({ truthy: ['true', '1'], falsy: ['false', '0'] })
     .optional(),
+  organization: z.string().optional(),
   includeVoided: z
     .stringbool({
       truthy: ['true', '1'],
