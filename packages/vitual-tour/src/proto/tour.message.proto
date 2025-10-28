@@ -1,0 +1,53 @@
+syntax = 'proto3';
+
+
+import "common.message.proto";
+import "virtual-tour.model.proto";
+
+message QueryTourRequest {
+    QueryBuilder query_builder = 1;
+    optional string search = 2;
+    optional string user_id = 3;
+    optional string organization_id = 4;
+    optional bool include_voided = 5;
+    optional RequestContext context = 6;
+    optional string type = 7;
+    optional string level1 = 8;
+    optional string level2 = 9;
+    optional string level3 = 10;
+    optional string level4 = 11;
+    optional string level5 = 12;
+    optional string country = 13;
+    optional string postal_code = 14;
+    optional string start_date_from = 15;
+    optional string start_date_to = 16;
+    optional string end_date_from = 17;
+    optional string end_date_to = 18;
+    optional string created_at_from = 19;
+    optional string created_at_to = 20;
+    optional string location = 21;
+}
+
+message QueryTourResponse {
+    repeated Tour data = 1;
+    string metadata = 2; 
+}
+
+message CreateTourRequest {
+    QueryBuilder query_builder = 1;
+    optional RequestContext context = 2;
+    optional string property_id = 3;
+    optional string listing_id = 4;
+}
+message UpdateTourRequest {
+    QueryBuilder query_builder = 1;
+    string id = 2;
+    optional RequestContext context = 3;
+    optional string property_id = 4;
+    optional string listing_id = 5;
+}
+
+message GetTourResponse {
+    Tour data = 1;
+    string metadata = 2; 
+}

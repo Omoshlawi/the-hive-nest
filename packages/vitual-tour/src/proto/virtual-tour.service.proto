@@ -1,0 +1,25 @@
+syntax = 'proto3';
+
+import "common.message.proto";
+import "scene.message.proto";
+import "tour.message.proto";
+
+
+package hive.virtualtour.v1;
+
+service VirtualTours {
+
+  // Tour
+  rpc QueryTour(QueryTourRequest) returns (QueryTourResponse){};
+  rpc GetTour(GetRequest) returns (GetTourResponse){};
+  rpc CreateTour(CreateTourRequest) returns (GetTourResponse){};
+  rpc UpdateTour(UpdateTourRequest) returns (GetTourResponse){};
+  rpc DeleteTour(DeleteRequest) returns (GetTourResponse){};
+  
+  // Scene
+  rpc QueryScene(QuerySceneRequest) returns (QuerySceneResponse){};
+  rpc GetScene(GetRequest) returns (GetSceneResponse){};
+  rpc CreateScene(CreateSceneRequest) returns (GetSceneResponse){};
+  rpc UpdateScene(UpdateSceneRequest) returns (GetSceneResponse){};
+  rpc DeleteScene(DeleteRequest) returns (GetSceneResponse){};
+}

@@ -1,0 +1,39 @@
+syntax = 'proto3';
+
+import "common.message.proto";
+import "virtual-tour.model.proto";
+
+
+message QuerySceneRequest {
+    QueryBuilder query_builder = 1;
+    optional string tour_id = 2;
+    optional string property_id = 3;
+    optional string listing_id = 4;
+    optional RequestContext context = 5;
+    optional string search = 6;
+}
+
+message QuerySceneResponse {
+    repeated Scene data = 1;
+    string metadata = 2; 
+}
+
+message CreateSceneRequest {
+    QueryBuilder query_builder = 1;
+    string tour_id = 2;
+    string name = 3;
+    optional RequestContext context = 4;
+
+}
+
+message UpdateSceneRequest {
+    QueryBuilder query_builder = 1;
+    string id = 2;
+    optional RequestContext context = 3;
+    optional string tour_id = 4;
+}
+
+message GetSceneResponse {
+    string metadata = 1; 
+    Scene data = 2;
+}

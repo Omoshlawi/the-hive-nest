@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tour {
+  id         String   @id @default(uuid())
+  propertyId String?
+  listingId  String?
+  scenes     Scene[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([propertyId])
+  @@index([listingId])
+}
+
+model Scene {
+  id          String   @id @default(uuid())
+  tourId      String
+  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  name        String
+  tileBaseUrl String // Base URL for tiles in MinIO
+  width       Int // Original image width
+  height      Int // Original image height
+  tileSize    Int      @default(512)
+  maxLevel    Int // Number of zoom levels
+  hotspots    Json     @default("[]") // Array of hotspot configurations
+  position    Int      @default(0) // Order in tour
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tourId])
+}

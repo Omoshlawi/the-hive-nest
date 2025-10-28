@@ -1,0 +1,27 @@
+syntax = 'proto3';
+
+message Tour {
+    string id = 1;
+    optional string property_id  = 2;
+    optional string listing_id = 3;
+    repeated Scene scenes = 4;
+    string created_at  = 5;
+    string updated_at  = 6;
+}
+
+message Scene {
+    string id = 1;
+    string tour_id = 2;
+    optional Tour tour = 3;
+    string name = 4;
+    string tile_base_url = 5;
+    int32 width = 6;
+    int32 height = 7;
+    int32 tile_size = 8;
+    int32 max_level = 9;
+    string hotspots = 10; // JSON stringfied array of hotsport configs
+    int32 position = 11;
+    string created_at = 12;
+    string updated_at = 13;
+}
+
