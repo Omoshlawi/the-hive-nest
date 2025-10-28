@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Prisma, PrismaClient } from '../../generated/prisma';
 
@@ -11,7 +14,7 @@ export class PrismaService
 
     let extendedClient = this.$extends(timestampExtension);
     // extendedClient = extendedClient.$extends(auditExtension);
-    extendedClient = extendedClient.$extends(lastNumberToString);
+    extendedClient = extendedClient.$extends(hotspotsToString);
 
     return extendedClient as this;
   }
@@ -29,17 +32,7 @@ export class PrismaService
 const timestampExtension = Prisma.defineExtension({
   name: 'timestampToISOString',
   result: {
-    identifierSequence: {
-      updatedAt: {
-        needs: { updatedAt: true },
-        compute(data) {
-          return data.updatedAt instanceof Date
-            ? data.updatedAt.toISOString()
-            : data.updatedAt;
-        },
-      },
-    },
-    address: {
+    tour: {
       createdAt: {
         needs: { createdAt: true },
         compute(data) {
@@ -56,27 +49,12 @@ const timestampExtension = Prisma.defineExtension({
             : data.updatedAt;
         },
       },
-      startDate: {
-        needs: { startDate: true },
-        compute(data) {
-          return data.startDate instanceof Date
-            ? data.startDate.toISOString()
-            : data.startDate;
-        },
-      },
-      endDate: {
-        needs: { endDate: true },
-        compute(data) {
-          return data.endDate instanceof Date
-            ? data.endDate.toISOString()
-            : data.endDate;
-        },
-      },
     },
   },
 });
 
 // Extension 2: Audit logging with full type safety
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const auditExtension = Prisma.defineExtension({
   name: 'audit',
   query: {
@@ -103,14 +81,14 @@ const auditExtension = Prisma.defineExtension({
   },
 });
 
-const lastNumberToString = Prisma.defineExtension({
-  name: 'lastNumberToString',
+const hotspotsToString = Prisma.defineExtension({
+  name: 'hotspotsToString',
   result: {
-    identifierSequence: {
-      lastNumber: {
-        needs: { lastNumber: true },
-        compute(data) {
-          return data.lastNumber.toString();
+    scene: {
+      hotspots: {
+        needs: { hotspots: true },
+        compute(data): string {
+          return JSON.stringify(data.hotspots);
         },
       },
     },
