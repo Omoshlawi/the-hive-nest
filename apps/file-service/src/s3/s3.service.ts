@@ -18,6 +18,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { FileBlobData } from '@hive/files';
 
 export interface S3FileMetadata {
   id: string;
@@ -124,28 +125,28 @@ export class S3Service implements OnModuleInit {
   }
 
   async uploadSingleFile(
-    file: Express.Multer.File,
+    file: FileBlobData,
     uploadTo: string,
     isPublic = false,
     customMetadata?: Record<string, string>,
   ): Promise<S3FileMetadata> {
     const fileId = uuidv4();
-    const fileExtension = extname(file.originalname);
+    const fileExtension = extname(file.originalName);
     const filename = `${fileId}${fileExtension}`;
     const key = this.generateS3Key(uploadTo, filename);
 
-    this.logger.log(`Uploading to S3: ${file.originalname} -> ${key}`);
+    this.logger.log(`Uploading to S3: ${file.originalName} -> ${key}`);
 
     try {
       // Create upload stream
       const uploadParams: PutObjectCommandInput = {
         Bucket: this.getBucket(isPublic),
         Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-        ContentLength: file.size,
+        Body: Buffer.from(file.buffer),
+        ContentType: file.mimeType,
+        ContentLength: parseInt(file.size),
         Metadata: {
-          originalName: file.originalname,
+          originalName: file.originalName,
           uploadId: fileId,
           uploadTo: uploadTo,
           uploadedAt: new Date().toISOString(),
@@ -184,9 +185,9 @@ export class S3Service implements OnModuleInit {
         key,
         bucket: this.getBucket(isPublic),
         filename,
-        originalName: file.originalname,
-        contentType: file.mimetype,
-        size: file.size,
+        originalName: file.originalName,
+        contentType: file.mimeType,
+        size: parseInt(file.size),
         uploadTo,
         isPublic,
         etag: result.ETag?.replace(/"/g, '') || '',
@@ -197,12 +198,12 @@ export class S3Service implements OnModuleInit {
       };
 
       this.logger.log(
-        `File uploaded successfully: ${filename} (${this.formatFileSize(file.size)})`,
+        `File uploaded successfully: ${filename} (${this.formatFileSize(parseInt(file.size))})`,
       );
       return fileMetadata;
     } catch (error) {
       this.logger.error(
-        `Failed to upload file ${file.originalname}: ${error.message}`,
+        `Failed to upload file ${file.originalName}: ${error.message}`,
         error.stack,
       );
       throw new BadRequestException(`Upload failed: ${error.message}`);
@@ -210,7 +211,7 @@ export class S3Service implements OnModuleInit {
   }
 
   async uploadMultipleFiles(
-    files: Express.Multer.File[],
+    files: FileBlobData[],
     uploadTo: string,
     isPublic = false,
     customMetadata?: Record<string, string>,
@@ -241,9 +242,9 @@ export class S3Service implements OnModuleInit {
           result.uploadedCount++;
         } catch (error) {
           result.failedCount++;
-          result.errors?.push(`${file.originalname}: ${error.message}`);
+          result.errors?.push(`${file.originalName}: ${error.message}`);
           this.logger.error(
-            `Failed to upload ${file.originalname}: ${error.message}`,
+            `Failed to upload ${file.originalName}: ${error.message}`,
           );
         }
       });

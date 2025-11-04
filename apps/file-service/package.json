@@ -43,6 +43,7 @@
     "nestjs-s3": "^3.0.1",
     "nestjs-zod": "5.0.0-beta.20250806T023752",
     "rxjs": "^7.8.1",
+    "uuid": "^11.1.0",
     "zod": "^4.0.15"
   },
   "devDependencies": {

@@ -1,5 +1,4 @@
 import {
-  CreateFileFromExistingBlobRequest,
   CreateFileRequest,
   DeleteRequest,
   FILES_SERVICE_NAME,
@@ -40,14 +39,6 @@ export class AppController {
   @GrpcMethod(FILES_SERVICE_NAME)
   createFile(request: CreateFileRequest): Promise<GetFileResponse> {
     return this.appService.create(
-      request,
-    ) as unknown as Promise<GetFileResponse>;
-  }
-  @GrpcMethod(FILES_SERVICE_NAME)
-  createFileFromExistingBlob(
-    request: CreateFileFromExistingBlobRequest,
-  ): Promise<GetFileResponse> {
-    return this.appService.createFromExistingBlob(
       request,
     ) as unknown as Promise<GetFileResponse>;
   }

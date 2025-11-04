@@ -8,7 +8,6 @@ import {
   SortService,
 } from '@hive/common';
 import {
-  CreateFileFromExistingBlobRequest,
   CreateFileRequest,
   DeleteRequest,
   FileAuthZService,
@@ -21,16 +20,21 @@ import { RpcException } from '@nestjs/microservices';
 import { pick } from 'lodash';
 import { PrismaService } from './prisma/prisma.service';
 import { FileMetadata } from '../generated/prisma';
+import { createHash } from 'crypto';
+import { S3FileMetadata, S3Service } from './s3/s3.service';
 
 @Injectable()
 export class AppService {
   private logger = new Logger(AppService.name);
+  private readonly uploadPath = 'uploads';
+
   constructor(
     private readonly prismaService: PrismaService,
     private readonly sortService: SortService,
     private readonly paginationService: PaginationService,
     private readonly representationService: CustomRepresentationService,
     private readonly authz: FileAuthZService,
+    private readonly s3Service: S3Service,
   ) {}
 
   async getAll(query: QueryFileRequest) {
@@ -123,6 +127,13 @@ export class AppService {
     };
   }
 
+  private generateFileHash(buffer: Buffer<ArrayBufferLike>): string {
+    // Generate a SHA-256 hash of the file buffer and return as hex string
+    const hash = createHash('sha256');
+    hash.update(buffer);
+    return hash.digest('hex');
+  }
+
   async create(query: CreateFileRequest) {
     const { queryBuilder, context, blob, ...props } = query;
     if (!context?.userId) {
@@ -140,50 +151,53 @@ export class AppService {
     //     ),
     //   );
     // TODO: eNHANCE VALIDATION to chech upload purpose scope scope and rules
-    const data = await this.prismaService.fileMetadata.create({
-      data: {
-        ...props,
-        organizationId: context?.organizationId,
-        uploadedById: context.userId,
-        blob: {
-          create: {
-            ...blob!,
-            size: parseInt(blob!.size),
-          },
-        },
-      },
-      ...this.representationService.buildCustomRepresentationQuery(
-        queryBuilder?.v,
-      ),
-    });
+    const buffer = Buffer.from(blob!.buffer);
+    const hash = this.generateFileHash(buffer);
 
-    return {
-      data,
-      metadata: JSON.stringify({}),
-    };
-  }
-  async createFromExistingBlob(query: CreateFileFromExistingBlobRequest) {
-    const { queryBuilder, context, ...props } = query;
-    if (!context?.userId) {
-      throw new RpcException(
-        new BadRequestException('User ID is required in context'),
+    // Check if the file already exists in the database
+    const existingBlob = await this.prismaService.fileBlob.findUnique({
+      where: { hash },
+    });
+    let uploaded: S3FileMetadata;
+    if (!existingBlob) {
+      uploaded = await this.s3Service.uploadSingleFile(
+        blob!,
+        this.uploadPath,
+        true,
+        {},
       );
     }
-    // if (
-    //   context?.organizationId &&
-    //   !(await this.authz.canCreateFile(context.userId, context.organizationId))
-    // )
-    //   throw new RpcException(
-    //     new ForbiddenException(
-    //       'You do not have permission to create a file in this organization.',
-    //     ),
-    //   );
-    // TODO: eNHANCE VALIDATION to chech upload purpose scope scope and rules
+
     const data = await this.prismaService.fileMetadata.create({
       data: {
         ...props,
-        organizationId: context?.organizationId,
+        organizationId: context?.organizationId ?? undefined,
         uploadedById: context.userId,
+        metadata: JSON.stringify({
+          createdFromExistingBlob: existingBlob ? true : false,
+        }),
+        blobId: (existingBlob?.id ?? undefined) as string,
+        originalName: blob!.originalName,
+        blob: (existingBlob
+          ? undefined
+          : {
+              create: {
+                filename: uploaded!.filename,
+                hash,
+                mimeType: uploaded!.contentType,
+                size: uploaded!.size,
+                remoteId: uploaded!.id,
+                storagePath: uploaded!.key,
+                storageUrl: uploaded!.url,
+                metadata: JSON.stringify({
+                  ...(uploaded!.customMetadata ?? {}),
+                  bucket: uploaded!.bucket,
+                  key: uploaded!.key,
+                  etag: uploaded!.etag,
+                  uploadedAt: uploaded!.uploadedAt,
+                }),
+              },
+            }) as any,
       },
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
