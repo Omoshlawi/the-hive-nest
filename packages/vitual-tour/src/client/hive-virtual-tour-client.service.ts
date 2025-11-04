@@ -13,8 +13,6 @@ import {
 import {
   CreateSceneRequest,
   CreateTourRequest,
-  FileUploadChunk,
-  FileUploadResponse,
   GetSceneResponse,
   GetTourResponse,
   QuerySceneRequest,
@@ -69,20 +67,6 @@ export class HiveVirtualToursServiceClient
     deleteScene: (request: DeleteRequest): Observable<GetSceneResponse> =>
       this.loadBalance().deleteScene(request),
   };
-
-  /**
-   * Stream file upload to virtual tour service
-   * This method handles large files by streaming them in chunks
-   */
-  streamUploadSceneFile(
-    dataStream: Observable<FileUploadChunk>,
-  ): Observable<FileUploadResponse> {
-    const service = this.loadBalance();
-    if ('streamUploadSceneFile' in service) {
-      return (service as any).streamUploadSceneFile(dataStream);
-    }
-    throw new Error('streamUploadSceneFile method not available on service');
-  }
 
   private loadBalance() {
     // Get service internally uses random strategy to load balance cached clients

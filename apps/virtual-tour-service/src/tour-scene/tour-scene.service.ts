@@ -5,19 +5,19 @@ import {
   SortService,
 } from '@hive/common';
 import {
-  CreateTourRequest,
+  CreateSceneRequest,
   DeleteRequest,
   GetRequest,
-  QueryTourRequest,
-  UpdateTourRequest,
+  QuerySceneRequest,
+  UpdateSceneRequest,
 } from '@hive/virtual-tour';
 import { Injectable } from '@nestjs/common';
+import { Scene, Prisma } from '../../generated/prisma';
 import { pick } from 'lodash';
-import { PrismaService } from './prisma/prisma.service';
-import { Prisma, Tour } from '../generated/prisma';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class TourService {
+export class TourSceneService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly sortService: SortService,
@@ -25,15 +25,18 @@ export class TourService {
     private readonly representationService: CustomRepresentationService,
   ) {}
 
-  async getAll(query: QueryTourRequest) {
+  async getAll(query: QuerySceneRequest) {
     const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.tour.findMany
+      typeof this.prismaService.scene.findMany
     > = {
       where: {
         AND: [
           { voided: query?.includeVoided ? undefined : false },
-          { propertyId: query.propertyId },
-          { listingId: query.listingId },
+          {
+            OR: query.search
+              ? [{ name: { contains: query.search } }]
+              : undefined,
+          },
         ],
       },
       ...this.paginationService.buildPaginationQuery(query.queryBuilder),
@@ -43,8 +46,8 @@ export class TourService {
       ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
     };
     const [data, totalCount] = await Promise.all([
-      this.prismaService.tour.findMany(dbQuery),
-      this.prismaService.tour.count(pick(dbQuery, 'where')),
+      this.prismaService.scene.findMany(dbQuery),
+      this.prismaService.scene.count(pick(dbQuery, 'where')),
     ]);
     return {
       data,
@@ -53,7 +56,7 @@ export class TourService {
   }
 
   async getById(query: GetRequest) {
-    const data = await this.prismaService.tour.findUnique({
+    const data = await this.prismaService.scene.findUnique({
       where: {
         id: query.id,
       },
@@ -67,10 +70,10 @@ export class TourService {
     };
   }
 
-  async create(query: CreateTourRequest) {
+  async create(query: CreateSceneRequest) {
     const { queryBuilder, context: _, ...props } = query;
-    const data = await this.prismaService.tour.create({
-      data: { ...props, scenes: { createMany: { data: [] } } }, // TODO: Add scenes
+    const data = await this.prismaService.scene.create({
+      data: { ...props, tileBaseUrl: '', width: 0, height: 0, maxLevel: 0 }, // TODO: Add tileBaseUrl, width, height, maxLevel
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
@@ -82,11 +85,11 @@ export class TourService {
     };
   }
 
-  async update(query: UpdateTourRequest) {
+  async update(query: UpdateSceneRequest) {
     const { queryBuilder, id, context: _, ...props } = query;
-    const data = await this.prismaService.tour.update({
+    const data = await this.prismaService.scene.update({
       where: { id },
-      data: props as Prisma.TourUpdateInput,
+        data: { ...props, tileBaseUrl: '', width: 0, height: 0, maxLevel: 0 }, // TODO: Add tileBaseUrl, width, height, maxLevel
       ...this.representationService.buildCustomRepresentationQuery(
         queryBuilder?.v,
       ),
@@ -100,16 +103,16 @@ export class TourService {
 
   async delete(query: DeleteRequest) {
     const { id, purge, queryBuilder } = query;
-    let data: Tour;
+    let data: Scene;
     if (purge) {
-      data = await this.prismaService.tour.delete({
+      data = await this.prismaService.scene.delete({
         where: { id },
         ...this.representationService.buildCustomRepresentationQuery(
           queryBuilder?.v,
         ),
       });
     } else {
-      data = await this.prismaService.tour.update({
+      data = await this.prismaService.scene.update({
         where: { id },
         data: { voided: true },
         ...this.representationService.buildCustomRepresentationQuery(

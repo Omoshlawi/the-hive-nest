@@ -9,6 +9,8 @@ message QueryTourRequest {
     optional string property_id = 2;
     optional string listing_id = 3;
     optional RequestContext context = 6;
+    optional bool include_voided = 7;
+
 }
 
 message QueryTourResponse {
@@ -16,11 +18,17 @@ message QueryTourResponse {
     string metadata = 2; 
 }
 
+message CreateTourNestedScene {
+    string name = 1;
+    string file_url = 2;
+}
+
 message CreateTourRequest {
     QueryBuilder query_builder = 1;
     optional RequestContext context = 2;
     optional string property_id = 3;
     optional string listing_id = 4;
+    repeated CreateTourNestedScene scenes = 5;
 }
 message UpdateTourRequest {
     QueryBuilder query_builder = 1;

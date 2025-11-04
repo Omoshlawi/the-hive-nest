@@ -10,8 +10,6 @@ import { Observable } from "rxjs";
 import { DeleteRequest, GetRequest } from "./common.message";
 import {
   CreateSceneRequest,
-  FileUploadChunk,
-  FileUploadResponse,
   GetSceneResponse,
   QuerySceneRequest,
   QuerySceneResponse,
@@ -53,10 +51,6 @@ export interface VirtualToursClient {
   updateScene(request: UpdateSceneRequest): Observable<GetSceneResponse>;
 
   deleteScene(request: DeleteRequest): Observable<GetSceneResponse>;
-
-  /** Streaming file upload for large files */
-
-  streamUploadSceneFile(request: Observable<FileUploadChunk>): Observable<FileUploadResponse>;
 }
 
 export interface VirtualToursController {
@@ -85,12 +79,6 @@ export interface VirtualToursController {
   updateScene(request: UpdateSceneRequest): Promise<GetSceneResponse> | Observable<GetSceneResponse> | GetSceneResponse;
 
   deleteScene(request: DeleteRequest): Promise<GetSceneResponse> | Observable<GetSceneResponse> | GetSceneResponse;
-
-  /** Streaming file upload for large files */
-
-  streamUploadSceneFile(
-    request: Observable<FileUploadChunk>,
-  ): Promise<FileUploadResponse> | Observable<FileUploadResponse> | FileUploadResponse;
 }
 
 export function VirtualToursControllerMethods() {
@@ -111,7 +99,7 @@ export function VirtualToursControllerMethods() {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("VirtualTours", method)(constructor.prototype[method], method, descriptor);
     }
-    const grpcStreamMethods: string[] = ["streamUploadSceneFile"];
+    const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcStreamMethod("VirtualTours", method)(constructor.prototype[method], method, descriptor);

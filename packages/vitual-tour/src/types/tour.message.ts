@@ -15,6 +15,7 @@ export interface QueryTourRequest {
   propertyId?: string | undefined;
   listingId?: string | undefined;
   context?: RequestContext | undefined;
+  includeVoided?: boolean | undefined;
 }
 
 export interface QueryTourResponse {
@@ -22,11 +23,17 @@ export interface QueryTourResponse {
   metadata: string;
 }
 
+export interface CreateTourNestedScene {
+  name: string;
+  fileUrl: string;
+}
+
 export interface CreateTourRequest {
   queryBuilder: QueryBuilder | undefined;
   context?: RequestContext | undefined;
   propertyId?: string | undefined;
   listingId?: string | undefined;
+  scenes: CreateTourNestedScene[];
 }
 
 export interface UpdateTourRequest {

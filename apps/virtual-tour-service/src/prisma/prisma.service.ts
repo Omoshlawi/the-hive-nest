@@ -50,6 +50,24 @@ const timestampExtension = Prisma.defineExtension({
         },
       },
     },
+    scene: {
+      createdAt: {
+        needs: { createdAt: true },
+        compute(data) {
+          return data.createdAt instanceof Date
+            ? data.createdAt.toISOString()
+            : data.createdAt;
+        },
+      },
+      updatedAt: {
+        needs: { updatedAt: true },
+        compute(data) {
+          return data.updatedAt instanceof Date
+            ? data.updatedAt.toISOString()
+            : data.updatedAt;
+        },
+      },
+    },
   },
 });
 

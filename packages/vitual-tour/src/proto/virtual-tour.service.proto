@@ -23,6 +23,4 @@ service VirtualTours {
   rpc UpdateScene(UpdateSceneRequest) returns (GetSceneResponse){};
   rpc DeleteScene(DeleteRequest) returns (GetSceneResponse){};
   
-  // Streaming file upload for large files
-  rpc StreamUploadSceneFile(stream FileUploadChunk) returns (FileUploadResponse){};
 }

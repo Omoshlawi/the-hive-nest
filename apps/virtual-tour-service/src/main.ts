@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { ServerConfig } from '@hive/utils';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { TourModule } from './app.module';
 import {
   VIRTUAL_TOUR_HTTP_SERVER_CONFIG_TOKEN,
   VIRTUAL_TOUR_PACKAGE,
@@ -10,7 +10,7 @@ import {
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(TourModule);
   const httpServerConfig: ServerConfig = app.get(
     VIRTUAL_TOUR_HTTP_SERVER_CONFIG_TOKEN,
   );

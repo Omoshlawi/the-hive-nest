@@ -1,3 +1,5 @@
+import { VirtualToursController } from './virtual-tour.service';
+
 export {
   DeleteRequest,
   Empty,
@@ -13,10 +15,6 @@ export {
   QuerySceneRequest,
   QuerySceneResponse,
   UpdateSceneRequest,
-  FileUploadChunk,
-  FileUploadResponse,
-  FileUploadMetadata,
-  FileData,
 } from './scene.message';
 export {
   CreateTourRequest,
@@ -26,3 +24,11 @@ export {
   UpdateTourRequest,
 } from './tour.message';
 export { Scene, Tour } from './virtual-tour.model';
+export type TourController = Pick<
+  VirtualToursController,
+  'queryTour' | 'getTour' | 'createTour' | 'updateTour' | 'deleteTour'
+>;
+export type SceneController = Pick<
+  VirtualToursController,
+  'queryScene' | 'getScene' | 'createScene' | 'updateScene' | 'deleteScene'
+>;
