@@ -7,7 +7,7 @@ import {
 import { InjectS3, S3 } from 'nestjs-s3';
 import { extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { S3Config } from '../config/s3.config';
+import { S3Config } from './s3.config';
 
 import {
   DeleteObjectCommand,

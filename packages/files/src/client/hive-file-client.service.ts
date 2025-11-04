@@ -5,7 +5,6 @@ import { OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { FILE_PACKAGE, HIVE_FILE_SERVICE_NAME } from '../constants';
 import {
-  CreateFileFromExistingBlobRequest,
   CreateFileRequest,
   CreateFileUsageRuleRequest,
   CreateFileUsageScopeRequest,
@@ -16,6 +15,9 @@ import {
   GetFileResponse,
   GetFileUsageRuleResponse,
   GetFileUsageScopeResponse,
+  IFilesController,
+  IFileUsageRuleController,
+  IFileUsageScopeController,
   QueryFileRequest,
   QueryFileResponse,
   QueryFileUsageRuleRequest,
@@ -37,7 +39,7 @@ import { DeleteRequest, GetRequest } from '../types/common.message';
 export class HiveFileServiceClient implements OnModuleInit, OnModuleDestroy {
   constructor(private client: HiveServiceClient) {}
 
-  readonly fileUsageScope = {
+  readonly fileUsageScope: IFileUsageScopeController = {
     queryFileUsageScope: (
       request: QueryFileUsageScopeRequest,
     ): Observable<QueryFileUsageScopeResponse> =>
@@ -64,7 +66,7 @@ export class HiveFileServiceClient implements OnModuleInit, OnModuleDestroy {
       this.loadBalance().deleteFileUsageScope(request),
   };
 
-  readonly fileUsageRule = {
+  readonly fileUsageRule: IFileUsageRuleController = {
     queryFileUsageRule: (
       request: QueryFileUsageRuleRequest,
     ): Observable<QueryFileUsageRuleResponse> =>
@@ -91,17 +93,13 @@ export class HiveFileServiceClient implements OnModuleInit, OnModuleDestroy {
       this.loadBalance().deleteFileUsageRule(request),
   };
 
-  readonly file = {
+  readonly file: IFilesController = {
     queryFile: (request: QueryFileRequest): Observable<QueryFileResponse> =>
       this.loadBalance().queryFile(request),
     getFile: (request: GetRequest): Observable<GetFileResponse> =>
       this.loadBalance().getFile(request),
     getBlobByHash: (request: GetByHashRequest): Observable<GetBlobResponse> =>
       this.loadBalance().getBlobByHash(request),
-    createFileFromExistingBlob: (
-      request: CreateFileFromExistingBlobRequest,
-    ): Observable<GetFileResponse> =>
-      this.loadBalance().createFileFromExistingBlob(request),
     createFile: (request: CreateFileRequest): Observable<GetFileResponse> =>
       this.loadBalance().createFile(request),
     deleteFile: (request: DeleteRequest): Observable<GetFileResponse> =>

@@ -21,7 +21,6 @@ import {
   UpdateFileUsageScopeRequest,
 } from "./file-usage.message";
 import {
-  CreateFileFromExistingBlobRequest,
   CreateFileRequest,
   GetBlobResponse,
   GetByHashRequest,
@@ -44,8 +43,6 @@ export interface FilesClient {
   getBlobByHash(request: GetByHashRequest): Observable<GetBlobResponse>;
 
   createFile(request: CreateFileRequest): Observable<GetFileResponse>;
-
-  createFileFromExistingBlob(request: CreateFileFromExistingBlobRequest): Observable<GetFileResponse>;
 
   deleteFile(request: DeleteRequest): Observable<GetFileResponse>;
 
@@ -84,10 +81,6 @@ export interface FilesController {
   getBlobByHash(request: GetByHashRequest): Promise<GetBlobResponse> | Observable<GetBlobResponse> | GetBlobResponse;
 
   createFile(request: CreateFileRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
-
-  createFileFromExistingBlob(
-    request: CreateFileFromExistingBlobRequest,
-  ): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
 
   deleteFile(request: DeleteRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
 
@@ -143,7 +136,6 @@ export function FilesControllerMethods() {
       "getFile",
       "getBlobByHash",
       "createFile",
-      "createFileFromExistingBlob",
       "deleteFile",
       "queryFileUsageScope",
       "getFileUsageScope",

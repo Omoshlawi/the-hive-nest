@@ -1,7 +1,7 @@
 import { Controller, NotFoundException } from '@nestjs/common';
 import { TourSceneService } from './tour-scene.service';
 import {
-  SceneController,
+  ISceneController,
   QuerySceneRequest,
   QuerySceneResponse,
   GetRequest,
@@ -14,7 +14,7 @@ import {
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 
 @Controller('tour-scene')
-export class TourSceneController implements SceneController {
+export class TourSceneController implements ISceneController {
   constructor(private readonly tourSceneService: TourSceneService) {}
   @GrpcMethod(VIRTUAL_TOURS_SERVICE_NAME)
   queryScene(request: QuerySceneRequest): Promise<QuerySceneResponse> {

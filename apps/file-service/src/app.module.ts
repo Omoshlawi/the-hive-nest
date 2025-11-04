@@ -21,6 +21,7 @@ import { AppService } from './app.service';
 import { FileUsageRuleModule } from './file-usage-rule/file-usage-rule.module';
 import { FileUsageScopeModule } from './file-usage-scope/file-usage-scope.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { S3Module } from './s3/s3.module';
 
 @Module({
   imports: [
@@ -92,6 +93,7 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     FileUsageScopeModule,
     FileUsageRuleModule,
+    S3Module,
   ],
   controllers: [AppController],
   providers: [AppService, GlobalRpcExceptionFilter, FileAuthZService],

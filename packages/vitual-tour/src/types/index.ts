@@ -24,11 +24,11 @@ export {
   UpdateTourRequest,
 } from './tour.message';
 export { Scene, Tour } from './virtual-tour.model';
-export type TourController = Pick<
+export type ITourController = Pick<
   VirtualToursController,
   'queryTour' | 'getTour' | 'createTour' | 'updateTour' | 'deleteTour'
 >;
-export type SceneController = Pick<
+export type ISceneController = Pick<
   VirtualToursController,
   'queryScene' | 'getScene' | 'createScene' | 'updateScene' | 'deleteScene'
 >;

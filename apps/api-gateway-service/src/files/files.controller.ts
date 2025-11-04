@@ -43,7 +43,6 @@ import {
   ApiListTransformInterceptor,
 } from '../app.interceptors';
 import { UserSession } from '../auth/auth.types';
-import { S3Service } from '../s3/s3.service';
 
 @Controller('files')
 export class FilesController {

@@ -15,46 +15,26 @@ message QueryFileResponse {
     string metadata = 2; // JSON as string
 }
 
-message CreateNestedBlobRequest {
-    string hash = 1;
+message FileBlobData {
+    string name = 1;
     string size = 2;
     string mime_type = 3;
-    string remote_id = 4;
-    string filename = 5;
-    string storage_path = 6;
-    optional string storage_url = 7;
-    optional string metadata = 8; // JSON as string
+    string filename = 4;
+    string original_name = 5;
+    bytes buffer = 6;
+    string field_name = 7;
 }
 
 message CreateFileRequest {
     QueryBuilder query_builder = 1;
-    CreateNestedBlobRequest blob = 2;
-    string original_name = 3;
-
-    string related_model_id = 4;
-    string related_model_name = 5;
-    string purpose = 6;
-
-    optional string metadata = 7; // JSON as string
-    repeated string tags = 8;
-
-    optional string last_accessed_at = 9;
-    optional string expires_at = 10;
-    optional RequestContext context = 11;
-}
-
-message CreateFileFromExistingBlobRequest {
-    QueryBuilder query_builder = 1;
-    string blob_id = 2;
-    string original_name = 3;
-    string related_model_id = 4;
-    string related_model_name = 5;
-    string purpose = 6;
-    optional string metadata = 7; // JSON as string
-    repeated string tags = 8;
-    optional string last_accessed_at = 9;
-    optional string expires_at = 10;
-    optional RequestContext context = 11;
+    FileBlobData blob = 2;
+    string related_model_id = 3;
+    string related_model_name = 4;
+    string purpose = 5;
+    optional string metadata = 6; // JSON as string
+    repeated string tags = 7;
+    optional string expires_at = 8;
+    optional RequestContext context = 9;
 }
 
 message GetByHashRequest {

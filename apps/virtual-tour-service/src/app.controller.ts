@@ -5,7 +5,7 @@ import {
   GetTourResponse,
   QueryTourRequest,
   QueryTourResponse,
-  TourController as ITourController,
+  ITourController as ITourController,
   UpdateTourRequest,
   VIRTUAL_TOURS_SERVICE_NAME,
 } from '@hive/virtual-tour';
@@ -14,7 +14,7 @@ import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { TourService } from './app.service';
 
 @Controller()
-export class TourController implements ITourController {
+export class ITourController implements ITourController {
   constructor(private readonly appService: TourService) {}
   @GrpcMethod(VIRTUAL_TOURS_SERVICE_NAME)
   queryTour(request: QueryTourRequest): Promise<QueryTourResponse> {

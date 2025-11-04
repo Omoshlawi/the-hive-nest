@@ -1,3 +1,5 @@
+import { FilesController } from './files.service';
+
 export {
   DeleteRequest,
   Empty,
@@ -25,9 +27,8 @@ export {
   GetFileResponse,
   QueryFileRequest,
   QueryFileResponse,
-  CreateFileFromExistingBlobRequest,
   GetBlobResponse,
-  CreateNestedBlobRequest,
+  FileBlobData,
 } from './files.message';
 export {
   FileUsageRule,
@@ -37,3 +38,23 @@ export {
   FileBlob,
   FileMetadata,
 } from './files.model';
+export type IFileUsageScopeController = Pick<
+  FilesController,
+  | 'queryFileUsageScope'
+  | 'getFileUsageScope'
+  | 'createFileUsageScope'
+  | 'updateFileUsageScope'
+  | 'deleteFileUsageScope'
+>;
+export type IFileUsageRuleController = Pick<
+  FilesController,
+  | 'queryFileUsageRule'
+  | 'getFileUsageRule'
+  | 'createFileUsageRule'
+  | 'updateFileUsageRule'
+  | 'deleteFileUsageRule'
+>;
+export type IFilesController = Pick<
+  FilesController,
+  'queryFile' | 'getFile' | 'getBlobByHash' | 'createFile' | 'deleteFile'
+>;

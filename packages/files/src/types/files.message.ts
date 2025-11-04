@@ -23,46 +23,25 @@ export interface QueryFileResponse {
   metadata: string;
 }
 
-export interface CreateNestedBlobRequest {
-  hash: string;
+export interface FileBlobData {
+  name: string;
   size: string;
   mimeType: string;
-  remoteId: string;
   filename: string;
-  storagePath: string;
-  storageUrl?:
-    | string
-    | undefined;
-  /** JSON as string */
-  metadata?: string | undefined;
+  originalName: string;
+  buffer: Uint8Array;
+  fieldName: string;
 }
 
 export interface CreateFileRequest {
   queryBuilder: QueryBuilder | undefined;
-  blob: CreateNestedBlobRequest | undefined;
-  originalName: string;
+  blob: FileBlobData | undefined;
   relatedModelId: string;
   relatedModelName: string;
   purpose: string;
   /** JSON as string */
   metadata?: string | undefined;
   tags: string[];
-  lastAccessedAt?: string | undefined;
-  expiresAt?: string | undefined;
-  context?: RequestContext | undefined;
-}
-
-export interface CreateFileFromExistingBlobRequest {
-  queryBuilder: QueryBuilder | undefined;
-  blobId: string;
-  originalName: string;
-  relatedModelId: string;
-  relatedModelName: string;
-  purpose: string;
-  /** JSON as string */
-  metadata?: string | undefined;
-  tags: string[];
-  lastAccessedAt?: string | undefined;
   expiresAt?: string | undefined;
   context?: RequestContext | undefined;
 }

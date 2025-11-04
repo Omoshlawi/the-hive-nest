@@ -6,7 +6,7 @@ import {
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
 import { Module } from '@nestjs/common';
-import { TourController } from './app.controller';
+import { ITourController } from './app.controller';
 import { TourService } from './app.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from './prisma/prisma.module';
@@ -81,7 +81,7 @@ import { TourSceneModule } from './tour-scene/tour-scene.module';
     QueryBuilderModule.register({ global: true }),
     TourSceneModule,
   ],
-  controllers: [TourController],
+  controllers: [ITourController],
   providers: [TourService],
 })
 export class TourModule {}
