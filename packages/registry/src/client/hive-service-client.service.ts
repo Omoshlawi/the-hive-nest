@@ -206,6 +206,10 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
         package: this.config.package,
         protoPath: this.config.protoPath,
         url: `${endpoint.host}:${endpoint.port}`,
+        // Support large file uploads (up to 100MB)
+        // This is especially important for virtual tour service file streaming
+        // maxSendMessageLength: 100 * 1024 * 1024, // 100MB
+        // maxReceiveMessageLength: 100 * 1024 * 1024, // 100MB
       },
     });
   }

@@ -23,6 +23,9 @@ async function bootstrap() {
       package: VIRTUAL_TOUR_PACKAGE.V1.NAME,
       protoPath: VIRTUAL_TOUR_PACKAGE.V1.PROTO_PATH,
       url: `${grpcServerConfig.host}:${grpcServerConfig.port}`,
+      // Support large file uploads (up to 100MB)
+      maxSendMessageLength: 100 * 1024 * 1024, // 100MB
+      maxReceiveMessageLength: 100 * 1024 * 1024, // 100MB
     },
   });
 

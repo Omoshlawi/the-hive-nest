@@ -26,6 +26,8 @@ import { FilesModule } from './files/files.module';
 import { IdentityModule } from './identity/identity.module';
 
 import { APP_GUARD } from '@nestjs/core';
+import { AddressHierarchyModule } from './address-hierarchy/address-hierarchy.module';
+import { AddressModule } from './address/address.module';
 import {
   RequireActiveOrganizationGuard,
   RequireOrganizationPermissionsGuard,
@@ -36,8 +38,7 @@ import { IdentifierSequenceModule } from './identifier-sequence/identifier-seque
 import { PropertiesModule } from './properties/properties.module';
 import { RegistryModule } from './registry/registry.module';
 import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
-import { AddressHierarchyModule } from './address-hierarchy/address-hierarchy.module';
-import { AddressModule } from './address/address.module';
+import { VirtualToursModule } from './virtual-tours/virtual-tours.module';
 
 @Module({
   imports: [
@@ -93,6 +94,7 @@ import { AddressModule } from './address/address.module';
     PropertiesModule,
     AddressHierarchyModule,
     AddressModule,
+    VirtualToursModule,
   ],
   controllers: [AppController],
   providers: [

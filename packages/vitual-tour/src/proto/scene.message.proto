@@ -18,12 +18,21 @@ message QuerySceneResponse {
     string metadata = 2; 
 }
 
+message FileData {
+    bytes buffer = 1;
+    int32 size = 2;
+    string original_name = 3;
+    string file_name = 4;
+    string meme_type = 5;
+}
+
 message CreateSceneRequest {
     QueryBuilder query_builder = 1;
     string tour_id = 2;
     string name = 3;
     optional RequestContext context = 4;
-
+    bytes fileBuffer = 5;
+    FileData file = 6;
 }
 
 message UpdateSceneRequest {
@@ -36,4 +45,26 @@ message UpdateSceneRequest {
 message GetSceneResponse {
     string metadata = 1; 
     Scene data = 2;
+}
+
+// Streaming file upload messages
+message FileUploadMetadata {
+    string tour_id = 1;
+    string name = 2;
+    string original_name = 3;
+    string mime_type = 4;
+    int64 total_size = 5;
+    optional RequestContext context = 6;
+    optional QueryBuilder query_builder = 7;
+}
+
+message FileUploadChunk {
+    optional FileUploadMetadata metadata = 1;
+    optional bytes data = 2;
+}
+
+message FileUploadResponse {
+    optional GetSceneResponse scene = 1;
+    bool success = 2;
+    optional string error = 3;
 }

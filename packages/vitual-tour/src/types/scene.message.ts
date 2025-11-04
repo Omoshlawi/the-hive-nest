@@ -24,11 +24,21 @@ export interface QuerySceneResponse {
   metadata: string;
 }
 
+export interface FileData {
+  buffer: Uint8Array;
+  size: number;
+  originalName: string;
+  fileName: string;
+  memeType: string;
+}
+
 export interface CreateSceneRequest {
   queryBuilder: QueryBuilder | undefined;
   tourId: string;
   name: string;
   context?: RequestContext | undefined;
+  fileBuffer: Uint8Array;
+  file: FileData | undefined;
 }
 
 export interface UpdateSceneRequest {
@@ -41,6 +51,28 @@ export interface UpdateSceneRequest {
 export interface GetSceneResponse {
   metadata: string;
   data: Scene | undefined;
+}
+
+/** Streaming file upload messages */
+export interface FileUploadMetadata {
+  tourId: string;
+  name: string;
+  originalName: string;
+  mimeType: string;
+  totalSize: number;
+  context?: RequestContext | undefined;
+  queryBuilder?: QueryBuilder | undefined;
+}
+
+export interface FileUploadChunk {
+  metadata?: FileUploadMetadata | undefined;
+  data?: Uint8Array | undefined;
+}
+
+export interface FileUploadResponse {
+  scene?: GetSceneResponse | undefined;
+  success: boolean;
+  error?: string | undefined;
 }
 
 export const _PACKAGE_NAME = "";

@@ -13,6 +13,10 @@ export {
   QuerySceneRequest,
   QuerySceneResponse,
   UpdateSceneRequest,
+  FileUploadChunk,
+  FileUploadResponse,
+  FileUploadMetadata,
+  FileData,
 } from './scene.message';
 export {
   CreateTourRequest,

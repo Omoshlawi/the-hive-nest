@@ -155,6 +155,7 @@ export class FilesController {
   @ApiOperation({
     summary: 'Upload single file',
     description: 'Upload a single file to the specified location',
+    deprecated: true,
   })
   @Post('upload/single')
   async uploadSingleFile(
@@ -248,6 +249,7 @@ export class FilesController {
   @Post('upload/multiple')
   @ApiOperation({
     summary: 'Upload multiple files',
+    deprecated: true,
     description:
       'Upload multiple files with the same field name to the specified location',
   })
@@ -371,6 +373,7 @@ export class FilesController {
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: 'Upload files from multiple form fields',
+    deprecated: true,
     description:
       'Upload files from different form fields to the specified location',
   })

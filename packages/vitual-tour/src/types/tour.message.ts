@@ -12,26 +12,9 @@ export const protobufPackage = "";
 
 export interface QueryTourRequest {
   queryBuilder: QueryBuilder | undefined;
-  search?: string | undefined;
-  userId?: string | undefined;
-  organizationId?: string | undefined;
-  includeVoided?: boolean | undefined;
+  propertyId?: string | undefined;
+  listingId?: string | undefined;
   context?: RequestContext | undefined;
-  type?: string | undefined;
-  level1?: string | undefined;
-  level2?: string | undefined;
-  level3?: string | undefined;
-  level4?: string | undefined;
-  level5?: string | undefined;
-  country?: string | undefined;
-  postalCode?: string | undefined;
-  startDateFrom?: string | undefined;
-  startDateTo?: string | undefined;
-  endDateFrom?: string | undefined;
-  endDateTo?: string | undefined;
-  createdAtFrom?: string | undefined;
-  createdAtTo?: string | undefined;
-  location?: string | undefined;
 }
 
 export interface QueryTourResponse {
