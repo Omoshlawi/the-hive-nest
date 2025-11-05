@@ -58,12 +58,11 @@ message GenerateUploadSignedUrlRequest {
     optional RequestContext context = 2;
     optional int32 expires_in = 3; // Default 3600 seconds
     string mime_type = 4;
-    QueryBuilder query_builder = 5;
-    string related_model_id = 6;
-    string related_model_name = 7;
-    string purpose = 8;
-    repeated string tags = 9;
-    string size = 10;
+    string related_model_id = 5;
+    string related_model_name = 6;
+    string purpose = 7;
+    repeated string tags = 8;
+    string size = 9;
 }
 
 message SignedUrlData  {

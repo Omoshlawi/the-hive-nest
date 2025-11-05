@@ -12,21 +12,19 @@ import {
   DeleteRequest,
   FileAuthZService,
   GenerateUploadSignedUrlRequest,
-  GenerateUploadSignedUrlResponse,
   GetByHashRequest,
   GetRequest,
   QueryFileRequest,
 } from '@hive/files';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { pick } from 'lodash';
-import { PrismaService } from './prisma/prisma.service';
-import { FileMetadata } from '../generated/prisma';
 import { createHash } from 'crypto';
-import { S3FileMetadata, S3Service } from './s3/s3.service';
+import { pick } from 'lodash';
+import { basename, extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { extname } from 'path';
-import { S3Config } from './s3/s3.config';
+import { FileMetadata, UploadStatus } from '../generated/prisma';
+import { PrismaService } from './prisma/prisma.service';
+import { S3FileMetadata, S3Service } from './s3/s3.service';
 
 @Injectable()
 export class AppService {
@@ -49,21 +47,60 @@ export class AppService {
   }
 
   private extractFileUrl(signedUrl: string): string {
-    return signedUrl?.split('?')[0] ?? '';
+    return signedUrl?.split('?')?.[0] ?? '';
   }
 
-  async generateUploadSignedUrl(
-    request: GenerateUploadSignedUrlRequest,
-  ): Promise<GenerateUploadSignedUrlResponse> {
+  private extractFileIdFromKey(key: string): string {
+    return basename(key)?.split('.')?.[0] ?? '';
+  }
+
+  async generateUploadSignedUrl(request: GenerateUploadSignedUrlRequest) {
+    const { context, ...props } = request;
     const key = `${this.uploadPath}/${this.generateFileName(request.fileName)}`;
-    const url = await this.s3Service.generateUploadSignedUrl(
+    const signedUrl = await this.s3Service.generateUploadSignedUrl(
       key,
       request.mimeType,
       request.expiresIn,
     );
+    const storageUrl = this.extractFileUrl(signedUrl);
+    await this.prismaService.fileMetadata.create({
+      data: {
+        organizationId: context?.organizationId ?? undefined,
+        uploadedById: context!.userId!,
+        metadata: {
+          createdFromExistingBlob: false,
+        },
+        purpose: props.purpose,
+        relatedModelId: props.relatedModelId,
+        relatedModelName: props.relatedModelName,
+        tags: props.tags,
+        originalName: props.fileName,
+        blob: {
+          create: {
+            filename: this.generateFileName(props.fileName),
+            hash: uuidv4(), // TODO: generate hash from remote file
+            mimeType: props.mimeType,
+            size: parseInt(props.size),
+            remoteId: this.extractFileIdFromKey(key),
+            storagePath: key,
+            storageUrl,
+            metadata: {
+              // bucket: uploaded!.bucket,
+              signedUrl,
+              key,
+              directUpload: true, // Indicates that the file was uploaded directly to the S3 bucket
+              signedUploadUrlExpiresAt: new Date(
+                Date.now() + (request.expiresIn ?? 3600) * 1000,
+              ).toISOString(),
+            },
+            status: UploadStatus.PENDING,
+          },
+        },
+      },
+    });
     return {
       data: {
-        signedUrl: url,
+        signedUrl,
         fileName: this.generateFileName(request.fileName),
         originalName: request.fileName,
         expiresAt: new Date(
@@ -71,7 +108,7 @@ export class AppService {
         ).toISOString(),
         mimeType: request.mimeType,
         key,
-        storageUrl: this.extractFileUrl(url),
+        storageUrl: this.extractFileUrl(signedUrl),
       },
       metadata: JSON.stringify({}),
     };
@@ -213,9 +250,9 @@ export class AppService {
         ...props,
         organizationId: context?.organizationId ?? undefined,
         uploadedById: context.userId,
-        metadata: JSON.stringify({
+        metadata: {
           createdFromExistingBlob: existingBlob ? true : false,
-        }),
+        },
         blobId: (existingBlob?.id ?? undefined) as string,
         originalName: blob!.originalName,
         blob: (existingBlob
@@ -229,13 +266,15 @@ export class AppService {
                 remoteId: uploaded!.id,
                 storagePath: uploaded!.key,
                 storageUrl: uploaded!.url,
-                metadata: JSON.stringify({
+                status: UploadStatus.COMPLETED,
+                metadata: {
                   ...(uploaded!.customMetadata ?? {}),
                   bucket: uploaded!.bucket,
                   key: uploaded!.key,
                   etag: uploaded!.etag,
                   uploadedAt: uploaded!.uploadedAt,
-                }),
+                  directUpload: false, // Indicates that the file was not uploaded directly to the S3 bucket
+                },
               },
             }) as any,
       },

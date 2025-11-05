@@ -2,6 +2,11 @@ import z from 'zod';
 import { createZodDto } from 'nestjs-zod';
 import { ApiProperty } from '@nestjs/swagger';
 import { COMMA_SEPARATED_REGEX } from '@hive/utils';
+import { QueryBuilderSchema } from '@hive/common';
+
+export const QueryReqestFileUploadSchema = z.object({
+  organization: z.string().optional(),
+});
 export const UploadFileSchema = z.object({
   relatedModelName: z
     .string()
@@ -21,7 +26,11 @@ export const UploadFileSchema = z.object({
 export const RequestFileUploadSchema = UploadFileSchema.extend({
   fileName: z.string().nonempty().describe('File name'),
   mimeType: z.string().nonempty().describe('Mime type'),
-  expiresIn: z.coerce.number().optional().describe('Expires in seconds'),
+  expiresIn: z.coerce
+    .number()
+    .optional()
+    .default(3600)
+    .describe('Expires in seconds'),
   size: z.coerce.number().min(1).describe('File size in bytes'),
 });
 
@@ -36,6 +45,9 @@ export class UploadSingleFileDto extends createZodDto(UploadFileSchema) {
 export class UploadFilesDto extends createZodDto(UploadFileSchema) {}
 export class RequestFileUploadDto extends createZodDto(
   RequestFileUploadSchema,
+) {}
+export class QueryReqestFileUploadDto extends createZodDto(
+  QueryReqestFileUploadSchema,
 ) {}
 
 export class RequestFileUploadResponseDto {

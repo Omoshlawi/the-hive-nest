@@ -10,6 +10,7 @@ import {
   GetFileByHashQueryDto,
   HiveFileServiceClient,
   QueryFileDto,
+  QueryReqestFileUploadDto,
   RequestFileUploadDto,
   RequestFileUploadResponseDto,
   UploadFilesDto,
@@ -111,22 +112,26 @@ export class FilesController {
     });
   }
 
-  @Post('/')
+  @Post('/upload/request')
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Request file upload' })
   @ApiCreatedResponse({ type: RequestFileUploadResponseDto })
   @ApiErrorsResponse({ badRequest: true })
   requestFileUpload(
     @Body() requestFileUploadDto: RequestFileUploadDto,
-    @Query() query: CustomRepresentationQueryDto,
+    @Query() query: QueryReqestFileUploadDto,
+    @Session() { user, session }: UserSession,
   ) {
     return this.fileService.file.generateUploadSignedUrl({
-      queryBuilder: {
-        v: query.v,
-      },
       ...requestFileUploadDto,
       tags: requestFileUploadDto.tags?.split(',')?.map((t) => t.trim()) ?? [],
       size: requestFileUploadDto.size.toString(),
+      context: {
+        userId: user.id,
+        organizationId: query.organization
+          ? session?.activeOrganizationId
+          : undefined,
+      },
     });
   }
 

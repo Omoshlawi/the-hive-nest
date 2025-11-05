@@ -15,7 +15,6 @@ import {
 import { Controller, NotFoundException } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { AppService } from './app.service';
-import { Observable } from 'rxjs';
 
 @Controller()
 export class AppController implements IFilesController {

@@ -77,7 +77,6 @@ export interface GenerateUploadSignedUrlRequest {
   /** Default 3600 seconds */
   expiresIn?: number | undefined;
   mimeType: string;
-  queryBuilder: QueryBuilder | undefined;
   relatedModelId: string;
   relatedModelName: string;
   purpose: string;

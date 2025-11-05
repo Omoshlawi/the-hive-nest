@@ -18,19 +18,25 @@ model FileBlob {
   mimeType String
 
   // Physical storage locations
-  remoteId    String  @unique
+  remoteId    String         @unique
   storagePath String
   storageUrl  String?
-  metadata    String? @db.Text
+  metadata    Json?
   filename    String // Name file is saved with
-
+  status      UploadStatus   @default(PENDING)
   // Reference count for cleanup
-  references FileMetadata[]
+  references  FileMetadata[]
 
   createdAt DateTime @default(now())
 
   @@index([hash])
   @@map("file_blobs")
+}
+
+enum UploadStatus {
+  PENDING
+  COMPLETED
+  FAILED
 }
 
 // User-specific file metadata (can have duplicates)
@@ -54,7 +60,7 @@ model FileMetadata {
   organizationId String?
 
   // User-specific metadata
-  metadata    String?  @db.Text
+  metadata    Json?
   tags        String[]
   description String?
 
