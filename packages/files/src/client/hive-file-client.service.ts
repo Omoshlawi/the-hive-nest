@@ -10,6 +10,8 @@ import {
   CreateFileUsageScopeRequest,
   FILES_SERVICE_NAME,
   FilesClient,
+  GenerateUploadSignedUrlRequest,
+  GenerateUploadSignedUrlResponse,
   GetBlobResponse,
   GetByHashRequest,
   GetFileResponse,
@@ -104,6 +106,10 @@ export class HiveFileServiceClient implements OnModuleInit, OnModuleDestroy {
       this.loadBalance().createFile(request),
     deleteFile: (request: DeleteRequest): Observable<GetFileResponse> =>
       this.loadBalance().deleteFile(request),
+    generateUploadSignedUrl: (
+      request: GenerateUploadSignedUrlRequest,
+    ): Observable<GenerateUploadSignedUrlResponse> =>
+      this.loadBalance().generateUploadSignedUrl(request),
   };
 
   private loadBalance() {

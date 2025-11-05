@@ -1,12 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-import { CustomRepresentationQueryDto, DeleteQueryDto } from '@hive/common';
 import {
-  FileBlob,
+  ApiErrorsResponse,
+  CustomRepresentationQueryDto,
+  DeleteQueryDto,
+} from '@hive/common';
+import {
   GetFileByHashQueryDto,
   HiveFileServiceClient,
   QueryFileDto,
+  RequestFileUploadDto,
+  RequestFileUploadResponseDto,
   UploadFilesDto,
   UploadMutipleFilesDto,
   UploadSingleFileDto,
@@ -34,10 +39,8 @@ import {
   FileInterceptor,
   FilesInterceptor,
 } from '@nestjs/platform-express';
-import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { ApiConsumes, ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
 import { OptionalAuth, Session } from '@thallesp/nestjs-better-auth';
-import { createHash } from 'crypto';
-import { lastValueFrom, map } from 'rxjs';
 import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
@@ -48,14 +51,6 @@ import { UserSession } from '../auth/auth.types';
 export class FilesController {
   private readonly logger = new Logger(FilesController.name);
   constructor(private readonly fileService: HiveFileServiceClient) {}
-
-  private formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
 
   @Get('/')
   @UseInterceptors(ApiListTransformInterceptor)
@@ -113,6 +108,25 @@ export class FilesController {
         userId: user.id,
         organizationId: session?.activeOrganizationId ?? undefined,
       },
+    });
+  }
+
+  @Post('/')
+  @UseInterceptors(ApiDetailTransformInterceptor)
+  @ApiOperation({ summary: 'Request file upload' })
+  @ApiCreatedResponse({ type: RequestFileUploadResponseDto })
+  @ApiErrorsResponse({ badRequest: true })
+  requestFileUpload(
+    @Body() requestFileUploadDto: RequestFileUploadDto,
+    @Query() query: CustomRepresentationQueryDto,
+  ) {
+    return this.fileService.file.generateUploadSignedUrl({
+      queryBuilder: {
+        v: query.v,
+      },
+      ...requestFileUploadDto,
+      tags: requestFileUploadDto.tags?.split(',')?.map((t) => t.trim()) ?? [],
+      size: requestFileUploadDto.size.toString(),
     });
   }
 

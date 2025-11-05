@@ -18,6 +18,13 @@ export const UploadFileSchema = z.object({
   tags: z.string().regex(COMMA_SEPARATED_REGEX),
 });
 
+export const RequestFileUploadSchema = UploadFileSchema.extend({
+  fileName: z.string().nonempty().describe('File name'),
+  mimeType: z.string().nonempty().describe('Mime type'),
+  expiresIn: z.coerce.number().optional().describe('Expires in seconds'),
+  size: z.coerce.number().min(1).describe('File size in bytes'),
+});
+
 export class UploadMutipleFilesDto extends createZodDto(UploadFileSchema) {
   @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' } })
   files: any[];
@@ -27,3 +34,26 @@ export class UploadSingleFileDto extends createZodDto(UploadFileSchema) {
   file: any;
 }
 export class UploadFilesDto extends createZodDto(UploadFileSchema) {}
+export class RequestFileUploadDto extends createZodDto(
+  RequestFileUploadSchema,
+) {}
+
+export class RequestFileUploadResponseDto {
+  @ApiProperty()
+  signedUrl: string;
+
+  @ApiProperty()
+  expiresAt: string;
+
+  @ApiProperty()
+  mimeType: string;
+
+  @ApiProperty()
+  fileName: string;
+
+  @ApiProperty()
+  originalName: string;
+
+  @ApiProperty()
+  storageUrl: string;
+}
