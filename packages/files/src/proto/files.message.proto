@@ -67,6 +67,7 @@ message SignedUrlData  {
     string key = 4;
     string file_name = 5;
     string original_name = 6;
+    string storage_url = 7;
 }
 
 message GenerateUploadSignedUrlResponse {

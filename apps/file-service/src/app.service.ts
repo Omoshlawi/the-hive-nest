@@ -26,6 +26,7 @@ import { createHash } from 'crypto';
 import { S3FileMetadata, S3Service } from './s3/s3.service';
 import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
+import { S3Config } from './s3/s3.config';
 
 @Injectable()
 export class AppService {
@@ -39,6 +40,7 @@ export class AppService {
     private readonly representationService: CustomRepresentationService,
     private readonly authz: FileAuthZService,
     private readonly s3Service: S3Service,
+    private readonly config: S3Config,
   ) {}
 
   get s3(): S3Service {
@@ -49,6 +51,10 @@ export class AppService {
     const fileId = uuidv4();
     const fileExtension = extname(originalName);
     return `${fileId}${fileExtension}`;
+  }
+
+  private generatePublicUrl(key: string): string {
+    return `${this.config.endpoint}/${this.config.publicBucket}/${key}`;
   }
 
   async generateUploadSignedUrl(
@@ -70,6 +76,7 @@ export class AppService {
         ).toISOString(),
         mimeType: request.mimeType,
         key,
+        storageUrl: this.generatePublicUrl(key),
       },
       metadata: JSON.stringify({}),
     };

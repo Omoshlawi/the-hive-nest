@@ -86,6 +86,7 @@ export interface SignedUrlData {
   key: string;
   fileName: string;
   originalName: string;
+  storageUrl: string;
 }
 
 export interface GenerateUploadSignedUrlResponse {
