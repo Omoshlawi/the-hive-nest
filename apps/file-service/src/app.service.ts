@@ -40,12 +40,7 @@ export class AppService {
     private readonly representationService: CustomRepresentationService,
     private readonly authz: FileAuthZService,
     private readonly s3Service: S3Service,
-    private readonly config: S3Config,
   ) {}
-
-  get s3(): S3Service {
-    return this.s3Service;
-  }
 
   private generateFileName(originalName: string): string {
     const fileId = uuidv4();
@@ -53,8 +48,8 @@ export class AppService {
     return `${fileId}${fileExtension}`;
   }
 
-  private generatePublicUrl(key: string): string {
-    return `${this.config.endpoint}/${this.config.publicBucket}/${key}`;
+  private extractFileUrl(signedUrl: string): string {
+    return signedUrl?.split('?')[0] ?? '';
   }
 
   async generateUploadSignedUrl(
@@ -76,7 +71,7 @@ export class AppService {
         ).toISOString(),
         mimeType: request.mimeType,
         key,
-        storageUrl: this.generatePublicUrl(key),
+        storageUrl: this.extractFileUrl(url),
       },
       metadata: JSON.stringify({}),
     };
