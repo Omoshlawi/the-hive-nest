@@ -27,6 +27,7 @@ message FileBlob {
     optional string storage_url = 8;
     optional FileMetadata rereferences = 9;
     optional string metadata = 10; // JSON as string
+    string status = 11;
 }
 
 message FileMetadata {

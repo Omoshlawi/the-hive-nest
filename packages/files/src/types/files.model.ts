@@ -37,6 +37,7 @@ export interface FileBlob {
     | undefined;
   /** JSON as string */
   metadata?: string | undefined;
+  status: string;
 }
 
 export interface FileMetadata {
