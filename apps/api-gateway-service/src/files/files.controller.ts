@@ -116,13 +116,14 @@ export class FilesController {
     });
   }
 
+  @Post('upload/single')
+  @UseInterceptors(ApiDetailTransformInterceptor)
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: 'Upload single file',
     description: 'Upload a single file to the specified location',
   })
-  @Post('upload/single')
   async uploadSingleFile(
     @UploadedFile(
       'file',

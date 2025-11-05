@@ -11,6 +11,8 @@ import {
   CreateFileRequest,
   DeleteRequest,
   FileAuthZService,
+  GenerateUploadSignedUrlRequest,
+  GenerateUploadSignedUrlResponse,
   GetByHashRequest,
   GetRequest,
   QueryFileRequest,
@@ -22,6 +24,8 @@ import { PrismaService } from './prisma/prisma.service';
 import { FileMetadata } from '../generated/prisma';
 import { createHash } from 'crypto';
 import { S3FileMetadata, S3Service } from './s3/s3.service';
+import { v4 as uuidv4 } from 'uuid';
+import { extname } from 'path';
 
 @Injectable()
 export class AppService {
@@ -36,6 +40,40 @@ export class AppService {
     private readonly authz: FileAuthZService,
     private readonly s3Service: S3Service,
   ) {}
+
+  get s3(): S3Service {
+    return this.s3Service;
+  }
+
+  private generateFileName(originalName: string): string {
+    const fileId = uuidv4();
+    const fileExtension = extname(originalName);
+    return `${fileId}${fileExtension}`;
+  }
+
+  async generateUploadSignedUrl(
+    request: GenerateUploadSignedUrlRequest,
+  ): Promise<GenerateUploadSignedUrlResponse> {
+    const key = `${this.uploadPath}/${this.generateFileName(request.fileName)}`;
+    const url = await this.s3Service.generateUploadSignedUrl(
+      key,
+      request.mimeType,
+      request.expiresIn,
+    );
+    return {
+      data: {
+        signedUrl: url,
+        fileName: this.generateFileName(request.fileName),
+        originalName: request.fileName,
+        expiresAt: new Date(
+          Date.now() + (request.expiresIn ?? 3600) * 1000,
+        ).toISOString(),
+        mimeType: request.mimeType,
+        key,
+      },
+      metadata: JSON.stringify({}),
+    };
+  }
 
   async getAll(query: QueryFileRequest) {
     if (!query.context?.userId) {

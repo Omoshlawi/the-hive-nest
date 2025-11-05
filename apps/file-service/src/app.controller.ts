@@ -2,20 +2,30 @@ import {
   CreateFileRequest,
   DeleteRequest,
   FILES_SERVICE_NAME,
+  GenerateUploadSignedUrlRequest,
+  GenerateUploadSignedUrlResponse,
   GetBlobResponse,
   GetByHashRequest,
   GetFileResponse,
   GetRequest,
+  IFilesController,
   QueryFileRequest,
   QueryFileResponse,
 } from '@hive/files';
 import { Controller, NotFoundException } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { AppService } from './app.service';
+import { Observable } from 'rxjs';
 
 @Controller()
-export class AppController {
+export class AppController implements IFilesController {
   constructor(private readonly appService: AppService) {}
+  @GrpcMethod(FILES_SERVICE_NAME)
+  generateUploadSignedUrl(
+    request: GenerateUploadSignedUrlRequest,
+  ): Promise<GenerateUploadSignedUrlResponse> {
+    return this.appService.generateUploadSignedUrl(request);
+  }
   @GrpcMethod(FILES_SERVICE_NAME)
   queryFile(request: QueryFileRequest): Promise<QueryFileResponse> {
     return this.appService.getAll(

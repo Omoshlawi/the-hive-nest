@@ -29,6 +29,9 @@ export {
   QueryFileResponse,
   GetBlobResponse,
   FileBlobData,
+  GenerateUploadSignedUrlRequest,
+  GenerateUploadSignedUrlResponse,
+  SignedUrlData,
 } from './files.message';
 export {
   FileUsageRule,
@@ -56,5 +59,10 @@ export type IFileUsageRuleController = Pick<
 >;
 export type IFilesController = Pick<
   FilesController,
-  'queryFile' | 'getFile' | 'getBlobByHash' | 'createFile' | 'deleteFile'
+  | 'queryFile'
+  | 'getFile'
+  | 'getBlobByHash'
+  | 'createFile'
+  | 'deleteFile'
+  | 'generateUploadSignedUrl'
 >;

@@ -277,12 +277,15 @@ export class S3Service implements OnModuleInit {
 
   async generateUploadSignedUrl(
     key: string,
+    mimeType: string,
     expiresIn = 3600,
   ): Promise<string> {
     // Default URL valid for 1 hour (in seconds)
     const command = new PutObjectCommand({
-      Bucket: this.config.privateBucket,
+      // Bucket: this.config.privateBucket,
+      Bucket: this.config.publicBucket,
       Key: key,
+      ContentType: mimeType,
     });
 
     return await getSignedUrl(this.s3, command, { expiresIn });

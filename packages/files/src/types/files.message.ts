@@ -68,4 +68,32 @@ export interface GetBlobResponse {
   metadata: string;
 }
 
+/** Generate signed url */
+export interface GenerateUploadSignedUrlRequest {
+  fileName: string;
+  context?:
+    | RequestContext
+    | undefined;
+  /** Default 3600 seconds */
+  expiresIn?: number | undefined;
+  mimeType: string;
+}
+
+export interface SignedUrlData {
+  signedUrl: string;
+  expiresAt: string;
+  mimeType: string;
+  key: string;
+  fileName: string;
+  originalName: string;
+}
+
+export interface GenerateUploadSignedUrlResponse {
+  data:
+    | SignedUrlData
+    | undefined;
+  /** JSON as string */
+  metadata: string;
+}
+
 export const _PACKAGE_NAME = "";

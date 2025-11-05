@@ -51,3 +51,26 @@ message GetBlobResponse {
     FileBlob data = 1;
     string metadata = 2; // JSON as string
 }
+
+// Generate signed url
+message GenerateUploadSignedUrlRequest {
+    string file_name = 1;
+    optional RequestContext context = 2;
+    optional int32 expires_in = 3; // Default 3600 seconds
+    string mime_type = 4;
+}
+
+message SignedUrlData  {
+    string signed_url = 1;
+    string expires_at = 2;
+    string mime_type = 3;
+    string key = 4;
+    string file_name = 5;
+    string original_name = 6;
+}
+
+message GenerateUploadSignedUrlResponse {
+    SignedUrlData data = 1;
+    string metadata = 2; // JSON as string
+}
+

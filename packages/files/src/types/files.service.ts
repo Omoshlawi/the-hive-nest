@@ -22,6 +22,8 @@ import {
 } from "./file-usage.message";
 import {
   CreateFileRequest,
+  GenerateUploadSignedUrlRequest,
+  GenerateUploadSignedUrlResponse,
   GetBlobResponse,
   GetByHashRequest,
   GetFileResponse,
@@ -45,6 +47,8 @@ export interface FilesClient {
   createFile(request: CreateFileRequest): Observable<GetFileResponse>;
 
   deleteFile(request: DeleteRequest): Observable<GetFileResponse>;
+
+  generateUploadSignedUrl(request: GenerateUploadSignedUrlRequest): Observable<GenerateUploadSignedUrlResponse>;
 
   /** Scope */
 
@@ -83,6 +87,13 @@ export interface FilesController {
   createFile(request: CreateFileRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
 
   deleteFile(request: DeleteRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
+
+  generateUploadSignedUrl(
+    request: GenerateUploadSignedUrlRequest,
+  ):
+    | Promise<GenerateUploadSignedUrlResponse>
+    | Observable<GenerateUploadSignedUrlResponse>
+    | GenerateUploadSignedUrlResponse;
 
   /** Scope */
 
@@ -137,6 +148,7 @@ export function FilesControllerMethods() {
       "getBlobByHash",
       "createFile",
       "deleteFile",
+      "generateUploadSignedUrl",
       "queryFileUsageScope",
       "getFileUsageScope",
       "createFileUsageScope",
