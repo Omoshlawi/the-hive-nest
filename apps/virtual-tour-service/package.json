@@ -25,9 +25,10 @@
     "@grpc/proto-loader": "^0.8.0",
     "@hive/authorization": "workspace:*",
     "@hive/common": "workspace:*",
-    "@hive/virtual-tour": "workspace:*",
+    "@hive/files": "workspace:*",
     "@hive/registry": "workspace:*",
     "@hive/utils": "workspace:*",
+    "@hive/virtual-tour": "workspace:*",
     "@itgorillaz/configify": "^4.0.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
@@ -40,6 +41,7 @@
     "nestjs-zod": "5.0.0-beta.20250806T023752",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "sharp": "^0.34.4",
     "zod": "^4.0.15"
   },
   "devDependencies": {

@@ -11,6 +11,7 @@ import { TourService } from './app.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from './prisma/prisma.module';
 import { QueryBuilderModule } from '@hive/common';
+import { HiveFileServiceClient } from '@hive/files';
 import {
   VIRTUAL_TOUR_HTTP_SERVER_CONFIG_TOKEN,
   VIRTUAL_TOUR_RPC_SERVER_CONFIG_TOKEN,
@@ -18,14 +19,16 @@ import {
   VirtualTourRPCServerConfigProvider,
 } from '@hive/virtual-tour';
 import { TourSceneModule } from './tour-scene/tour-scene.module';
+import { TileGeneratorService } from './tile-generator.service';
 
 @Module({
   imports: [
     ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
     ScheduleModule.forRoot(),
     HiveServiceModule.forRoot({
+      global: true,
       enableHeartbeat: true,
-      services: [],
+      services: [HiveFileServiceClient],
       client: {
         useFactory: (
           config: RegistryClientConfig,
@@ -82,6 +85,6 @@ import { TourSceneModule } from './tour-scene/tour-scene.module';
     TourSceneModule,
   ],
   controllers: [TourController],
-  providers: [TourService],
+  providers: [TourService, TileGeneratorService],
 })
 export class TourModule {}

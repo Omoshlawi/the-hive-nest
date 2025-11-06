@@ -22,6 +22,7 @@ export {
   QueryTourRequest,
   QueryTourResponse,
   UpdateTourRequest,
+  CreateTourNestedScene,
 } from './tour.message';
 export { Scene, Tour } from './virtual-tour.model';
 export type ITourController = Pick<

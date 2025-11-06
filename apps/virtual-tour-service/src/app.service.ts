@@ -5,6 +5,7 @@ import {
   SortService,
 } from '@hive/common';
 import {
+  CreateTourNestedScene,
   CreateTourRequest,
   DeleteRequest,
   GetRequest,
@@ -15,6 +16,20 @@ import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
 import { PrismaService } from './prisma/prisma.service';
 import { Prisma, Tour } from '../generated/prisma';
+import { TileGeneratorService } from './tile-generator.service';
+import { HiveFileServiceClient } from '@hive/files';
+import { TileConfig } from './tile-generator.service';
+
+interface CreateSceneDto {
+  name: string;
+  imageBuffer: Buffer;
+  hotspots?: Array<{
+    pitch: number;
+    yaw: number;
+    text: string;
+    targetSceneId?: string;
+  }>;
+}
 
 @Injectable()
 export class TourService {
@@ -23,6 +38,8 @@ export class TourService {
     private readonly sortService: SortService,
     private readonly paginationService: PaginationService,
     private readonly representationService: CustomRepresentationService,
+    private readonly tileGeneratorService: TileGeneratorService,
+    private readonly fileServiceClient: HiveFileServiceClient,
   ) {}
 
   async getAll(query: QueryTourRequest) {
@@ -67,8 +84,21 @@ export class TourService {
     };
   }
 
+  // private async prepareScenes(
+  //   scenes: CreateTourNestedScene[] = [],
+  // ): Promise<Array<TileConfig>> {
+  //   const preparedScenes: Array<TileConfig> = [];
+  //   for (const { fileUrl, name } of scenes) {
+  //     const file = await this.fileServiceClient.getFile(fileUrl);
+  //     const tileGenerator = await this.tileGeneratorService.generateTile(file);
+  //     preparedScenes.push({ name, tileGenerator });
+  //   }
+  //   return preparedScenes;
+  // }
+
   async create(query: CreateTourRequest) {
-    const { queryBuilder, context: _, ...props } = query;
+    const { queryBuilder, context: _, scenes, ...props } = query;
+
     const data = await this.prismaService.tour.create({
       data: { ...props, scenes: { createMany: { data: [] } } }, // TODO: Add scenes
       ...this.representationService.buildCustomRepresentationQuery(
