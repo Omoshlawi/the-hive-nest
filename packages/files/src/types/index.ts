@@ -65,4 +65,5 @@ export type IFilesController = Pick<
   | 'createFile'
   | 'deleteFile'
   | 'generateUploadSignedUrl'
+  | 'completeFileUpload'
 >;

@@ -19,6 +19,11 @@ import { AppService } from './app.service';
 @Controller()
 export class AppController implements IFilesController {
   constructor(private readonly appService: AppService) {}
+  completeFileUpload(request: GetRequest): Promise<GetFileResponse> {
+    return this.appService.completeFileUpload(
+      request,
+    ) as unknown as Promise<GetFileResponse>;
+  }
   @GrpcMethod(FILES_SERVICE_NAME)
   generateUploadSignedUrl(
     request: GenerateUploadSignedUrlRequest,

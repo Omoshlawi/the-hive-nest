@@ -85,6 +85,7 @@ export interface GenerateUploadSignedUrlRequest {
 }
 
 export interface SignedUrlData {
+  id: string;
   signedUrl: string;
   expiresAt: string;
   mimeType: string;

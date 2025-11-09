@@ -12,12 +12,13 @@ import {
   QueryTourRequest,
   UpdateTourRequest,
 } from '@hive/virtual-tour';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { pick } from 'lodash';
+import { firstValueFrom, Observable } from 'rxjs';
 import { PrismaService } from './prisma/prisma.service';
 import { Prisma, Tour } from '../generated/prisma';
 import { TileGeneratorService } from './tile-generator.service';
-import { HiveFileServiceClient } from '@hive/files';
+import { HiveFileServiceClient, GetFileResponse } from '@hive/files';
 import { TileConfig } from './tile-generator.service';
 
 interface CreateSceneDto {
@@ -33,6 +34,8 @@ interface CreateSceneDto {
 
 @Injectable()
 export class TourService {
+  private readonly logger = new Logger(TourService.name);
+
   constructor(
     private readonly prismaService: PrismaService,
     private readonly sortService: SortService,
@@ -84,17 +87,37 @@ export class TourService {
     };
   }
 
-  // private async prepareScenes(
-  //   scenes: CreateTourNestedScene[] = [],
-  // ): Promise<Array<TileConfig>> {
-  //   const preparedScenes: Array<TileConfig> = [];
-  //   for (const { fileUrl, name } of scenes) {
-  //     const file = await this.fileServiceClient.getFile(fileUrl);
-  //     const tileGenerator = await this.tileGeneratorService.generateTile(file);
-  //     preparedScenes.push({ name, tileGenerator });
-  //   }
-  //   return preparedScenes;
-  // }
+  /**
+   * Prepare scenes by downloading files from URLs and generating tiles using streams
+   */
+  private async prepareScenes(
+    scenes: CreateTourNestedScene[] = [],
+  ): Promise<Array<{ name: string; tileConfig: TileConfig }>> {
+    const preparedScenes: Array<{ name: string; tileConfig: TileConfig }> = [];
+
+    for (const { fileUrl, name } of scenes) {
+      try {
+        this.logger.log(`Preparing scene: ${name} from file: ${fileUrl}`);
+
+        this.logger.log(`Downloading file from URL: ${fileUrl}`);
+
+        // Generate tiles using stream from URL
+        const tileConfig =
+          await this.tileGeneratorService.generateTilesFromUrl(fileUrl);
+
+        preparedScenes.push({ name, tileConfig });
+        this.logger.log(`Successfully prepared scene: ${name}`);
+      } catch (error) {
+        this.logger.error(
+          `Failed to prepare scene ${name}: ${error.message}`,
+          error.stack,
+        );
+        // Continue with other scenes even if one fails
+      }
+    }
+
+    return preparedScenes;
+  }
 
   async create(query: CreateTourRequest) {
     const { queryBuilder, context: _, scenes, ...props } = query;

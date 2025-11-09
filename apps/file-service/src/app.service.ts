@@ -11,12 +11,18 @@ import {
   CreateFileRequest,
   DeleteRequest,
   FileAuthZService,
+  FileBlob,
   GenerateUploadSignedUrlRequest,
   GetByHashRequest,
   GetRequest,
   QueryFileRequest,
 } from '@hive/files';
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { createHash } from 'crypto';
 import { pick } from 'lodash';
@@ -25,6 +31,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FileMetadata, UploadStatus } from '../generated/prisma';
 import { PrismaService } from './prisma/prisma.service';
 import { S3FileMetadata, S3Service } from './s3/s3.service';
+import { Prisma } from '../generated/prisma';
 
 @Injectable()
 export class AppService {
@@ -63,7 +70,7 @@ export class AppService {
       request.expiresIn,
     );
     const storageUrl = this.extractFileUrl(signedUrl);
-    await this.prismaService.fileMetadata.create({
+    const data = await this.prismaService.fileMetadata.create({
       data: {
         organizationId: context?.organizationId ?? undefined,
         uploadedById: context!.userId!,
@@ -109,6 +116,7 @@ export class AppService {
         mimeType: request.mimeType,
         key,
         storageUrl: this.extractFileUrl(signedUrl),
+        id: data.id,
       },
       metadata: JSON.stringify({}),
     };
@@ -339,6 +347,34 @@ export class AppService {
       ).toFixed(2),
       storageSaved:
         (totalSize as any)[0].total - (deduplicatedSize as any)[0].total,
+    };
+  }
+
+  async completeFileUpload(request: GetRequest) {
+    const { id, queryBuilder, context } = request;
+    const data = (await this.prismaService.fileMetadata.findUnique({
+      where: { id },
+      ...this.representationService.buildCustomRepresentationQuery(
+        queryBuilder?.v,
+      ),
+    })) as FileMetadata & { blob: FileBlob };
+    if (!data) {
+      throw new RpcException(new NotFoundException('File not found'));
+    }
+    await this.prismaService.fileBlob.update({
+      where: { id: data.blobId },
+      data: {
+        status: UploadStatus.COMPLETED,
+      },
+    });
+    return {
+      data: {
+        ...data,
+        blob: data.blob
+          ? { ...data.blob, status: UploadStatus.COMPLETED }
+          : undefined,
+      },
+      metadata: JSON.stringify({}),
     };
   }
 }

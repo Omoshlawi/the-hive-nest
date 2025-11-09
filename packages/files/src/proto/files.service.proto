@@ -14,6 +14,7 @@ service Files {
   rpc CreateFile(CreateFileRequest) returns (GetFileResponse){};
   rpc DeleteFile(DeleteRequest) returns (GetFileResponse){};
   rpc GenerateUploadSignedUrl(GenerateUploadSignedUrlRequest) returns (GenerateUploadSignedUrlResponse){};
+  rpc CompleteFileUpload(GetRequest) returns (GetFileResponse){};
   // Scope
   rpc QueryFileUsageScope(QueryFileUsageScopeRequest) returns (QueryFileUsageScopeResponse){};
   rpc GetFileUsageScope(GetRequest) returns (GetFileUsageScopeResponse){};

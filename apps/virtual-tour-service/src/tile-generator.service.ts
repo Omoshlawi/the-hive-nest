@@ -1,5 +1,8 @@
+import { HiveFileServiceClient } from '@hive/files';
 import { Injectable, Logger } from '@nestjs/common';
 import * as sharp from 'sharp';
+import { Readable } from 'stream';
+import { extname, basename } from 'path';
 
 export interface TileConfig {
   width: number;
@@ -19,11 +22,17 @@ export class TileGeneratorService {
   private readonly logger = new Logger(TileGeneratorService.name);
   private readonly TILE_SIZE = 512;
 
+  constructor(private readonly fileServiceClient: HiveFileServiceClient) {}
+
   /**
-   * Generate multi-resolution tiles from a 360° panorama image
+   * Generate multi-resolution tiles from a 360° panorama image URL using streams
    */
-  async generateTiles(imageBuffer: Buffer): Promise<TileConfig> {
-    this.logger.log('Starting tile generation...');
+  async generateTilesFromUrl(fileUrl: string): Promise<TileConfig> {
+    this.logger.log(`Starting tile generation from URL: ${fileUrl}`);
+
+    // Download file as buffer (we need the full image for tiling)
+    // For very large files, we could optimize this further with streaming
+    const imageBuffer = await this.downloadFileAsBuffer(fileUrl);
 
     // Get original image dimensions
     const metadata = await sharp(imageBuffer).metadata();
@@ -33,6 +42,73 @@ export class TileGeneratorService {
       throw new Error('Unable to read image dimensions');
     }
 
+    this.logger.log(`Original image: ${width}x${height}`);
+
+    return this.generateTilesFromBuffer(
+      imageBuffer,
+      width,
+      height,
+      basename(fileUrl),
+    );
+  }
+
+  /**
+   * Generate multi-resolution tiles from a 360° panorama image stream
+   * This method uses streaming for better memory efficiency with large files
+   */
+  async generateTilesFromStream(
+    imageStream: Readable,
+    name: string,
+  ): Promise<TileConfig> {
+    this.logger.log('Starting tile generation from stream...');
+
+    // Convert stream to buffer for processing
+    // Note: For very large files, consider processing in chunks
+    const chunks: Buffer[] = [];
+    for await (const chunk of imageStream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    const imageBuffer = Buffer.concat(chunks);
+
+    // Get original image dimensions
+    const metadata = await sharp(imageBuffer).metadata();
+    const { width, height } = metadata;
+
+    if (!width || !height) {
+      throw new Error('Unable to read image dimensions');
+    }
+
+    this.logger.log(`Original image: ${width}x${height}`);
+
+    return this.generateTilesFromBuffer(imageBuffer, width, height, name);
+  }
+
+  /**
+   * Generate multi-resolution tiles from a 360° panorama image buffer
+   */
+  async generateTiles(imageBuffer: Buffer, name: string): Promise<TileConfig> {
+    this.logger.log('Starting tile generation from buffer...');
+
+    // Get original image dimensions
+    const metadata = await sharp(imageBuffer).metadata();
+    const { width, height } = metadata;
+
+    if (!width || !height) {
+      throw new Error('Unable to read image dimensions');
+    }
+
+    return this.generateTilesFromBuffer(imageBuffer, width, height, name);
+  }
+
+  /**
+   * Internal method to generate tiles from buffer with known dimensions
+   */
+  private async generateTilesFromBuffer(
+    imageBuffer: Buffer,
+    width: number,
+    height: number,
+    name: string,
+  ): Promise<TileConfig> {
     this.logger.log(`Original image: ${width}x${height}`);
 
     // Calculate number of zoom levels
@@ -49,6 +125,7 @@ export class TileGeneratorService {
         maxLevel,
         width,
         height,
+        name,
       );
       tiles.push(...levelTiles);
     }
@@ -62,6 +139,54 @@ export class TileGeneratorService {
       maxLevel,
       tiles,
     };
+  }
+
+  /**
+   * Download file from URL as a stream
+   */
+  private async downloadFileAsStream(fileUrl: string): Promise<Readable> {
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to download file: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      if (!response.body) {
+        throw new Error('Response body is null');
+      }
+
+      // Convert web stream to Node.js Readable stream
+      return Readable.fromWeb(response.body as any);
+    } catch (error) {
+      this.logger.error(
+        `Failed to download file from ${fileUrl}: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Download file from URL as a buffer
+   */
+  private async downloadFileAsBuffer(fileUrl: string): Promise<Buffer> {
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to download file: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      return Buffer.from(arrayBuffer);
+    } catch (error) {
+      this.logger.error(
+        `Failed to download file from ${fileUrl}: ${error.message}`,
+      );
+      throw error;
+    }
   }
 
   /**
@@ -81,6 +206,7 @@ export class TileGeneratorService {
     maxLevel: number,
     originalWidth: number,
     originalHeight: number,
+    name: string,
   ): Promise<TileConfig['tiles']> {
     const scale = Math.pow(2, maxLevel - level);
     const levelWidth = Math.ceil(originalWidth / scale);
@@ -119,7 +245,28 @@ export class TileGeneratorService {
           })
           .jpeg({ quality: 85, progressive: true })
           .toBuffer();
-
+        // Save tile buffer to file service
+        const file = await this.fileServiceClient.file.createFile({
+          queryBuilder: undefined,
+          tags: ['tiles', 'virtual-tour'],
+          blob: {
+            buffer: Uint8Array.from(tileBuffer),
+            size: tileBuffer.length.toString(),
+            filename: `${name}-${level}-${col}-${row}.jpg`,
+            mimeType: `image/${extname(name)}`,
+            originalName: `${name}-${level}-${col}-${row}.jpg`,
+            fieldName: `tiles`,
+            name: `${name}-${level}-${col}-${row}.jpg`,
+          },
+          relatedModelId: 'virtual-tour',
+          relatedModelName: 'virtual-tour',
+          purpose: 'virtual-tour',
+          metadata: JSON.stringify({
+            level,
+            col,
+            row,
+          }),
+        });
         tiles.push({
           level,
           col,

@@ -7,6 +7,7 @@ import {
   DeleteQueryDto,
 } from '@hive/common';
 import {
+  CompleteFileUploadDto,
   GetFileByHashQueryDto,
   HiveFileServiceClient,
   QueryFileDto,
@@ -124,13 +125,34 @@ export class FilesController {
   ) {
     return this.fileService.file.generateUploadSignedUrl({
       ...requestFileUploadDto,
-      tags: requestFileUploadDto.tags?.split(',')?.map((t) => t.trim()) ?? [],
+      tags: requestFileUploadDto.tags ?? [],
       size: requestFileUploadDto.size.toString(),
       context: {
         userId: user.id,
         organizationId: query.organization
           ? session?.activeOrganizationId
           : undefined,
+      },
+    });
+  }
+
+  @Get('upload/complete')
+  @UseInterceptors(ApiDetailTransformInterceptor)
+  @ApiOperation({ summary: 'Complete File Upload' })
+  // @ApiCreatedResponse({ type: GetFileResponseDto })
+  @ApiErrorsResponse({})
+  completeFileUpload(
+    @Query() query: CompleteFileUploadDto,
+    @Session() { user, session }: UserSession,
+  ) {
+    return this.fileService.file.completeFileUpload({
+      id: query.id,
+      queryBuilder: {
+        v: query.v,
+      },
+      context: {
+        userId: user.id,
+        organizationId: session?.activeOrganizationId ?? undefined,
       },
     });
   }

@@ -50,6 +50,8 @@ export interface FilesClient {
 
   generateUploadSignedUrl(request: GenerateUploadSignedUrlRequest): Observable<GenerateUploadSignedUrlResponse>;
 
+  completeFileUpload(request: GetRequest): Observable<GetFileResponse>;
+
   /** Scope */
 
   queryFileUsageScope(request: QueryFileUsageScopeRequest): Observable<QueryFileUsageScopeResponse>;
@@ -94,6 +96,8 @@ export interface FilesController {
     | Promise<GenerateUploadSignedUrlResponse>
     | Observable<GenerateUploadSignedUrlResponse>
     | GenerateUploadSignedUrlResponse;
+
+  completeFileUpload(request: GetRequest): Promise<GetFileResponse> | Observable<GetFileResponse> | GetFileResponse;
 
   /** Scope */
 
@@ -149,6 +153,7 @@ export function FilesControllerMethods() {
       "createFile",
       "deleteFile",
       "generateUploadSignedUrl",
+      "completeFileUpload",
       "queryFileUsageScope",
       "getFileUsageScope",
       "createFileUsageScope",

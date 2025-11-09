@@ -110,6 +110,8 @@ export class HiveFileServiceClient implements OnModuleInit, OnModuleDestroy {
       request: GenerateUploadSignedUrlRequest,
     ): Observable<GenerateUploadSignedUrlResponse> =>
       this.loadBalance().generateUploadSignedUrl(request),
+    completeFileUpload: (request: GetRequest): Observable<GetFileResponse> =>
+      this.loadBalance().completeFileUpload(request),
   };
 
   private loadBalance() {
