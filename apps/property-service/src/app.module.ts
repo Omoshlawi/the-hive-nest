@@ -23,6 +23,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PropertiesModule } from './properties/properties.module';
+import { PropertyMediaModule } from './property-media/property-media.module';
+import { PropertyRelationshipsModule } from './property-relationships/property-relationships.module';
 
 @Module({
   imports: [
@@ -90,6 +92,8 @@ import { PropertiesModule } from './properties/properties.module';
     AttributeTypesModule,
     RelationshipTypesModule,
     PropertiesModule,
+    PropertyMediaModule,
+    PropertyRelationshipsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

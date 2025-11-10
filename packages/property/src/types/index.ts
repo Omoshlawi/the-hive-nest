@@ -1,3 +1,5 @@
+import { PropertiesController } from './property.service';
+
 export * from './property.service';
 export {
   CreateAmenityRequest,
@@ -112,3 +114,101 @@ export {
   QueryRelationshipTypeResponse,
   UpdateRelationshipTypeRequest,
 } from './relationship-type.message';
+
+export type IAmenitiesController = Pick<
+  PropertiesController,
+  | 'queryAmenities'
+  | 'getAmenity'
+  | 'createAmenity'
+  | 'updateAmenity'
+  | 'deleteAmenity'
+>;
+
+export type ICategoriesController = Pick<
+  PropertiesController,
+  | 'queryCategories'
+  | 'getCategory'
+  | 'createCategory'
+  | 'updateCategory'
+  | 'deleteCategory'
+>;
+
+export type IAttributeTypesController = Pick<
+  PropertiesController,
+  | 'queryAttributeTypes'
+  | 'getAttributeType'
+  | 'createAttributeType'
+  | 'updateAttributeType'
+  | 'deleteAttributeType'
+>;
+
+export type IPropertiesController = Pick<
+  PropertiesController,
+  | 'queryProperties'
+  | 'getProperty'
+  | 'createProperty'
+  | 'updateProperty'
+  | 'deleteProperty'
+>;
+
+export type IRelationshipTypesController = Pick<
+  PropertiesController,
+  | 'queryRelationshipType'
+  | 'getRelationshipType'
+  | 'createRelationshipType'
+  | 'updateRelationshipType'
+  | 'deleteRelationshipType'
+>;
+
+export type IRelationshipsController = Pick<
+  PropertiesController,
+  | 'queryRelationship'
+  | 'getRelationship'
+  | 'createRelationship'
+  | 'updateRelationship'
+  | 'deleteRelationship'
+>;
+
+export type IPropertyStatusHistoryController = Pick<
+  PropertiesController,
+  | 'queryPropertyStatusHistory'
+  | 'getPropertyStatusHistory'
+  | 'createPropertyStatusHistory'
+  | 'deletePropertyStatusHistory'
+>;
+
+export type IPropertyMediaController = Pick<
+  PropertiesController,
+  | 'queryPropertyMedia'
+  | 'getPropertyMedia'
+  | 'createPropertyMedia'
+  | 'updatePropertyMedia'
+  | 'deletePropertyMedia'
+>;
+
+export type IPropertyAttributeController = Pick<
+  PropertiesController,
+  | 'queryPropertyAttribute'
+  | 'getPropertyAttribute'
+  | 'createPropertyAttribute'
+  | 'updatePropertyAttribute'
+  | 'deletePropertyAttribute'
+>;
+
+export type IPropertyAmenityController = Pick<
+  PropertiesController,
+  | 'queryPropertyAmenity'
+  | 'getPropertyAmenity'
+  | 'createPropertyAmenity'
+  | 'updatePropertyAmenity'
+  | 'deletePropertyAmenity'
+>;
+
+export type IPropertyCategoryController = Pick<
+  PropertiesController,
+  | 'queryPropertyCategory'
+  | 'getPropertyCategory'
+  | 'createPropertyCategory'
+  | 'updatePropertyCategory'
+  | 'deletePropertyCategory'
+>;

@@ -2,6 +2,7 @@ import {
   CreatePropertyRequest,
   DeletePropertyRequest,
   GetPropertyResponse,
+  IPropertiesController,
   PROPERTIES_SERVICE_NAME,
   QueryPropertyRequest,
   QueryPropertyResponse,
@@ -12,17 +13,7 @@ import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { PropertiesService } from './properties.service';
 
 @Controller('properties')
-export class PropertiesController
-  implements
-    Pick<
-      PropertiesController,
-      | 'queryProperties'
-      | 'getProperty'
-      | 'createProperty'
-      | 'updateProperty'
-      | 'deleteProperty'
-    >
-{
+export class PropertiesController implements IPropertiesController {
   constructor(private readonly propertyService: PropertiesService) {}
   @GrpcMethod(PROPERTIES_SERVICE_NAME)
   queryProperties(

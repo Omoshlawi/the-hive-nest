@@ -3,6 +3,7 @@ import {
   DeleteAmenityRequest,
   GetAmenityRequest,
   GetAmenityResponse,
+  IAmenitiesController,
   PROPERTIES_SERVICE_NAME,
   QueryAmenityRequest,
   QueryAmenityResponse,
@@ -13,7 +14,7 @@ import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { AmenitiesService } from './amenities.service';
 
 @Controller('amenities')
-export class AmenitiesController {
+export class AmenitiesController implements IAmenitiesController{
   constructor(private readonly amenitiesService: AmenitiesService) {}
 
   @GrpcMethod(PROPERTIES_SERVICE_NAME, 'queryAmenities')

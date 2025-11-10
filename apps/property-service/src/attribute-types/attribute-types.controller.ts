@@ -3,6 +3,7 @@ import {
   DeleteAttributeTypeRequest,
   GetAttributeTypeRequest,
   GetAttributeTypeResponse,
+  IAttributeTypesController,
   PROPERTIES_SERVICE_NAME,
   QueryAttributeTypeRequest,
   QueryAttributeTypeResponse,
@@ -13,7 +14,7 @@ import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { AttributeTypesService } from './attribute-types.service';
 
 @Controller('attribute-types')
-export class AttributeTypesController {
+export class AttributeTypesController implements IAttributeTypesController{
   constructor(private readonly attributeTypeService: AttributeTypesService) {}
   @GrpcMethod(PROPERTIES_SERVICE_NAME, 'queryAttributeTypes')
   queryAttributeTypes(

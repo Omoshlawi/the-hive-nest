@@ -4,6 +4,7 @@ import {
   DeleteCategoryRequest,
   GetCategoryRequest,
   GetCategoryResponse,
+  ICategoriesController,
   PROPERTIES_SERVICE_NAME,
   QueryCategoryRequest,
   QueryCategoryResponse,
@@ -14,7 +15,7 @@ import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { CategoriesService } from './categories.service';
 
 @Controller('categories')
-export class CategoriesController {
+export class CategoriesController implements ICategoriesController{
   constructor(private readonly categoryService: CategoriesService) {}
   @GrpcMethod(PROPERTIES_SERVICE_NAME, 'queryCategories')
   queryCategories(
