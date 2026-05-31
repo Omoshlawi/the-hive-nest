@@ -8,6 +8,11 @@ import {
   VIRTUAL_TOUR_RPC_SERVER_CONFIG_TOKEN,
 } from '@hive/virtual-tour';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { ReflectionService } from '@grpc/reflection';
+import {
+  HealthImplementation,
+  protoPath as healthCheckProtoPath,
+} from 'grpc-health-check';
 
 async function bootstrap() {
   const app = await NestFactory.create(TourModule);
@@ -21,11 +26,21 @@ async function bootstrap() {
     transport: Transport.GRPC,
     options: {
       package: VIRTUAL_TOUR_PACKAGE.V1.NAME,
-      protoPath: VIRTUAL_TOUR_PACKAGE.V1.PROTO_PATH,
+      protoPath: [healthCheckProtoPath, VIRTUAL_TOUR_PACKAGE.V1.PROTO_PATH],
       url: `${grpcServerConfig.host}:${grpcServerConfig.port}`,
       // Support large file uploads (up to 100MB)
       maxSendMessageLength: 100 * 1024 * 1024, // 100MB
       maxReceiveMessageLength: 100 * 1024 * 1024, // 100MB
+
+      onLoadPackageDefinition: (pkg, server) => {
+        new ReflectionService(pkg).addToServer(server);
+        const healthImpl = new HealthImplementation({
+          '': 'UNKNOWN',
+        });
+
+        healthImpl.addToServer(server);
+        healthImpl.setStatus('', 'SERVING');
+      },
     },
   });
 

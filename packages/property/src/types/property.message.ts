@@ -25,8 +25,10 @@ export interface QueryRelationshipRequest {
   propertyBId?: string | undefined;
   typeId?: string | undefined;
   includeVoided?: boolean | undefined;
-  startDate?: string | undefined;
-  endDate?: string | undefined;
+  startDateFrom?: string | undefined;
+  startDateTo?: string | undefined;
+  endDateFrom?: string | undefined;
+  endDateTo?: string | undefined;
   context?: RequestContext | undefined;
 }
 
@@ -144,33 +146,25 @@ export interface CreatePropertyMediaRequest {
   description?:
     | string
     | undefined;
-  /** size ,memeType,id,e.t.c */
-  metadata: { [key: string]: string };
+  /** JSON Stringified metadata size ,memeType,id,e.t.c */
+  metadata?: string | undefined;
   order: number;
   context?: RequestContext | undefined;
 }
 
-export interface CreatePropertyMediaRequest_MetadataEntry {
-  key: string;
-  value: string;
-}
-
 export interface UpdatePropertyMediaRequest {
   queryBuilder: QueryBuilder | undefined;
-  propertyId?: string | undefined;
   type?: string | undefined;
   url?: string | undefined;
   title?: string | undefined;
-  description?: string | undefined;
-  metadata: { [key: string]: string };
+  description?:
+    | string
+    | undefined;
+  /** JSON Stringified metadata size ,memeType,id,e.t.c */
+  metadata?: string | undefined;
   order?: number | undefined;
   id: string;
   context?: RequestContext | undefined;
-}
-
-export interface UpdatePropertyMediaRequest_MetadataEntry {
-  key: string;
-  value: string;
 }
 
 export interface GetPropertyMediaRequest {

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AppConfig } from './config/app.config';
@@ -12,6 +14,11 @@ import {
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { AuthService } from '@thallesp/nestjs-better-auth';
 import { BetterAuthWithPlugins } from './auth/auth.types';
+import { ReflectionService } from '@grpc/reflection';
+import {
+  HealthImplementation,
+  protoPath as healthCheckProtoPath,
+} from 'grpc-health-check';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -46,7 +53,7 @@ async function bootstrap() {
   // Setup Swagger with merged documentation
   SwaggerModule.setup('api', app, mergedDocument);
 
-  app.use('/api-doc', (req: Request, res: Response, next: NextFunction) => {
+  app.use('/api-doc', (req: Request, res: Response, _next: NextFunction) => {
     res.setHeader('Content-Type', 'text/html');
     res.send(`<!doctype html>
           <html>
@@ -86,8 +93,17 @@ async function bootstrap() {
     transport: Transport.GRPC,
     options: {
       package: IDENTITY_PACKAGE.V1.NAME,
-      protoPath: IDENTITY_PACKAGE.V1.PROTO_PATH,
+      protoPath: [healthCheckProtoPath, IDENTITY_PACKAGE.V1.PROTO_PATH],
       url: `0.0.0.0:${serverConfig.port}`,
+      onLoadPackageDefinition: (pkg, server) => {
+        new ReflectionService(pkg).addToServer(server);
+        const healthImpl = new HealthImplementation({
+          '': 'UNKNOWN',
+        });
+
+        healthImpl.addToServer(server);
+        healthImpl.setStatus('', 'SERVING');
+      },
     },
   });
   await app.startAllMicroservices();

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import { ModuleMetadata, Type } from '@nestjs/common';
 import { RegisterServiceRequest, ServiceRegistration } from '../types';
 

@@ -12,9 +12,11 @@ message QueryRelationshipRequest {
     optional string property_b_id = 4;
     optional string type_id = 5;
     optional bool include_voided = 6;
-    optional string start_date = 7;
-    optional string end_date = 8;
-    optional RequestContext context = 9;
+    optional string start_date_from = 7;
+    optional string start_date_to = 8;
+    optional string end_date_from = 9;
+    optional string end_date_to = 10;
+    optional RequestContext context = 11;
 
 }
 message QueryRelationshipResponse {
@@ -122,22 +124,21 @@ message CreatePropertyMediaRequest {
     string url = 4;
     optional string title = 5;
     optional string description = 6;
-    map<string, string> metadata = 7; // size ,memeType,id,e.t.c
+    optional string metadata = 7; //JSON Stringified metadata size ,memeType,id,e.t.c
     int32 order = 8;
     optional RequestContext context = 9;
 }
 
 message UpdatePropertyMediaRequest {
     QueryBuilder query_builder = 1;
-    optional string property_id = 2;
-    optional string type = 3;
-    optional string url = 4;
-    optional string title = 5;
-    optional string description = 6;
-    map<string, string> metadata = 7; 
-    optional int32 order = 8;
-    string id = 9;
-    optional RequestContext context = 10;
+    optional string type = 2;
+    optional string url = 3;
+    optional string title = 4;
+    optional string description = 5;
+    optional string metadata = 6; //JSON Stringified metadata size ,memeType,id,e.t.c
+    optional int32 order = 7;
+    string id = 8;
+    optional RequestContext context = 9;
 }
 message GetPropertyMediaRequest {
     QueryBuilder query_builder = 1;

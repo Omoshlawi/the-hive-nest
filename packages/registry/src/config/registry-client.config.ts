@@ -27,4 +27,4 @@ export class RegistryClientConfig {
   tags: Array<string>;
   @Value('META', { default: {} })
   metadata: Record<string, string>;
-} 
+}

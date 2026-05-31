@@ -22,7 +22,6 @@ export {
   CreatePropertyAttributeRequest,
   CreatePropertyCategoryRequest,
   CreatePropertyMediaRequest,
-  CreatePropertyMediaRequest_MetadataEntry,
   CreatePropertyStatusHistoryRequest,
   CreateRelationshipRequest,
   DeletePropertyAmenityRequest,
@@ -59,7 +58,6 @@ export {
   UpdatePropertyAttributeRequest,
   UpdatePropertyCategoryRequest,
   UpdatePropertyMediaRequest,
-  UpdatePropertyMediaRequest_MetadataEntry,
   UpdateRelationshipRequest,
 } from './property.message';
 export {

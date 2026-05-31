@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await */
 import { Logger } from '@nestjs/common';
 import { ServiceRegistration } from '../types';
 import { IStorage } from '../interfaces'; // Assuming IStorage is in this file path

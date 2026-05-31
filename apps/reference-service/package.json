@@ -24,6 +24,7 @@
   "dependencies": {
     "@grpc/grpc-js": "^1.13.4",
     "@grpc/proto-loader": "^0.8.0",
+    "@grpc/reflection": "^1.0.4",
     "@hive/authorization": "workspace:*",
     "@hive/common": "workspace:*",
     "@hive/reference": "workspace:*",
@@ -37,6 +38,7 @@
     "@nestjs/schedule": "^6.0.0",
     "@nestjs/swagger": "^11.2.0",
     "@prisma/client": "^6.14.0",
+    "grpc-health-check": "^2.1.0",
     "lodash": "^4.17.21",
     "nestjs-zod": "5.0.0-beta.20250806T023752",
     "reflect-metadata": "^0.2.2",

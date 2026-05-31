@@ -30,13 +30,13 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
     private readonly discoveryService: HiveDiscoveryService,
   ) {}
 
-  onModuleInit() {
+  onModuleInit(): void {
     this.logger.debug('Setting up service stream processing');
     this.validateConfiguration();
     this.setupServiceWatcher();
   }
 
-  private validateConfiguration() {
+  private validateConfiguration(): void {
     const required = ['name', 'package', 'protoPath'];
     const missing = required.filter((field) => !this.config[field]);
 
@@ -58,7 +58,7 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
    * This method  includes retry logic with exponential backoff
    * to handle transient connection failures gracefully.
    */
-  private setupServiceWatcher() {
+  private setupServiceWatcher(): void {
     try {
       this.discoveryService
         .watchServices()
