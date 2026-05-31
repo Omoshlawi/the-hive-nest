@@ -1,0 +1,23 @@
+// Prisma schema for @hive/{{name}}-service
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// TODO: Add your models here. Example:
+//
+// model Item {
+//   id             String   @id @default(uuid())
+//   name           String
+//   organizationId String
+//   voided         Boolean  @default(false)
+//   createdAt      DateTime @default(now())
+//   updatedAt      DateTime @updatedAt
+// }

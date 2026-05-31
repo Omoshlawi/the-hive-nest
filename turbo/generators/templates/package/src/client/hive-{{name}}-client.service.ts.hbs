@@ -1,0 +1,40 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { HiveService, HiveServiceClient } from '@hive/registry';
+import { OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  {{constantCase name}}_PACKAGE,
+  HIVE_{{constantCase name}}_SERVICE_NAME,
+} from '../constants';
+
+// TODO: After running `pnpm gen`, import the generated client type and service name:
+// import { {{pascalCase name}}Client, {{constantCase name}}_SERVICE_NAME } from '../types';
+
+@HiveService({
+  package: {{constantCase name}}_PACKAGE.V1.NAME,
+  protoPath: {{constantCase name}}_PACKAGE.V1.PROTO_PATH,
+  version: '0.0.1',
+  // TODO: Replace with the generated service name constant: {{constantCase name}}_SERVICE_NAME
+  serviceName: `hive.{{name}}.v1.{{pascalCase name}}`,
+  name: HIVE_{{constantCase name}}_SERVICE_NAME,
+})
+export class Hive{{pascalCase name}}ClientService
+  implements OnModuleInit, OnModuleDestroy
+{
+  constructor(private client: HiveServiceClient) {}
+
+  private loadBalance() {
+    // TODO: Replace `any` with the generated client type, e.g. {{pascalCase name}}Client
+    const service = this.client.getService<any>();
+    if (!service) throw new Error('No {{pascalCase name}} service instance found');
+    return service;
+  }
+
+  onModuleInit() {
+    return this.client.onModuleInit();
+  }
+
+  onModuleDestroy() {
+    return this.client.onModuleDestroy();
+  }
+}

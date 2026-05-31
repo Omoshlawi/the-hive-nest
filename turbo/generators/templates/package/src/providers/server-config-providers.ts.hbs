@@ -1,0 +1,26 @@
+import { Provider } from '@nestjs/common';
+import { getFreePort, ServerConfig } from '@hive/utils';
+import {
+  {{constantCase name}}_HTTP_SERVER_CONFIG_TOKEN,
+  {{constantCase name}}_RPC_SERVER_CONFIG_TOKEN,
+} from '../constants';
+
+export const {{pascalCase name}}HTTPServerConfigProvider: Provider = {
+  provide: {{constantCase name}}_HTTP_SERVER_CONFIG_TOKEN,
+  useFactory: async (): Promise<ServerConfig> => {
+    const envPort = parseInt(process.env.PORT || '0');
+    const port = envPort === 0 ? await getFreePort() : envPort;
+    return { port, host: '0.0.0.0' };
+  },
+};
+
+export const {{pascalCase name}}RPCServerConfigProvider: Provider = {
+  provide: {{constantCase name}}_RPC_SERVER_CONFIG_TOKEN,
+  useFactory: async (): Promise<ServerConfig> => {
+    const envPort = parseInt(
+      process.env.{{constantCase name}}_GRPC_SERVICE_PORT || '0',
+    );
+    const port = envPort === 0 ? await getFreePort() : envPort;
+    return { port, host: '0.0.0.0' };
+  },
+};

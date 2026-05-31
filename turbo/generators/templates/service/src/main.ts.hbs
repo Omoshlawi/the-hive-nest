@@ -1,0 +1,43 @@
+import {
+  {{constantCase name}}_HTTP_SERVER_CONFIG_TOKEN,
+  {{constantCase name}}_PACKAGE,
+  {{constantCase name}}_RPC_SERVER_CONFIG_TOKEN,
+} from '@hive/{{name}}';
+import { ServerConfig } from '@hive/utils';
+import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { ReflectionService } from '@grpc/reflection';
+import {
+  HealthImplementation,
+  protoPath as healthCheckProtoPath,
+} from 'grpc-health-check';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  const httpServerConfig: ServerConfig = app.get(
+    {{constantCase name}}_HTTP_SERVER_CONFIG_TOKEN,
+  );
+  const grpcServerConfig: ServerConfig = app.get(
+    {{constantCase name}}_RPC_SERVER_CONFIG_TOKEN,
+  );
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.GRPC,
+    options: {
+      package: {{constantCase name}}_PACKAGE.V1.NAME,
+      protoPath: [healthCheckProtoPath, {{constantCase name}}_PACKAGE.V1.PROTO_PATH],
+      url: `${grpcServerConfig.host}:${grpcServerConfig.port}`,
+      onLoadPackageDefinition: (pkg, server) => {
+        new ReflectionService(pkg).addToServer(server);
+        const healthImpl = new HealthImplementation({
+          '': 'UNKNOWN',
+        });
+        healthImpl.addToServer(server);
+        healthImpl.setStatus('', 'SERVING');
+      },
+    },
+  });
+  await app.startAllMicroservices();
+  await app.listen(httpServerConfig.port);
+}
+bootstrap();

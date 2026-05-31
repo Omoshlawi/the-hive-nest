@@ -1,0 +1,18 @@
+import path from 'path';
+
+export const {{constantCase name}}_HTTP_SERVER_CONFIG_TOKEN =
+  '{{constantCase name}}_HTTP_SERVER_CONFIG';
+export const {{constantCase name}}_RPC_SERVER_CONFIG_TOKEN =
+  '{{constantCase name}}_RPC_SERVER_CONFIG';
+
+export const {{constantCase name}}_PACKAGE = Object.freeze({
+  V1: {
+    NAME: 'hive.{{name}}.v1',
+    PROTO_PATH: require.resolve(
+      path.join(__dirname, '../proto/{{name}}.service.proto'),
+    ),
+    TOKEN: 'SERVICE_{{constantCase name}}_PACKAGE_V1',
+  },
+});
+
+export const HIVE_{{constantCase name}}_SERVICE_NAME = '@hive/{{name}}-service';
