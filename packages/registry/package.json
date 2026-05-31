@@ -40,8 +40,7 @@
   "scripts": {
     "dev": "pnpm build --watch",
     "postinstall": "pnpm gen",
-    "copy-assets": "node scripts/copy-assets.js",
-    "gen": "node scripts/generate-types.js && pnpm run copy-assets",
+    "gen": "hive-gen && hive-copy-assets",
     "build": "tsc -b -v",
     "clean": "rm -rf dist",
     "format": "prettier --write \"src/**/*.ts\"",

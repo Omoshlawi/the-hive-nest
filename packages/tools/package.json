@@ -1,0 +1,12 @@
+{
+  "name": "@hive/tools",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Dev tooling scripts for the-hive-nest monorepo",
+  "main": "./src/index.js",
+  "bin": {
+    "hive-gen": "./bin/hive-gen.js",
+    "hive-copy-assets": "./bin/hive-copy-assets.js",
+    "hive-scaffold": "./bin/hive-scaffold.js"
+  }
+}

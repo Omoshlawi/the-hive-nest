@@ -12,10 +12,12 @@
     "test:e2e": "turbo run test:e2e",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "gen": "turbo gen"
+    "gen": "turbo gen",
+    "scaffold": "hive-scaffold"
   },
   "devDependencies": {
     "@hive/eslint-config": "workspace:*",
+    "@hive/tools": "workspace:*",
     "@turbo/gen": "^2.0.0",
     "eslint": "^9.18.0",
     "typescript": "^5.7.3",

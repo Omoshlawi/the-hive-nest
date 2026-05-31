@@ -1,0 +1,56 @@
+const fs = require('fs');
+const path = require('path');
+const { promisify } = require('util');
+
+const copyFile = promisify(fs.copyFile);
+const mkdir = promisify(fs.mkdir);
+const readdir = promisify(fs.readdir);
+const stat = promisify(fs.stat);
+
+async function copyRecursive(src, dest, filter = null) {
+  try {
+    const srcStat = await stat(src);
+    if (srcStat.isDirectory()) {
+      await mkdir(dest, { recursive: true });
+      const items = await readdir(src);
+      for (const item of items) {
+        await copyRecursive(path.join(src, item), path.join(dest, item), filter);
+      }
+    } else if (srcStat.isFile()) {
+      if (filter && !filter(src)) return;
+      await mkdir(path.dirname(dest), { recursive: true });
+      await copyFile(src, dest);
+      console.log(`Copied: ${path.relative(process.cwd(), src)} → ${path.relative(process.cwd(), dest)}`);
+    }
+  } catch (error) {
+    console.error(`Error copying ${src}: ${error.message}`);
+    throw error;
+  }
+}
+
+async function copyAssets(cwd = process.cwd()) {
+  const startTime = Date.now();
+  console.log('Copying proto assets...');
+
+  try {
+    const srcProtoDir = path.join(cwd, 'src/proto');
+    const distProtoDir = path.join(cwd, 'dist/proto');
+
+    if (!fs.existsSync(srcProtoDir)) {
+      console.warn(`Source proto directory not found: ${srcProtoDir}`);
+      return;
+    }
+
+    await copyRecursive(srcProtoDir, distProtoDir, (f) => path.extname(f) === '.proto');
+    console.log(`Proto assets copied in ${Date.now() - startTime}ms`);
+  } catch (error) {
+    console.error('Failed to copy assets:', error.message);
+    process.exit(1);
+  }
+}
+
+if (require.main === module) {
+  copyAssets();
+}
+
+module.exports = copyAssets;
