@@ -21,6 +21,8 @@ import { AppService } from './app.service';
 import { FileUsageRuleModule } from './file-usage-rule/file-usage-rule.module';
 import { FileUsageScopeModule } from './file-usage-scope/file-usage-scope.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { PrismaConfig } from './prisma/prisma.config';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { S3Module } from './s3/s3.module';
 
 @Module({
@@ -90,7 +92,13 @@ import { S3Module } from './s3/s3.module';
         providers: [FileHTTPServerConfigProvider, FileRPCServerConfigProvider],
       },
     }),
-    PrismaModule,
+    PrismaModule.forRootAsync({
+      global: true,
+      inject: [PrismaConfig],
+      useFactory: (config: PrismaConfig) => ({
+        adapter: new PrismaPg({ connectionString: config.databaseUrl }),
+      }),
+    }),
     FileUsageScopeModule,
     FileUsageRuleModule,
     S3Module,

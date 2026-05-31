@@ -16,7 +16,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { pick } from 'lodash';
 import { firstValueFrom, Observable } from 'rxjs';
 import { PrismaService } from './prisma/prisma.service';
-import { Prisma, Tour } from '../generated/prisma';
+import { Prisma, Tour } from '../generated/prisma/client';
 import { TileGeneratorService } from './tile-generator.service';
 import { HiveFileServiceClient, GetFileResponse } from '@hive/files';
 import { TileConfig } from './tile-generator.service';

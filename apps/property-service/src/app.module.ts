@@ -14,12 +14,15 @@ import {
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
 import { Module } from '@nestjs/common';
+import { PrismaConfig } from './prisma/prisma.config';
 import { AmenitiesModule } from './amenities/amenities.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AttributeTypesModule } from './attribute-types/attribute-types.module';
 import { CategoriesModule } from './categories/categories.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { PrismaPg } from '@prisma/adapter-pg';
+
 import { RelationshipTypesModule } from './relationship-types/relationship-types.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PropertiesModule } from './properties/properties.module';
@@ -87,7 +90,13 @@ import { PropertyRelationshipsModule } from './property-relationships/property-r
     }),
     AmenitiesModule,
     QueryBuilderModule.register({ global: true }),
-    PrismaModule,
+    PrismaModule.forRootAsync({
+      global: true,
+      inject: [PrismaConfig],
+      useFactory: (config: PrismaConfig) => ({
+        adapter: new PrismaPg({ connectionString: config.databaseUrl }),
+      }),
+    }),
     CategoriesModule,
     AttributeTypesModule,
     RelationshipTypesModule,

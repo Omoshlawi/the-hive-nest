@@ -24,7 +24,6 @@ import {
   organization,
   username,
 } from 'better-auth/plugins';
-import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { adminConfig, organizationConfig } from './auth.contants';
 import { AuthExtendedController } from './auth.controller';
@@ -42,7 +41,7 @@ export class AuthModule {
     return {
       module: AuthModule,
       global: true,
-      imports: [authModule, PrismaModule, QueryBuilderModule.register()],
+      imports: [authModule, QueryBuilderModule.register()],
       exports: [authModule],
       controllers: [AuthExtendedController],
       providers: [AuthHookHook],
@@ -51,7 +50,6 @@ export class AuthModule {
 
   private static getAuthModule() {
     return AuthenticationModule.forRootAsync({
-      imports: [PrismaModule],
       useFactory(
         prisma: PrismaService,
         discover: DiscoveryService,

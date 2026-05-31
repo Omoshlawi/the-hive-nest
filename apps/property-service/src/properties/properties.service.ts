@@ -14,7 +14,7 @@ import {
   UpdatePropertyRequest,
 } from '@hive/property';
 import { Injectable, Logger } from '@nestjs/common';
-import { Property, Prisma, PropertyMediaType } from '../../generated/prisma';
+import { Property, Prisma, PropertyMediaType } from '../../generated/prisma/client';
 import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
 import {

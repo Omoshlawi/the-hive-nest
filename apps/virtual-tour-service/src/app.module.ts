@@ -6,10 +6,13 @@ import {
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
 import { Module } from '@nestjs/common';
+import { PrismaConfig } from './prisma/prisma.config';
 import { TourController } from './app.controller';
 import { TourService } from './app.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from './prisma/prisma.module';
+import { PrismaPg } from '@prisma/adapter-pg';
+
 import { QueryBuilderModule } from '@hive/common';
 import { HiveFileServiceClient } from '@hive/files';
 import {
@@ -80,7 +83,13 @@ import { TileGeneratorService } from './tile-generator.service';
         ],
       },
     }),
-    PrismaModule,
+    PrismaModule.forRootAsync({
+      global: true,
+      inject: [PrismaConfig],
+      useFactory: (config: PrismaConfig) => ({
+        adapter: new PrismaPg({ connectionString: config.databaseUrl }),
+      }),
+    }),
     QueryBuilderModule.register({ global: true }),
     TourSceneModule,
   ],

@@ -20,7 +20,7 @@ import {
   UpdateFileUsageScopeRequest,
 } from '@hive/files';
 import { pick } from 'lodash';
-import { FileUsageScope } from '../../generated/prisma';
+import { FileUsageScope } from '../../generated/prisma/client';
 import { RpcException } from '@nestjs/microservices';
 
 @Injectable()

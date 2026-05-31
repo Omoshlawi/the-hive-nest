@@ -19,7 +19,7 @@ import {
   DeleteRequest,
   FileUsageAuthzService,
 } from '@hive/files';
-import { FileUsageRule } from '../../generated/prisma';
+import { FileUsageRule } from '../../generated/prisma/client';
 import { pick } from 'lodash';
 import { RpcException } from '@nestjs/microservices';
 

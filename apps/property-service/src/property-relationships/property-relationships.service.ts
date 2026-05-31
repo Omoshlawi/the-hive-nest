@@ -12,7 +12,7 @@ import {
   UpdateRelationshipRequest,
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
-import { Relationship, Prisma } from '../../generated/prisma';
+import { Relationship, Prisma } from '../../generated/prisma/client';
 import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
 

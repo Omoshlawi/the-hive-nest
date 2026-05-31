@@ -12,7 +12,7 @@ import {
   UpdateAmenityRequest,
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
-import { Amenity, Prisma } from '../../generated/prisma';
+import { Amenity, Prisma } from '../../generated/prisma/client';
 import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
 

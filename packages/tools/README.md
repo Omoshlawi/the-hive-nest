@@ -1,10 +1,10 @@
 # @hive/tools
 
-Dev tooling for the `the-hive-nest` monorepo. Provides three CLI commands used across all proto packages.
+Dev tooling for the `the-hive-nest` monorepo. Provides CLI commands for proto type generation, asset copying, Prisma client generation, and resource scaffolding.
 
 ## How it works
 
-`@hive/tools` is installed as a **root devDependency** — you do not add it to individual package `package.json` files. The root `.npmrc` hoists its bins to `node_modules/.bin/`, making `hive-gen`, `hive-copy-assets`, and `hive-scaffold` available to every package in the workspace when pnpm runs their scripts.
+`@hive/tools` is installed as a **root devDependency** — you do not add it to individual package `package.json` files. The root `.npmrc` hoists its bins to `node_modules/.bin/`, making all commands available to every package in the workspace when pnpm runs their scripts.
 
 ## Commands
 

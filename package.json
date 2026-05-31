@@ -13,7 +13,9 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "gen": "turbo gen",
-    "scaffold": "hive-scaffold"
+    "scaffold": "hive-scaffold",
+    "db:generate": "turbo db:generate",
+    "db:migrate": "turbo db:migrate"
   },
   "devDependencies": {
     "@hive/eslint-config": "workspace:*",

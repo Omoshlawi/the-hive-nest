@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   CustomRepresentationService,
   FunctionFirstArgument,
@@ -16,7 +13,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
-import { IdentifierSequence as IdentifierSequenceModel } from '../../generated/prisma';
+import { IdentifierSequence as IdentifierSequenceModel } from '../../generated/prisma/client';
 import type { IdentifierSequence } from '@hive/reference';
 
 @Injectable()

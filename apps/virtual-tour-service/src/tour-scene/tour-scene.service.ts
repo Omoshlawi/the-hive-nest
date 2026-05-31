@@ -12,7 +12,7 @@ import {
   UpdateSceneRequest,
 } from '@hive/virtual-tour';
 import { Injectable } from '@nestjs/common';
-import { Scene, Prisma } from '../../generated/prisma';
+import { Scene, Prisma } from '../../generated/prisma/client';
 import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
 

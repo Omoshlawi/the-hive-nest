@@ -560,7 +560,7 @@ HiveServiceModule.forRoot({
 #### Schema Configuration
 ```prisma
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../generated/prisma" // Generated folder for imports
 }
 

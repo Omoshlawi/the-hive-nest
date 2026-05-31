@@ -28,10 +28,9 @@ import { createHash } from 'crypto';
 import { pick } from 'lodash';
 import { basename, extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { FileMetadata, UploadStatus } from '../generated/prisma';
+import { FileMetadata, UploadStatus } from '../generated/prisma/client';
 import { PrismaService } from './prisma/prisma.service';
 import { S3FileMetadata, S3Service } from './s3/s3.service';
-import { Prisma } from '../generated/prisma';
 
 @Injectable()
 export class AppService {

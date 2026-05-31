@@ -6,11 +6,14 @@ import {
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
 import { Module } from '@nestjs/common';
+import { PrismaConfig } from './prisma/prisma.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { IdentifierSequenceModule } from './identifier-sequence/identifier-sequence.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { PrismaPg } from '@prisma/adapter-pg';
+
 import { QueryBuilderModule } from '@hive/common';
 import {
   REFERENCE_HTTP_SERVER_CONFIG_TOKEN,
@@ -80,7 +83,13 @@ import { AddressModule } from './address/address.module';
       },
     }),
     IdentifierSequenceModule,
-    PrismaModule,
+    PrismaModule.forRootAsync({
+      global: true,
+      inject: [PrismaConfig],
+      useFactory: (config: PrismaConfig) => ({
+        adapter: new PrismaPg({ connectionString: config.databaseUrl }),
+      }),
+    }),
     QueryBuilderModule.register({ global: true }),
     AddressHierarchyModule,
     AddressModule,

@@ -4,7 +4,7 @@ import {
   Member as PMember,
   Invitation as PInvitation,
   Organization as POrganization,
-} from '../../generated/prisma';
+} from '../../generated/prisma/client';
 import { Member, Organization, User, Invitation } from '@hive/identity';
 export class IdentityMappersUtils {
   // Add your methods and properties here

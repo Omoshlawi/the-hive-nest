@@ -7,7 +7,7 @@ import {
 import { DeleteRequest, QueryAddressHierarchyRequest } from '@hive/reference';
 import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
-import { AddressHierarchy as AddressHierarchyModel } from '../../generated/prisma';
+import { AddressHierarchy as AddressHierarchyModel } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()

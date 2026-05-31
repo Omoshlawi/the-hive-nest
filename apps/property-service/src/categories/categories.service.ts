@@ -13,7 +13,7 @@ import {
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
-import { Category, Prisma } from '../../generated/prisma';
+import { Category, Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()

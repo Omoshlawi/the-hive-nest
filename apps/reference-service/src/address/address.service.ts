@@ -13,7 +13,7 @@ import {
   UpdateAddressRequest,
 } from '@hive/reference';
 import { Injectable } from '@nestjs/common';
-import { Address, AddressType } from '../../generated/prisma';
+import { Address, AddressType } from '../../generated/prisma/client';
 import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
 

@@ -16,6 +16,10 @@ import {
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
 import { Module } from '@nestjs/common';
+import { PrismaConfig } from './prisma/prisma.config';
+import { PrismaModule } from './prisma/prisma.module';
+import { PrismaPg } from '@prisma/adapter-pg';
+
 import { ScheduleModule } from '@nestjs/schedule';
 import { AmenitiesModule } from './amenities/amenities.module';
 import { AppController } from './app.controller';
@@ -83,6 +87,13 @@ import { VirtualToursModule } from './virtual-tours/virtual-tours.module';
     }),
     // For direct communication with registry on registry endpoints
     RegistryModule,
+    PrismaModule.forRootAsync({
+      global: true,
+      inject: [PrismaConfig],
+      useFactory: (config: PrismaConfig) => ({
+        adapter: new PrismaPg({ connectionString: config.databaseUrl }),
+      }),
+    }),
     // Handle RPC calls to identity service (concreate implementation for rpc methods in identity package)
     IdentityModule,
     AmenitiesModule,
