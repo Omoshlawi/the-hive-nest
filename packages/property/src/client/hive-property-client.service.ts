@@ -100,9 +100,7 @@ export class HivePropertyServiceClient
 {
   constructor(private client: HiveServiceClient) {}
   private loadBalance() {
-    const property = this.client.getService<PropertiesClient>();
-    if (!property) throw new Error('No service instance');
-    return property;
+    return this.client.loadBalance<PropertiesClient>();
   }
   readonly relationshipTypes = {
     queryRelationshipType: (

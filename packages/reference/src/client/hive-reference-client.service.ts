@@ -95,11 +95,7 @@ export class HiveReferencesServiceClient
   };
 
   private loadBalance() {
-    // Get service internally uses random strategy to load balance cached clients
-    // Should randomize/load balance on every call
-    const service = this.client.getService<ReferencesClient>();
-    if (!service) throw new Error('No service instance');
-    return service;
+    return this.client.loadBalance<ReferencesClient>();
   }
   onModuleInit() {
     return this.client.onModuleInit();

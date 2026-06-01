@@ -255,6 +255,22 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
     return proxy.getService<T>(this.config.serviceName);
   }
 
+  /**
+   * Returns a typed gRPC service client or throws if no healthy instance is
+   * available. Use this in domain client packages instead of duplicating the
+   * null-check in every client.
+   */
+  loadBalance<T extends object>(): T {
+    const service = this.getService<T>();
+    if (!service) {
+      throw new Error(
+        `No healthy service instance available for "${this.config.name}". ` +
+          `Ensure the service is running and registered with the registry.`,
+      );
+    }
+    return service;
+  }
+
   getconfig() {
     return this.config;
   }
