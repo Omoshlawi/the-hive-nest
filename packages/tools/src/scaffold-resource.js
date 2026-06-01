@@ -46,8 +46,12 @@ function parseArgs(argv) {
 function validateArgs(args) {
   const missing = ['resource', 'package', 'service'].filter((k) => !args[k]);
   if (missing.length) {
-    console.error(`Missing required arguments: ${missing.map((k) => `--${k}`).join(', ')}`);
-    console.error('Usage: node scripts/scaffold-resource.js --resource Review --package property --service PROPERTIES_SERVICE_NAME');
+    console.error(
+      `Missing required arguments: ${missing.map((k) => `--${k}`).join(', ')}`,
+    );
+    console.error(
+      'Usage: node scripts/scaffold-resource.js --resource Review --package property --service PROPERTIES_SERVICE_NAME',
+    );
     process.exit(1);
   }
 }
@@ -76,7 +80,13 @@ function pluralise(str) {
   if (str.endsWith('y') && !/[aeiou]y$/i.test(str)) {
     return str.slice(0, -1) + 'ies';
   }
-  if (str.endsWith('s') || str.endsWith('x') || str.endsWith('z') || str.endsWith('ch') || str.endsWith('sh')) {
+  if (
+    str.endsWith('s') ||
+    str.endsWith('x') ||
+    str.endsWith('z') ||
+    str.endsWith('ch') ||
+    str.endsWith('sh')
+  ) {
     return str + 'es';
   }
   return str + 's';
@@ -85,14 +95,14 @@ function pluralise(str) {
 function deriveNames(resourcePascal) {
   const plural = pluralise(resourcePascal);
   return {
-    pascal: resourcePascal,                         // Review
-    pluralPascal: plural,                           // Reviews
-    camel: toCamel(resourcePascal),                 // review
-    pluralCamel: toCamel(plural),                   // reviews
-    kebab: toKebab(resourcePascal),                 // review
-    pluralKebab: toKebab(plural),                   // reviews
-    protoSnake: toProtoSnake(resourcePascal),       // review
-    pluralProtoSnake: toProtoSnake(plural),         // reviews
+    pascal: resourcePascal, // Review
+    pluralPascal: plural, // Reviews
+    camel: toCamel(resourcePascal), // review
+    pluralCamel: toCamel(plural), // reviews
+    kebab: toKebab(resourcePascal), // review
+    pluralKebab: toKebab(plural), // reviews
+    protoSnake: toProtoSnake(resourcePascal), // review
+    pluralProtoSnake: toProtoSnake(plural), // reviews
   };
 }
 
@@ -315,7 +325,7 @@ export class ${n.pluralPascal}Module {}
 
 function gatewayControllerTemplate(n, pkg) {
   const clientClass = `Hive${pkg.charAt(0).toUpperCase() + pkg.slice(1)}ServiceClient`;
-  return `import { ApiErrorsResponse, CustomRepresentationQueryDto } from '@hive/common';
+  return `import { ApiErrorsResponse, CustomRepresentationQueryDto, DeleteQueryDto } from '@hive/common';
 import {
   Create${n.pascal}Dto,
   Get${n.pascal}ResponseDto,
@@ -342,10 +352,13 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { OptionalAuth, Session } from '@thallesp/nestjs-better-auth';
 import {
   ApiDetailTransformInterceptor,
   ApiListTransformInterceptor,
 } from '../app.interceptors';
+import { RequireOrganizationPermission } from '../auth/auth.decorators';
+import { UserSession } from '../auth/auth.types';
 
 @Controller('${n.pluralKebab}')
 @ApiTags('${n.pluralPascal}')
@@ -353,11 +366,16 @@ export class ${n.pluralPascal}Controller {
   constructor(private readonly ${pkg}Service: ${clientClass}) {}
 
   @Get('/')
+  @OptionalAuth()
   @UseInterceptors(ApiListTransformInterceptor)
   @ApiOperation({ summary: 'Query ${n.pluralPascal}' })
   @ApiOkResponse({ type: Query${n.pascal}ResponseDto })
   @ApiErrorsResponse()
-  query${n.pascal}(@Query() query: Query${n.pascal}Dto) {
+  query${n.pascal}(
+    @Query() query: Query${n.pascal}Dto,
+    @Session() userSession?: UserSession,
+  ) {
+    const { session } = userSession ?? {};
     return this.${pkg}Service.${n.pluralCamel}.query${n.pluralPascal}({
       queryBuilder: {
         limit: query.limit,
@@ -367,10 +385,12 @@ export class ${n.pluralPascal}Controller {
       },
       includeVoided: query.includeVoided,
       search: query.search,
+      context: { organizationId: session?.activeOrganizationId ?? '' },
     });
   }
 
   @Post('/')
+  @RequireOrganizationPermission({ ${n.pluralCamel}: ['create'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Create ${n.pascal}' })
   @ApiCreatedResponse({ type: Get${n.pascal}ResponseDto })
@@ -378,10 +398,12 @@ export class ${n.pluralPascal}Controller {
   create${n.pascal}(
     @Body() dto: Create${n.pascal}Dto,
     @Query() query: CustomRepresentationQueryDto,
+    @Session() { session, user }: UserSession,
   ) {
     return this.${pkg}Service.${n.pluralCamel}.create${n.pascal}({
       queryBuilder: { v: query.v },
       ...dto,
+      context: { organizationId: session.activeOrganizationId, userId: user.id },
     });
   }
 
@@ -398,6 +420,7 @@ export class ${n.pluralPascal}Controller {
   }
 
   @Patch('/:id')
+  @RequireOrganizationPermission({ ${n.pluralCamel}: ['update'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Update ${n.pascal}' })
   @ApiOkResponse({ type: Get${n.pascal}ResponseDto })
@@ -406,27 +429,32 @@ export class ${n.pluralPascal}Controller {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: Update${n.pascal}Dto,
     @Query() query: CustomRepresentationQueryDto,
+    @Session() { session, user }: UserSession,
   ) {
     return this.${pkg}Service.${n.pluralCamel}.update${n.pascal}({
       id,
       queryBuilder: { v: query?.v },
       ...dto,
+      context: { organizationId: session.activeOrganizationId, userId: user.id },
     });
   }
 
   @Delete('/:id')
+  @RequireOrganizationPermission({ ${n.pluralCamel}: ['delete'] })
   @UseInterceptors(ApiDetailTransformInterceptor)
   @ApiOperation({ summary: 'Delete ${n.pascal}' })
   @ApiOkResponse({ type: Get${n.pascal}ResponseDto })
   @ApiErrorsResponse()
   delete${n.pascal}(
     @Param('id', ParseUUIDPipe) id: string,
-    @Query() query: CustomRepresentationQueryDto & { purge?: boolean },
+    @Query() query: DeleteQueryDto,
+    @Session() { session, user }: UserSession,
   ) {
     return this.${pkg}Service.${n.pluralCamel}.delete${n.pascal}({
       id,
-      queryBuilder: { v: query.v },
       purge: query.purge,
+      queryBuilder: { v: query.v },
+      context: { organizationId: session.activeOrganizationId, userId: user.id },
     });
   }
 }
@@ -621,32 +649,47 @@ function main() {
 
   // 2. Domain service
   writeFile(
-    path.join(rootDir, `apps/${pkg}-service/src/${n.pluralKebab}/${n.pluralKebab}.service.ts`),
+    path.join(
+      rootDir,
+      `apps/${pkg}-service/src/${n.pluralKebab}/${n.pluralKebab}.service.ts`,
+    ),
     domainServiceTemplate(n, pkg),
   );
 
   // 3. Domain controller
   writeFile(
-    path.join(rootDir, `apps/${pkg}-service/src/${n.pluralKebab}/${n.pluralKebab}.controller.ts`),
+    path.join(
+      rootDir,
+      `apps/${pkg}-service/src/${n.pluralKebab}/${n.pluralKebab}.controller.ts`,
+    ),
     domainControllerTemplate(n, pkg, serviceName),
   );
 
   // 4. Domain module
   writeFile(
-    path.join(rootDir, `apps/${pkg}-service/src/${n.pluralKebab}/${n.pluralKebab}.module.ts`),
+    path.join(
+      rootDir,
+      `apps/${pkg}-service/src/${n.pluralKebab}/${n.pluralKebab}.module.ts`,
+    ),
     domainModuleTemplate(n),
   );
 
   if (!skipGateway) {
     // 5. Gateway controller
     writeFile(
-      path.join(rootDir, `apps/api-gateway-service/src/${n.pluralKebab}/${n.pluralKebab}.controller.ts`),
+      path.join(
+        rootDir,
+        `apps/api-gateway-service/src/${n.pluralKebab}/${n.pluralKebab}.controller.ts`,
+      ),
       gatewayControllerTemplate(n, pkg),
     );
 
     // 6. Gateway module
     writeFile(
-      path.join(rootDir, `apps/api-gateway-service/src/${n.pluralKebab}/${n.pluralKebab}.module.ts`),
+      path.join(
+        rootDir,
+        `apps/api-gateway-service/src/${n.pluralKebab}/${n.pluralKebab}.module.ts`,
+      ),
       gatewayModuleTemplate(n, pkg),
     );
   }
