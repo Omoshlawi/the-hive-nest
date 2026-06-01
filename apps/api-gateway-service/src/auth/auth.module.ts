@@ -22,14 +22,14 @@ import {
   organization,
   username,
 } from 'better-auth/plugins';
-import { createAuthMiddleware } from "better-auth/api";
+import { createAuthMiddleware } from 'better-auth/api';
 import { PrismaService } from '../prisma/prisma.service';
 import { adminConfig, organizationConfig } from './auth.contants';
 import { AuthExtendedController } from './auth.controller';
 import { AuthHookHook } from './auth.hooks';
 import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
-import { apiKey } from "@better-auth/api-key"
-
+import { apiKey } from '@better-auth/api-key';
+import { AppConfig } from '../config/app.config';
 
 const HOOKS = [
   { metadataKey: BEFORE_HOOK_KEY, hookType: 'before' as const },
@@ -56,6 +56,7 @@ export class AuthModule {
         discover: DiscoveryService,
         reflector: Reflector,
         metadataScanner: MetadataScanner,
+        appConfig: AppConfig,
       ) {
         const providers = discover
           .getProviders()
@@ -91,6 +92,7 @@ export class AuthModule {
             database: prismaAdapter(prisma, {
               provider: 'postgresql',
             }),
+            trustedOrigins: appConfig.trustedOrigins,
             plugins: [
               username(),
               anonymous(),
@@ -126,7 +128,13 @@ export class AuthModule {
           }),
         };
       },
-      inject: [PrismaService, DiscoveryService, Reflector, MetadataScanner],
+      inject: [
+        PrismaService,
+        DiscoveryService,
+        Reflector,
+        MetadataScanner,
+        AppConfig,
+      ],
     });
   }
 }
