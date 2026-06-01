@@ -1,47 +1,52 @@
 syntax = 'proto3';
 
-package hive.{{name}}.v1;
+import "common.message.proto";
+import "{{name}}.model.proto";
 
-// TODO: Define your message types here.
-// Example:
-//
-// message Item {
-//   string id = 1;
-//   string name = 2;
-//   string organizationId = 3;
-//   bool voided = 4;
-//   string createdAt = 5;
-//   string updatedAt = 6;
-// }
-//
-// message QueryItemRequest {
-//   optional string search = 1;
-//   optional string organizationId = 2;
-// }
-//
-// message QueryItemResponse {
-//   repeated Item data = 1;
-//   string metadata = 2;
-// }
-//
-// message GetItemRequest {
-//   string id = 1;
-// }
-//
-// message GetItemResponse {
-//   Item data = 1;
-// }
-//
-// message CreateItemRequest {
-//   string name = 1;
-//   string organizationId = 2;
-// }
-//
-// message UpdateItemRequest {
-//   string id = 1;
-//   optional string name = 2;
-// }
-//
-// message DeleteItemRequest {
-//   string id = 1;
-// }
+message Query{{pascalCase name}}Request {
+    QueryBuilder query_builder = 1;
+    optional string search = 2;
+    optional string organization_id = 3;
+    optional bool include_voided = 4;
+    optional RequestContext context = 5;
+    // TODO: add domain-specific filter fields
+}
+
+message Query{{pascalCase name}}Response {
+    repeated {{pascalCase name}} data = 1;
+    string metadata = 2;
+}
+
+message Get{{pascalCase name}}Request {
+    QueryBuilder query_builder = 1;
+    string id = 2;
+    optional RequestContext context = 3;
+}
+
+message Get{{pascalCase name}}Response {
+    {{pascalCase name}} data = 1;
+    string metadata = 2;
+}
+
+message Create{{pascalCase name}}Request {
+    QueryBuilder query_builder = 1;
+    string name = 2;
+    optional string organization_id = 3;
+    optional RequestContext context = 4;
+    // TODO: add domain-specific create fields
+}
+
+message Update{{pascalCase name}}Request {
+    QueryBuilder query_builder = 1;
+    string id = 2;
+    optional string name = 3;
+    optional RequestContext context = 4;
+    // TODO: add domain-specific update fields
+}
+
+message Delete{{pascalCase name}}Request {
+    QueryBuilder query_builder = 1;
+    string id = 2;
+    optional bool purge = 3;
+    optional RequestContext context = 4;
+}
