@@ -1,5 +1,6 @@
 export * from './dto';
 export * from './constants';
+export * from './prisma';
 export * from './config';
 export * from './exception-filters';
 export * from './interceptors';

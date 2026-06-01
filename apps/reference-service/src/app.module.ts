@@ -5,16 +5,19 @@ import {
 } from '@hive/registry';
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
-import { Module } from '@nestjs/common';
+import { PrismaService } from './prisma/prisma.service';
 import { PrismaConfig } from './prisma/prisma.config';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { IdentifierSequenceModule } from './identifier-sequence/identifier-sequence.module';
-import { PrismaModule } from './prisma/prisma.module';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-import { QueryBuilderModule } from '@hive/common';
+import {
+  PrismaModule,
+  QueryBuilderModule,
+} from '@hive/common';
 import {
   REFERENCE_HTTP_SERVER_CONFIG_TOKEN,
   REFERENCE_RPC_SERVER_CONFIG_TOKEN,
@@ -85,6 +88,7 @@ import { AddressModule } from './address/address.module';
     IdentifierSequenceModule,
     PrismaModule.forRootAsync({
       global: true,
+      service: PrismaService,
       inject: [PrismaConfig],
       useFactory: (config: PrismaConfig) => ({
         adapter: new PrismaPg({ connectionString: config.databaseUrl }),

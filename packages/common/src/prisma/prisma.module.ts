@@ -1,7 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { PRISMA_CONFIG_TOKEN } from './prisma.contants';
-import { PrismaService } from './prisma.service';
+import { PRISMA_CONFIG_TOKEN } from './prisma.constants';
 import { PrismaAsyncOptions } from './prisma.types';
+
 @Module({})
 export class PrismaModule {
   static forRootAsync(options: PrismaAsyncOptions): DynamicModule {
@@ -14,9 +14,9 @@ export class PrismaModule {
           useFactory: options.useFactory,
           inject: options.inject,
         },
-        PrismaService,
+        options.service,
       ],
-      exports: [PrismaService],
+      exports: [options.service],
     };
   }
 }

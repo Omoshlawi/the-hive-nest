@@ -82,3 +82,85 @@ The `postinstall` hook ensures types are regenerated whenever dependencies are i
 2. Add the two scripts above to `package.json` — no local `scripts/` directory needed.
 3. Run `pnpm install` from the monorepo root to link the package into the workspace.
 4. Run `pnpm --filter @hive/<name> gen` to generate the initial types.
+
+## Adding a new Prisma service
+
+When creating a new NestJS microservice that needs a database, follow this pattern. All shared infrastructure (`PrismaModule`, `PrismaConfig`, `createPrismaService`) lives in `@hive/common` — nothing needs to be copied between services.
+
+**1. Schema** — `prisma/schema.prisma`. Use `prisma-client` provider; leave the datasource block without a `url` field:
+
+```prisma
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+```
+
+**2. Root config** — copy `prisma.config.ts` from any existing service (e.g. `apps/property-service/prisma.config.ts`). It reads `DATABASE_URL` via configify and is used by the Prisma CLI for migrations and generation.
+
+**3. Prisma service** — `src/prisma/prisma.service.ts`:
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { createPrismaService } from '@hive/common';
+import { PrismaClient } from '../../generated/prisma/client';
+
+@Injectable()
+export class PrismaService extends createPrismaService(PrismaClient) {}
+```
+
+`createPrismaService` is a generic mixin factory in `@hive/common` that handles the constructor injection, `onModuleInit`, and `onModuleDestroy`. The extending class inherits full type-safe access to all model accessors generated for this service.
+
+**4. Wire in `app.module.ts`**:
+
+```typescript
+import { PrismaConfig, PrismaModule } from '@hive/common';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaService } from './prisma/prisma.service';
+
+@Module({
+  imports: [
+    PrismaModule.forRootAsync({
+      global: true,
+      service: PrismaService,       // required — the service-specific class
+      inject: [PrismaConfig],
+      useFactory: (config: PrismaConfig) => ({
+        adapter: new PrismaPg({ connectionString: config.databaseUrl }),
+      }),
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+**5. Add Prisma scripts** to the service `package.json`:
+
+```json
+{
+  "scripts": {
+    "db": "prisma",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0"
+  },
+  "devDependencies": {
+    "prisma": "^7.8.0"
+  }
+}
+```
+
+**6. Generate and migrate**:
+
+```bash
+pnpm --filter @hive/<service> db:generate   # generates the typed Prisma client
+pnpm --filter @hive/<service> db:migrate    # runs initial migration (prompts for name)
+```
+
+The `db:generate` Turbo task is already registered globally — `pnpm db:generate` from the root will include the new service automatically.

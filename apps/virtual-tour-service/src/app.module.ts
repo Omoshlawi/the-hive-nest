@@ -5,15 +5,18 @@ import {
 } from '@hive/registry';
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
-import { Module } from '@nestjs/common';
+import { PrismaService } from './prisma/prisma.service';
 import { PrismaConfig } from './prisma/prisma.config';
+import { Module } from '@nestjs/common';
 import { TourController } from './app.controller';
 import { TourService } from './app.service';
 import { ScheduleModule } from '@nestjs/schedule';
-import { PrismaModule } from './prisma/prisma.module';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-import { QueryBuilderModule } from '@hive/common';
+import {
+  PrismaModule,
+  QueryBuilderModule,
+} from '@hive/common';
 import { HiveFileServiceClient } from '@hive/files';
 import {
   VIRTUAL_TOUR_HTTP_SERVER_CONFIG_TOKEN,
@@ -85,6 +88,7 @@ import { TileGeneratorService } from './tile-generator.service';
     }),
     PrismaModule.forRootAsync({
       global: true,
+      service: PrismaService,
       inject: [PrismaConfig],
       useFactory: (config: PrismaConfig) => ({
         adapter: new PrismaPg({ connectionString: config.databaseUrl }),

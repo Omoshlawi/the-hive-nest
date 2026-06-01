@@ -102,7 +102,7 @@ export class FileUsageRuleService {
   }
 
   async create(query: CreateFileUsageRuleRequest) {
-    const { queryBuilder, context:_, ...props } = query;
+    const { queryBuilder, context: _, ...props } = query;
 
     const data = await this.prismaService.fileUsageRule.create({
       data: props,

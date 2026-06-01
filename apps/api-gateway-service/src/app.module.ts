@@ -2,6 +2,7 @@ import {
   GlobalRpcExceptionInterceptor,
   GlobalZodExceptionFilter,
   GlobalZodValidationPipe,
+  PrismaModule,
 } from '@hive/common';
 import {
   HIVE_IDENTITY_SERVICE_NAME,
@@ -15,9 +16,9 @@ import {
 } from '@hive/registry';
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
-import { Module } from '@nestjs/common';
+import { PrismaService } from './prisma/prisma.service';
 import { PrismaConfig } from './prisma/prisma.config';
-import { PrismaModule } from './prisma/prisma.module';
+import { Module } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 import { ScheduleModule } from '@nestjs/schedule';
@@ -89,6 +90,7 @@ import { VirtualToursModule } from './virtual-tours/virtual-tours.module';
     RegistryModule,
     PrismaModule.forRootAsync({
       global: true,
+      service: PrismaService,
       inject: [PrismaConfig],
       useFactory: (config: PrismaConfig) => ({
         adapter: new PrismaPg({ connectionString: config.databaseUrl }),

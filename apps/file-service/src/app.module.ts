@@ -1,5 +1,5 @@
 import { AuthorizatioModule, AuthorizationConfig } from '@hive/authorization';
-import { GlobalRpcExceptionFilter, QueryBuilderModule } from '@hive/common';
+import { GlobalRpcExceptionFilter, PrismaModule, QueryBuilderModule } from '@hive/common';
 import {
   FILE_HTTP_SERVER_CONFIG_TOKEN,
   FILE_RPC_SERVER_CONFIG_TOKEN,
@@ -14,14 +14,14 @@ import {
 } from '@hive/registry';
 import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
+import { PrismaService } from './prisma/prisma.service';
+import { PrismaConfig } from './prisma/prisma.config';
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { FileUsageRuleModule } from './file-usage-rule/file-usage-rule.module';
 import { FileUsageScopeModule } from './file-usage-scope/file-usage-scope.module';
-import { PrismaModule } from './prisma/prisma.module';
-import { PrismaConfig } from './prisma/prisma.config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { S3Module } from './s3/s3.module';
 
@@ -94,6 +94,7 @@ import { S3Module } from './s3/s3.module';
     }),
     PrismaModule.forRootAsync({
       global: true,
+      service: PrismaService,
       inject: [PrismaConfig],
       useFactory: (config: PrismaConfig) => ({
         adapter: new PrismaPg({ connectionString: config.databaseUrl }),
