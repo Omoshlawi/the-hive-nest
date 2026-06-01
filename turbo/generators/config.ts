@@ -10,10 +10,17 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
       'Must be kebab-case: lowercase letters, numbers, and hyphens only',
   };
 
+  const readmePrompt: PlopTypes.PromptQuestion = {
+    type: 'confirm',
+    name: 'includeReadme',
+    message: 'Include a README.md?',
+    default: true,
+  };
+
   plop.setGenerator('new-package', {
     description:
       'Scaffold a new @hive domain package with proto, client, and providers',
-    prompts: [namePrompt],
+    prompts: [namePrompt, readmePrompt],
     actions: [
       {
         type: 'addMany',
@@ -21,13 +28,20 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         base: 'templates/package',
         templateFiles: 'templates/package/**',
         globOptions: { dot: true },
+      },
+      {
+        type: 'add',
+        path: 'packages/{{name}}/README.md',
+        templateFile: 'templates/extras/package-README.md.hbs',
+        // @ts-expect-error — plop typings omit `when`
+        when: (answers: { includeReadme: boolean }) => answers.includeReadme,
       },
     ],
   });
 
   plop.setGenerator('new-service', {
     description: 'Scaffold a new NestJS microservice app',
-    prompts: [namePrompt],
+    prompts: [namePrompt, readmePrompt],
     actions: [
       {
         type: 'addMany',
@@ -36,12 +50,19 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         templateFiles: 'templates/service/**',
         globOptions: { dot: true },
       },
+      {
+        type: 'add',
+        path: 'apps/{{name}}-service/README.md',
+        templateFile: 'templates/extras/service-README.md.hbs',
+        // @ts-expect-error — plop typings omit `when`
+        when: (answers: { includeReadme: boolean }) => answers.includeReadme,
+      },
     ],
   });
 
   plop.setGenerator('new-domain', {
     description: 'Scaffold both a domain package and microservice app',
-    prompts: [namePrompt],
+    prompts: [namePrompt, readmePrompt],
     actions: [
       {
         type: 'addMany',
@@ -51,11 +72,25 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         globOptions: { dot: true },
       },
       {
+        type: 'add',
+        path: 'packages/{{name}}/README.md',
+        templateFile: 'templates/extras/package-README.md.hbs',
+        // @ts-expect-error — plop typings omit `when`
+        when: (answers: { includeReadme: boolean }) => answers.includeReadme,
+      },
+      {
         type: 'addMany',
         destination: 'apps/{{name}}-service',
         base: 'templates/service',
         templateFiles: 'templates/service/**',
         globOptions: { dot: true },
+      },
+      {
+        type: 'add',
+        path: 'apps/{{name}}-service/README.md',
+        templateFile: 'templates/extras/service-README.md.hbs',
+        // @ts-expect-error — plop typings omit `when`
+        when: (answers: { includeReadme: boolean }) => answers.includeReadme,
       },
     ],
   });

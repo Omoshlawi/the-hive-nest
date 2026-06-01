@@ -1,0 +1,30 @@
+# @hive/{{name}}
+
+gRPC domain package for the {{pascalCase name}} domain. Provides proto definitions, generated TypeScript types, gRPC client, and DTOs for the API gateway and other services.
+
+## Usage
+
+```typescript
+import { Hive{{pascalCase name}}ClientService } from '@hive/{{name}}';
+```
+
+## Development
+
+```bash
+# Regenerate TypeScript types from proto files
+pnpm gen
+
+# Build
+pnpm build
+
+# Run tests
+pnpm test
+```
+
+## Adding a new resource
+
+Run the scaffold tool from `the-hive-nest/`:
+
+```bash
+pnpm scaffold --resource MyResource --package {{name}} --service {{constantCase name}}_SERVICE_NAME
+```

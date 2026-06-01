@@ -1,0 +1,56 @@
+# {{name}}-service
+
+gRPC microservice for the {{pascalCase name}} domain.
+
+## Architecture
+
+```
+api-gateway-service → gRPC → {{name}}-service → PostgreSQL
+```
+
+On startup the service registers itself with `registry-service` so the gateway can discover its dynamically assigned gRPC port.
+
+## Environment variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DATABASE_URL` | ✅ | — | PostgreSQL connection string |
+| `PORT` | ❌ | `0` | HTTP port (registry health endpoint; `0` = auto-assign) |
+| `{{constantCase name}}_GRPC_SERVICE_PORT` | ❌ | `0` | gRPC server port (`0` = auto-assign) |
+| `SERVER_URL` | ❌ | `0.0.0.0:4001` | Address of `registry-service` |
+
+See `.env.example` for a ready-to-copy local configuration.
+
+## Setup
+
+```bash
+cp .env.example .env
+pnpm db:generate
+pnpm db:migrate
+pnpm dev
+```
+
+## Database
+
+Schema: `prisma/schema.prisma`
+Generated client: `generated/prisma/`
+
+```bash
+pnpm db:generate   # Regenerate Prisma client
+pnpm db:migrate    # Run migrations (interactive)
+```
+
+## Proto types
+
+After changing any `.proto` file in `packages/{{name}}/src/proto/`:
+
+```bash
+pnpm --filter @hive/{{name}} gen
+```
+
+## Testing
+
+```bash
+pnpm test
+pnpm test:e2e
+```
