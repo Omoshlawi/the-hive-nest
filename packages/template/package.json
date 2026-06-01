@@ -26,7 +26,7 @@
     "dev": "pnpm build --watch",
     "postinstall": "pnpm gen && pnpm build",
     "gen": "hive-gen && hive-copy-assets",
-    "build": "tsc -b -v",
+    "build": "tsc -b -v && hive-copy-assets",
     "clean": "rm -rf dist",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\" --fix",
