@@ -1,6 +1,7 @@
-# The Hive Nest - Project Specification & Guidelines
+# The Hive Nest — Project Specification & Guidelines
 
 ## Table of Contents
+
 1. [Project Overview](#project-overview)
 2. [Architecture](#architecture)
 3. [Technology Stack](#technology-stack)
@@ -13,191 +14,210 @@
 10. [Package Development](#package-development)
 11. [Development Workflow](#development-workflow)
 12. [Testing Patterns](#testing-patterns)
-13. [Configuration Management](#configuration-management)
-14. [Build & Deployment](#build--deployment)
-15. [Rules & Guidelines](#rules--guidelines)
+13. [Tooling](#tooling)
+14. [Configuration Management](#configuration-management)
+15. [Build & Deployment](#build--deployment)
+16. [Rules & Guidelines](#rules--guidelines)
 
 ---
 
 ## Project Overview
 
-**The Hive Nest** is a monorepo-based microservices architecture for property management. The system is built using:
+**The Hive Nest** is a monorepo-based microservices architecture for the Havena property management platform. The system is built using:
+
 - **Monorepo**: Turborepo with pnpm workspaces
-- **Backend**: NestJS microservices with gRPC communication
+- **Backend**: NestJS microservices communicating over gRPC
 - **Frontend**: Next.js web application
-- **Database**: PostgreSQL with Prisma ORM
-- **Service Discovery**: Custom registry service for service discovery and health monitoring
+- **Database**: PostgreSQL via Prisma v7 (per-service schemas, pg adapter)
+- **Service Discovery**: Custom registry service for dynamic discovery and health monitoring
 
 ### Key Features
-- Multi-tenant architecture with organization-based isolation
+
+- Multi-tenant architecture with organisation-based isolation
 - Service-to-service communication via gRPC
-- API Gateway pattern for HTTP endpoints
-- Service registry for dynamic service discovery
-- Role-based access control (RBAC) with OpenFGA
-- Property management domain with virtual tours, files, references, and more
+- API Gateway pattern for all HTTP entry points
+- Role-based access control via OpenFGA (`@hive/authorization`)
+- Property management domain: virtual tours, files, reference data, and more
 
 ---
 
 ## Architecture
 
 ### Architecture Pattern
-- **Microservices**: Each domain has its own service (property, identity, file, reference, virtual-tour, etc.)
-- **API Gateway**: Single entry point (`api-gateway-service`) for all HTTP/REST requests
+
+- **Microservices**: Each domain has its own service (property, identity, file, reference, virtual-tour, …)
+- **API Gateway**: Single HTTP/REST entry point (`api-gateway-service`) that routes calls to domain services via gRPC
 - **Service Registry**: Central registry service for service discovery and health monitoring
-- **gRPC**: Primary communication protocol between services
-- **Shared Packages**: Common code shared across services via workspace packages
+- **Shared Packages**: Common code (interceptors, Prisma module, base service, DTOs) shared via workspace packages
 
 ### Service Architecture
+
 ```
 ┌─────────────────┐
 │   Next.js Web   │
 └────────┬────────┘
          │ HTTP
          ▼
-┌─────────────────────┐
-│  API Gateway Service│
-└────────┬────────────┘
+┌──────────────────────┐
+│  API Gateway Service │
+└────────┬─────────────┘
          │ gRPC
-         ├─────────────┐
-         │             │
-    ┌────▼────┐   ┌────▼────┐
-    │ Property│   │ Identity│
-    │ Service │   │ Service │
-    └─────────┘   └─────────┘
-         │             │
-         └──────┬──────┘
-                │
-         ┌──────▼──────┐
-         │   Registry  │
-         │   Service  │
-         └────────────┘
+    ┌────┴──────────────────────────┐
+    │                               │
+┌───▼─────────┐            ┌───────▼──────┐
+│  Property   │            │   Identity   │
+│  Service    │            │   Service    │
+└─────────────┘            └──────────────┘
+    (File, Reference, Virtual-Tour, Template services follow the same pattern)
+         │
+         ▼
+┌─────────────────┐
+│ Registry Service│  ← all services register here on startup
+└─────────────────┘
 ```
 
 ### Service Types
-1. **API Gateway Service**: HTTP/REST endpoints, routes to microservices
-2. **Domain Services**: Business logic for specific domains (property, identity, file, etc.)
-3. **Registry Service**: Service discovery and health monitoring
-4. **Supporting Services**: Template service, etc.
+
+1. **API Gateway Service** — HTTP/REST endpoints, auth, routes to domain services via gRPC
+2. **Domain Services** — business logic for a specific domain (property, identity, file, reference, virtual-tour, template)
+3. **Registry Service** — service discovery and health monitoring
+4. **Web** — Next.js frontend
 
 ---
 
 ## Technology Stack
 
-### Core Technologies
-- **Runtime**: Node.js >= 18
-- **Package Manager**: pnpm 8.15.5
-- **Build Tool**: Turborepo 2.5.5
-- **Language**: TypeScript 5.7.3
+### Core
 
-### Backend Stack
-- **Framework**: NestJS 11.x
-- **Microservices**: @nestjs/microservices (gRPC)
-- **Database**: PostgreSQL with Prisma 6.14.0
-- **Validation**: Zod 4.0.15 + nestjs-zod
-- **API Docs**: Swagger/OpenAPI via @nestjs/swagger
-- **Authentication**: Better Auth (@thallesp/nestjs-better-auth)
-- **Authorization**: OpenFGA (via @hive/authorization)
-- **Scheduling**: @nestjs/schedule
-- **Configuration**: @itgorillaz/configify
+|                     |                  |
+| ------------------- | ---------------- |
+| **Runtime**         | Node.js ≥ 18     |
+| **Package Manager** | pnpm 9.15.9      |
+| **Build Tool**      | Turborepo 2.5.5  |
+| **Language**        | TypeScript 5.7.x |
 
-### Frontend Stack
-- **Framework**: Next.js 14.1.1
-- **UI Library**: React 18.2.0
-- **Testing**: Jest + Playwright
+### Backend
+
+|                             |                                                                |
+| --------------------------- | -------------------------------------------------------------- |
+| **Framework**               | NestJS 11.x                                                    |
+| **Microservices transport** | `@nestjs/microservices` (gRPC)                                 |
+| **Database ORM**            | Prisma 7.x (pg adapter, per-service schemas)                   |
+| **Validation**              | Zod 4.x + nestjs-zod 5.x (beta)                                |
+| **API docs**                | `@nestjs/swagger` (Swagger UI at `/api`, Scalar at `/api-doc`) |
+| **Authentication**          | Better Auth (`better-auth` + `@thallesp/nestjs-better-auth`)   |
+| **Authorization**           | OpenFGA via `@hive/authorization`                              |
+| **Scheduling**              | `@nestjs/schedule`                                             |
+| **Config**                  | `@itgorillaz/configify`                                        |
+
+### Frontend (web)
+
+|               |              |
+| ------------- | ------------ |
+| **Framework** | Next.js 14.1 |
+| **UI**        | React 18.2   |
 
 ### Development Tools
-- **Linting**: ESLint 9.18.0 with custom configs
-- **Formatting**: Prettier 3.4.2
-- **Testing**: Jest 29.7.0, Playwright 1.44.0
-- **Type Generation**: ts-proto 2.7.7 (for gRPC)
+
+|                          |                                                |
+| ------------------------ | ---------------------------------------------- |
+| **Linting**              | ESLint 9.x (flat config — `eslint.config.mjs`) |
+| **Formatting**           | Prettier 3.4                                   |
+| **Unit tests**           | Jest 29 + ts-jest                              |
+| **E2E tests (backend)**  | supertest                                      |
+| **E2E tests (frontend)** | Playwright 1.44                                |
+| **Proto → types**        | ts-proto 2.x                                   |
+| **Pre-commit hooks**     | Husky + lint-staged                            |
 
 ### Infrastructure
-- **Cloud Storage**: AWS S3 (via @aws-sdk/client-s3)
+
+- **Cloud Storage**: AWS S3 (`@aws-sdk/client-s3`)
 - **Protocol Buffers**: gRPC with proto3
 
 ---
 
 ## Project Structure
 
-### Monorepo Structure
+### Monorepo Layout
+
 ```
 the-hive-nest/
-├── apps/                          # Applications
-│   ├── api-gateway-service/      # Main API Gateway (HTTP → gRPC)
-│   ├── property-service/          # Property domain service
-│   ├── file-service/              # File management service
-│   ├── reference-service/         # Reference data service
-│   ├── virtual-tour-service/      # Virtual tour service
-│   ├── registry-service/          # Service discovery registry
-│   ├── template-service/          # Template service
-│   └── web/                       # Next.js frontend app
-├── packages/                      # Shared packages
-│   ├── common/                    # Common utilities, DTOs, interceptors
-│   ├── property/                  # Property domain package (DTOs, gRPC clients)
-│   ├── identity/                  # Identity domain package
-│   ├── files/                     # Files domain package
-│   ├── reference/                 # Reference domain package
-│   ├── vitual-tour/               # Virtual tour domain package
-│   ├── registry/                  # Registry service package
-│   ├── authorization/             # Authorization utilities (OpenFGA)
-│   ├── utils/                     # Utility functions
-│   ├── ui/                        # Shared UI components
-│   ├── eslint-config/             # ESLint configurations
-│   ├── jest-config/               # Jest configurations
-│   └── typescript-config/         # TypeScript configurations
-├── package.json                   # Root package.json
-├── pnpm-workspace.yaml            # pnpm workspace configuration
-├── turbo.json                     # Turborepo configuration
-└── tsconfig.json                  # Root TypeScript config
+├── apps/
+│   ├── api-gateway-service/   # HTTP entry point → routes gRPC to domain services
+│   ├── property-service/      # Property domain (Prisma + gRPC server)
+│   ├── file-service/          # File management (AWS S3)
+│   ├── reference-service/     # Reference / lookup data
+│   ├── virtual-tour-service/  # Virtual tour domain
+│   ├── registry-service/      # Service discovery + health monitoring
+│   ├── template-service/      # Template domain
+│   └── web/                   # Next.js frontend
+└── packages/
+    ├── common/                # Interceptors, filters, base CRUD service, Prisma module, DTOs
+    ├── property/              # Property proto + generated types + gRPC client
+    ├── identity/              # Identity proto + gRPC client
+    ├── files/                 # Files proto + gRPC client
+    ├── reference/             # Reference proto + gRPC client
+    ├── vitual-tour/           # Virtual-tour proto + gRPC client (note: typo in dir name)
+    ├── template/              # Template package
+    ├── registry/              # Registry service client + HiveServiceModule
+    ├── authorization/         # OpenFGA integration
+    ├── utils/                 # Utility functions, server config helpers
+    ├── ui/                    # Shared React components
+    ├── eslint-config/         # Shared ESLint flat configs
+    ├── jest-config/           # Shared Jest configs (nest / nest-e2e / base)
+    ├── typescript-config/     # Shared tsconfig bases
+    └── tools/                 # scaffold-resource CLI + hive-gen
 ```
 
-### Application Structure Pattern
-Each NestJS service follows this structure:
+### Service Directory Layout
+
 ```
-service-name/
+apps/[service-name]/
 ├── src/
-│   ├── main.ts                    # Bootstrap file
-│   ├── app.module.ts              # Root module
-│   ├── app.controller.ts          # Root controller
-│   ├── app.service.ts             # Root service
-│   ├── config/                    # Configuration files
-│   ├── [feature]/                 # Feature modules
+│   ├── main.ts
+│   ├── app.module.ts
+│   ├── app.controller.ts
+│   ├── app.service.ts
+│   ├── [feature]/
 │   │   ├── [feature].module.ts
 │   │   ├── [feature].controller.ts
 │   │   ├── [feature].service.ts
 │   │   └── [feature].controller.spec.ts
-│   └── prisma/                    # Prisma setup (if applicable)
-│       ├── prisma.module.ts
-│       └── prisma.service.ts
-├── prisma/                        # Prisma schema and migrations
+│   └── prisma/
+│       ├── prisma.service.ts
+│       └── prisma.config.ts
+├── prisma/
 │   ├── schema.prisma
 │   └── migrations/
-├── test/                          # E2E tests
-│   └── app.e2e-spec.ts
+├── generated/
+│   └── prisma/            # Prisma client output (not committed)
+├── test/
+│   ├── app.e2e-spec.ts
+│   └── jest-e2e.js        # Requires @hive/jest-config/nest-e2e
+├── jest.config.js         # Requires @hive/jest-config/nest
 ├── package.json
 ├── tsconfig.json
 └── nest-cli.json
 ```
 
-### Package Structure Pattern
-Each shared package follows this structure:
+### Domain Package Layout
+
 ```
-package-name/
+packages/[domain]/
 ├── src/
-│   ├── index.ts                   # Main exports
-│   ├── proto/                     # Protocol buffer definitions
-│   │   ├── *.service.proto        # Service definitions
-│   │   ├── *.message.proto        # Message definitions
-│   │   ├── *.model.proto          # Model definitions
-│   │   └── common.message.proto   # Common messages
-│   ├── types/                     # Generated TypeScript types from proto
-│   ├── dto/                       # Data Transfer Objects
-│   ├── client/                    # gRPC client code
-│   ├── constants/                 # Constants
-│   ├── config/                    # Configuration providers
-│   └── [other]/                   # Domain-specific modules
-├── scripts/                       # Build scripts
-│   └── generate-types.js          # Proto to TypeScript generator
+│   ├── index.ts
+│   ├── proto/
+│   │   ├── [domain].service.proto
+│   │   ├── [domain].message.proto
+│   │   ├── [domain].model.proto
+│   │   └── common.message.proto
+│   ├── types/             # Generated TypeScript types (run `pnpm gen`)
+│   ├── dto/               # Zod schemas + DTO classes
+│   ├── client/            # Injectable gRPC client
+│   └── constants/         # Package name + proto path constants
+├── scripts/
+│   └── generate-types.js  # Runs protoc → writes src/types/
+├── jest.config.js
 ├── package.json
 └── tsconfig.json
 ```
@@ -206,483 +226,373 @@ package-name/
 
 ## Code Patterns & Conventions
 
-### Naming Conventions
+### Naming
 
-#### Files
-- **Controllers**: `[feature].controller.ts`
-- **Services**: `[feature].service.ts`
-- **Modules**: `[feature].module.ts`
-- **DTOs**: `[feature].dto.ts`
-- **Guards**: `[feature].guards.ts`
-- **Interceptors**: `[feature].interceptors.ts`
-- **Tests**: `[feature].spec.ts` or `[feature].controller.spec.ts`
-- **E2E Tests**: `app.e2e-spec.ts`
+| Element               | Convention          | Example                                                          |
+| --------------------- | ------------------- | ---------------------------------------------------------------- |
+| Files                 | kebab-case          | `properties.controller.ts`                                       |
+| Classes               | PascalCase + suffix | `PropertiesController`, `PropertiesService`, `CreatePropertyDto` |
+| Variables / functions | camelCase           | `propertyService`, `createProperty`                              |
+| Constants             | UPPER_SNAKE_CASE    | `REQUIRE_ACTIVE_ORGANIZATION_KEY`                                |
+| Package names         | `@hive/[name]`      | `@hive/property`, `@hive/common`                                 |
 
-#### Classes
-- **Controllers**: PascalCase with `Controller` suffix (e.g., `PropertiesController`)
-- **Services**: PascalCase with `Service` suffix (e.g., `PropertiesService`)
-- **DTOs**: PascalCase with `Dto` suffix (e.g., `CreatePropertyDto`, `QueryPropertyDto`)
-- **Guards**: PascalCase with `Guard` suffix (e.g., `RequireOrganizationPermissionGuard`)
-- **Interceptors**: PascalCase with `Interceptor` suffix (e.g., `ApiListTransformInterceptor`)
+### Module Pattern
 
-#### Variables & Functions
-- **Variables**: camelCase (e.g., `propertyService`, `userSession`)
-- **Functions**: camelCase (e.g., `createProperty`, `queryProperties`)
-- **Constants**: UPPER_SNAKE_CASE (e.g., `REQUIRE_ACTIVE_ORGANIZATION_KEY`)
-
-#### Packages
-- **Package Names**: `@hive/[package-name]` (e.g., `@hive/property`, `@hive/common`)
-
-### Code Organization
-
-#### Module Pattern
 ```typescript
 @Module({
-  imports: [
-    // Other modules
-    ConfigifyModule.forRootAsync(),
-    ScheduleModule.forRoot(),
-    // Feature modules
-  ],
+  imports: [HiveServiceModule.forFeature([HivePropertyServiceClient])],
   controllers: [FeatureController],
-  providers: [
-    FeatureService,
-    // Global providers
-    GlobalZodValidationPipe,
-    GlobalZodExceptionFilter,
-  ],
-  exports: [FeatureService], // If module exports services
 })
 export class FeatureModule {}
 ```
 
-#### Controller Pattern
+### Controller Pattern
+
 ```typescript
 @Controller('resources')
 export class ResourcesController {
-  constructor(private readonly resourcesService: ResourcesService) {}
+  constructor(private readonly propertyService: HivePropertyServiceClient) {}
 
   @Get('/')
-  @OptionalAuth() // or @RequireOrganizationPermission({ resource: ['read'] })
+  @RequireOrganizationPermission({ resource: ['read'] })
   @UseInterceptors(ApiListTransformInterceptor)
-  @ApiOperation({ summary: 'Query Resources' })
+  @ApiOperation({ summary: 'Query resources' })
   @ApiOkResponse({ type: QueryResourceResponseDto })
   @ApiErrorsResponse()
   queryResources(
     @Query() query: QueryResourceDto,
-    @Session() userSession?: UserSession,
-  ) {
-    // Implementation
-  }
-
-  @Post('/')
-  @RequireOrganizationPermission({ resource: ['create'] })
-  @UseInterceptors(ApiDetailTransformInterceptor)
-  @ApiOperation({ summary: 'Create Resource' })
-  @ApiCreatedResponse({ type: GetResourceResponseDto })
-  @ApiErrorsResponse({ badRequest: true })
-  createResource(
-    @Body() createResourceDto: CreateResourceDto,
-    @Query() query: CustomRepresentationQueryDto,
     @Session() { session, user }: UserSession,
   ) {
-    // Implementation
-  }
-
-  @Get('/:id')
-  @UseInterceptors(ApiDetailTransformInterceptor)
-  @ApiOperation({ summary: 'Get Resource' })
-  @ApiOkResponse({ type: GetResourceResponseDto })
-  @ApiErrorsResponse()
-  getResource(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Query() query: CustomRepresentationQueryDto,
-  ) {
-    // Implementation
-  }
-
-  @Patch('/:id')
-  @RequireOrganizationPermission({ resource: ['update'] })
-  @UseInterceptors(ApiDetailTransformInterceptor)
-  @ApiOperation({ summary: 'Update Resource' })
-  @ApiOkResponse({ type: GetResourceResponseDto })
-  @ApiErrorsResponse({ badRequest: true })
-  updateResource(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateResourceDto: UpdateResourceDto,
-    @Query() query: CustomRepresentationQueryDto,
-  ) {
-    // Implementation
-  }
-
-  @Delete('/:id')
-  @RequireOrganizationPermission({ resource: ['delete'] })
-  @UseInterceptors(ApiDetailTransformInterceptor)
-  @ApiOperation({ summary: 'Delete Resource' })
-  @ApiOkResponse({ type: GetResourceResponseDto })
-  @ApiErrorsResponse()
-  deleteResource(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Query() query: DeleteQueryDto,
-  ) {
-    // Implementation
-  }
-}
-```
-
-### DTO Patterns
-
-#### Query DTOs
-- Use `QueryBuilderSchema` from `@hive/common`
-- Extend with domain-specific query parameters
-- Use Zod for validation and transformation
-
-```typescript
-export const QueryResourceSchema = z.object({
-  ...QueryBuilderSchema.shape,
-  search: z.string().optional(),
-  status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
-  // Domain-specific fields
-});
-
-export class QueryResourceDto extends createZodDto(QueryResourceSchema) {}
-```
-
-#### Create/Update DTOs
-- Use Zod schemas with `createZodDto` from `nestjs-zod`
-- Separate schemas for create and update operations
-- Update DTOs typically omit required fields and make everything partial
-
-```typescript
-export const ResourceSchema = z.object({
-  name: z.string().nonempty('Required'),
-  description: z.string().optional(),
-  // Other fields
-});
-
-export class CreateResourceDto extends createZodDto(ResourceSchema) {}
-
-export class UpdateResourceDto extends createZodDto(
-  ResourceSchema.partial(),
-) {}
-```
-
-#### Response DTOs
-- Use `@ApiProperty` decorators for Swagger documentation
-- Implement interfaces for type safety
-- Include metadata fields (id, timestamps, etc.)
-
-```typescript
-export class GetResourceResponseDto implements Resource {
-  @ApiProperty()
-  id: string;
-
-  @ApiProperty()
-  name: string;
-
-  @ApiProperty()
-  createdAt: string;
-
-  @ApiProperty()
-  updatedAt: string;
-}
-```
-
-### Error Handling
-
-#### Exception Filters
-- Use `GlobalZodExceptionFilter` for Zod validation errors
-- Use `GlobalRpcExceptionFilter` for gRPC errors
-- Custom exceptions in `@hive/common/exceptions`
-
-#### Error Response DTOs
-- Standardized error responses via `@ApiErrorsResponse()` decorator
-- Defined in `@hive/common/dto/errors.dto.ts`
-
-### Interceptors
-
-#### Response Transform Interceptors
-- `ApiListTransformInterceptor`: Transforms list responses to `{ results: [], ...metadata }`
-- `ApiDetailTransformInterceptor`: Extracts `data` field from responses
-
-```typescript
-// Used in controllers
-@UseInterceptors(ApiListTransformInterceptor)
-@UseInterceptors(ApiDetailTransformInterceptor)
-```
-
----
-
-## Service Communication
-
-### gRPC Communication
-
-#### Protocol Buffer Definitions
-- Proto files in `packages/[domain]/src/proto/`
-- Naming convention:
-  - `[domain].service.proto`: Service definitions
-  - `[domain].message.proto`: Request/Response messages
-  - `[domain].model.proto`: Data models
-  - `common.message.proto`: Shared messages
-
-#### Proto File Structure
-```protobuf
-syntax = 'proto3';
-
-import "common.message.proto";
-import "[domain].model.proto";
-
-message QueryResourceRequest {
-    QueryBuilder query_builder = 1;
-    optional string filter = 2;
-    optional RequestContext context = 3;
-}
-
-message QueryResourceResponse {
-    repeated Resource data = 1;
-    string metadata = 2; // JSON string with pagination info
-}
-
-service ResourceService {
-  rpc QueryResources (QueryResourceRequest) returns (QueryResourceResponse);
-  rpc GetResource (GetResourceRequest) returns (GetResourceResponse);
-  rpc CreateResource (CreateResourceRequest) returns (GetResourceResponse);
-  rpc UpdateResource (UpdateResourceRequest) returns (GetResourceResponse);
-  rpc DeleteResource (DeleteResourceRequest) returns (GetResourceResponse);
-}
-```
-
-#### Type Generation
-- Run `pnpm gen` in package directory to generate TypeScript types
-- Uses `ts-proto` with `nestJs=true` option
-- Generated types in `src/types/` directory
-
-#### gRPC Client Usage
-```typescript
-// In API Gateway controller
-import { HivePropertyServiceClient } from '@hive/property';
-
-@Controller('properties')
-export class PropertiesController {
-  constructor(private propertiesService: HivePropertyServiceClient) {}
-
-  @Get('/')
-  queryProperties(@Query() query: QueryPropertyDto) {
-    return this.propertiesService.properties.queryProperties({
+    return this.propertyService.resources.queryResources({
       queryBuilder: {
         limit: query.limit,
         page: query.page,
         orderBy: query.orderBy,
         v: query.v,
       },
-      // Other parameters
+      context: {
+        organizationId: session.activeOrganizationId,
+        userId: user.id,
+      },
+    });
+  }
+
+  @Post('/')
+  @RequireOrganizationPermission({ resource: ['create'] })
+  @UseInterceptors(ApiDetailTransformInterceptor)
+  @ApiCreatedResponse({ type: GetResourceResponseDto })
+  @ApiErrorsResponse({ badRequest: true })
+  createResource(
+    @Body() body: CreateResourceDto,
+    @Query() query: CustomRepresentationQueryDto,
+    @Session() { session, user }: UserSession,
+  ) {
+    return this.propertyService.resources.createResource({
+      ...body,
+      context: {
+        organizationId: session.activeOrganizationId,
+        userId: user.id,
+      },
+    });
+  }
+
+  @Get('/:id')
+  @UseInterceptors(ApiDetailTransformInterceptor)
+  @ApiOkResponse({ type: GetResourceResponseDto })
+  @ApiErrorsResponse()
+  getResource(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: CustomRepresentationQueryDto,
+  ) {
+    return this.propertyService.resources.getResource({ id, v: query.v });
+  }
+
+  @Patch('/:id')
+  @RequireOrganizationPermission({ resource: ['update'] })
+  @UseInterceptors(ApiDetailTransformInterceptor)
+  @ApiOkResponse({ type: GetResourceResponseDto })
+  @ApiErrorsResponse({ badRequest: true })
+  updateResource(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: UpdateResourceDto,
+    @Query() query: CustomRepresentationQueryDto,
+    @Session() { session, user }: UserSession,
+  ) {
+    return this.propertyService.resources.updateResource({
+      id,
+      ...body,
+      context: {
+        organizationId: session.activeOrganizationId,
+        userId: user.id,
+      },
+    });
+  }
+
+  @Delete('/:id')
+  @RequireOrganizationPermission({ resource: ['delete'] })
+  @UseInterceptors(ApiDetailTransformInterceptor)
+  @ApiOkResponse({ type: GetResourceResponseDto })
+  @ApiErrorsResponse()
+  deleteResource(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: DeleteQueryDto,
+    @Session() { session, user }: UserSession,
+  ) {
+    return this.propertyService.resources.deleteResource({
+      id,
+      purge: query.purge,
+      context: {
+        organizationId: session.activeOrganizationId,
+        userId: user.id,
+      },
     });
   }
 }
 ```
 
-#### gRPC Server Setup
-```typescript
-// In service main.ts
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { PROPERTY_PACKAGE } from '@hive/property';
+### DTO Patterns
 
-app.connectMicroservice<MicroserviceOptions>({
-  transport: Transport.GRPC,
-  options: {
-    package: PROPERTY_PACKAGE.V1.NAME,
-    protoPath: PROPERTY_PACKAGE.V1.PROTO_PATH,
-    url: `${grpcConfig.host}:${grpcConfig.port}`,
-  },
+```typescript
+// Query DTO — extends shared QueryBuilderSchema
+export const QueryResourceSchema = z.object({
+  ...QueryBuilderSchema.shape,
+  search: z.string().optional(),
+  status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
 });
+export class QueryResourceDto extends createZodDto(QueryResourceSchema) {}
+
+// Create / Update DTOs
+export const ResourceSchema = z.object({
+  name: z.string().min(1, 'Required'),
+  description: z.string().optional(),
+});
+export class CreateResourceDto extends createZodDto(ResourceSchema) {}
+export class UpdateResourceDto extends createZodDto(ResourceSchema.partial()) {}
+
+// Response DTO (Swagger)
+export class GetResourceResponseDto implements Resource {
+  @ApiProperty() id: string;
+  @ApiProperty() name: string;
+  @ApiProperty() createdAt: string;
+  @ApiProperty() updatedAt: string;
+}
+```
+
+### Interceptors
+
+| Interceptor                     | Use on                                                     |
+| ------------------------------- | ---------------------------------------------------------- |
+| `ApiListTransformInterceptor`   | GET list endpoints — wraps in `{ results, totalCount, … }` |
+| `ApiDetailTransformInterceptor` | GET detail / POST / PATCH / DELETE — extracts `data` field |
+
+---
+
+## Service Communication
+
+### Protocol Buffer Conventions
+
+Proto files live in `packages/[domain]/src/proto/`.
+
+| File                     | Purpose                                          |
+| ------------------------ | ------------------------------------------------ |
+| `[domain].service.proto` | RPC service definition                           |
+| `[domain].message.proto` | Request / response messages                      |
+| `[domain].model.proto`   | Data model messages                              |
+| `common.message.proto`   | `QueryBuilder`, `RequestContext` shared messages |
+
+```protobuf
+syntax = "proto3";
+import "common.message.proto";
+import "[domain].model.proto";
+
+message QueryResourceRequest {
+  QueryBuilder  query_builder = 1;
+  RequestContext context      = 2;
+}
+
+message QueryResourceResponse {
+  repeated Resource data = 1;
+  string metadata        = 2; // JSON — pagination info
+}
+
+service ResourceService {
+  rpc QueryResources (QueryResourceRequest)  returns (QueryResourceResponse);
+  rpc GetResource    (GetResourceRequest)    returns (GetResourceResponse);
+  rpc CreateResource (CreateResourceRequest) returns (GetResourceResponse);
+  rpc UpdateResource (UpdateResourceRequest) returns (GetResourceResponse);
+  rpc DeleteResource (DeleteResourceRequest) returns (GetResourceResponse);
+}
+```
+
+Run `pnpm --filter @hive/[domain] gen` after changing any `.proto` file to regenerate TypeScript types.
+
+### Adding a New RPC Method (full workflow)
+
+1. Add message defs to the relevant `.proto` file
+2. `pnpm --filter @hive/[domain] gen` — regenerates `src/types/`
+3. Export new types from `packages/[domain]/src/types/index.ts`
+4. Add a method to the client service (`packages/[domain]/src/client/hive-[domain]-client.service.ts`)
+5. Implement the method in the domain service controller (`@GrpcMethod`)
+6. Implement the method in the domain service service
+7. Add REST endpoint + Swagger decorators in the API Gateway controller
+
+> Steps 1–2 are automated. Steps 3–7 are manual (or use `pnpm scaffold` for steps 5–7).
+
+### gRPC Client Usage
+
+```typescript
+// Injected into API Gateway controller
+constructor(private readonly propertyService: HivePropertyServiceClient) {}
+
+// Called via the client's resource namespace
+this.propertyService.resources.queryResources({ queryBuilder: {...}, context: {...} });
 ```
 
 ### Service Registry
 
-#### Registry Service
-- Central service for service discovery
-- Tracks service health and endpoints
-- Supports heartbeat mechanism for service health monitoring
+Services register themselves on startup via `HiveServiceModule.forRoot(...)`.  
+The API Gateway discovers services via the registry client, which uses `loadBalance()` for per-call resolution.
 
-#### Service Registration
 ```typescript
-// In service app.module.ts
-import { HiveServiceModule } from '@hive/registry';
-
 HiveServiceModule.forRoot({
   enableHeartbeat: true,
   services: [],
   client: {
-    useFactory: (config: RegistryClientConfig, http: ServerConfig, grpc: ServerConfig) => {
-      return {
-        service: {
-          metadata: config.metadata ?? {},
-          name: config.serviceName,
-          version: config.serviceVersion,
-          tags: ['http', 'grpc'].filter(Boolean),
-          endpoints: [
-            {
-              host: http.host,
-              port: http.port,
-              protocol: 'http',
-              metadata: {},
-            },
-            {
-              host: grpc.host,
-              port: grpc.port,
-              protocol: 'grpc',
-              metadata: {},
-            },
-          ],
-        },
-      };
-    },
-    inject: [RegistryClientConfig, HTTP_SERVER_CONFIG_TOKEN, GRPC_SERVER_CONFIG_TOKEN],
+    useFactory: (config, http, grpc) => ({
+      service: {
+        name: config.serviceName,
+        version: config.serviceVersion,
+        tags: ['http', 'grpc'],
+        endpoints: [
+          { host: http.host, port: http.port, protocol: 'http', metadata: {} },
+          { host: grpc.host, port: grpc.port, protocol: 'grpc', metadata: {} },
+        ],
+      },
+    }),
+    inject: [
+      RegistryClientConfig,
+      HTTP_SERVER_CONFIG_TOKEN,
+      GRPC_SERVER_CONFIG_TOKEN,
+    ],
     providers: [HTTPServerConfigProvider, GRPCServerConfigProvider],
   },
-})
+});
 ```
-
-#### Registry Client
-- Services use registry client to discover other services
-- Dynamic service resolution based on service name and tags
 
 ---
 
 ## Data Layer
 
-### Prisma ORM
+### Prisma v7
 
-#### Schema Location
-- Each service has its own Prisma schema in `apps/[service]/prisma/schema.prisma`
-- Shared schemas might exist in packages
+Each service owns its own schema at `apps/[service]/prisma/schema.prisma`.  
+Connection is managed via `prisma.config.ts` — there is **no `url` field** in the datasource block.
 
-#### Schema Configuration
 ```prisma
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma" // Generated folder for imports
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // url is intentionally absent — injected via PrismaPg adapter at runtime
 }
 ```
 
-#### Model Conventions
-- Use `@@map` for table name mapping (e.g., `@@map("user")`)
-- Use `@db.Uuid` for UUID fields
-- Use `@db.Date` for date-only fields
-- Include `voided` boolean field for soft deletes
-- Include `createdAt` and `updatedAt` timestamps
+### Prisma Module (shared from `@hive/common`)
 
-#### Prisma Service Pattern
+Each service only needs two files:
+
 ```typescript
-// prisma/prisma.service.ts
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { PrismaClient } from '../generated/prisma';
+// src/prisma/prisma.service.ts
+import { Injectable } from '@nestjs/common';
+import { createPrismaService } from '@hive/common';
+import { PrismaClient } from '../../generated/prisma/client';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+export class PrismaService extends createPrismaService(PrismaClient) {}
+```
+
+```typescript
+// src/prisma/prisma.config.ts
+import { Configuration, Value } from '@itgorillaz/configify';
+import z from 'zod';
+
+@Configuration()
+export class PrismaConfig {
+  @Value('DATABASE_URL', { parse: z.url({}).parse })
+  databaseUrl: string;
 }
 ```
 
-#### Prisma Module Pattern
-```typescript
-// prisma/prisma.module.ts
-import { Module, Global } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
+Wire it in `app.module.ts`:
 
-@Global()
-@Module({
-  providers: [PrismaService],
-  exports: [PrismaService],
-})
-export class PrismaModule {}
+```typescript
+PrismaModule.forRootAsync({
+  global: true,
+  service: PrismaService,
+  inject: [PrismaConfig],
+  useFactory: (config: PrismaConfig) => ({
+    adapter: new PrismaPg({ connectionString: config.databaseUrl }),
+  }),
+}),
 ```
 
-### Database Migrations
-- Migrations in `prisma/migrations/` directory
-- Run migrations with `prisma migrate dev`
-- Use descriptive migration names
+### Model Conventions
+
+- `@@map("table_name")` for explicit table name mapping
+- `@db.Uuid` for UUID fields; `@db.Date` for date-only fields
+- `voided Boolean @default(false)` for soft deletes
+- Always include `createdAt DateTime @default(now())` and `updatedAt DateTime @updatedAt`
+
+### Database Commands
+
+```bash
+pnpm --filter @hive/[service] db:migrate    # Create + apply migration (prompts for name)
+pnpm --filter @hive/[service] db:generate   # Regenerate Prisma client after schema change
+pnpm db:generate                            # Regenerate all Prisma clients at once
+```
 
 ---
 
 ## API Design Patterns
 
-### REST API Conventions
+### REST Conventions
 
-#### Endpoint Naming
 - **Plural nouns**: `/properties`, `/users`, `/files`
-- **Nested resources**: `/properties/:id/amenities`, `/properties/:id/media`
-- **Actions**: Use HTTP verbs (GET, POST, PATCH, DELETE)
+- **Nested resources**: `/properties/:id/amenities`
+- **HTTP verbs**: GET (list/detail), POST (create), PATCH (partial update), DELETE (soft delete by default)
 
-#### HTTP Methods
-- **GET**: Retrieve resources (list or detail)
-- **POST**: Create new resources
-- **PATCH**: Update existing resources (partial updates)
-- **DELETE**: Delete resources (soft delete by default)
+### Query Parameters
 
-#### Query Parameters
-- **Pagination**: `page`, `limit`
-- **Sorting**: `orderBy` (e.g., `orderBy=name:asc,createdAt:desc`)
-- **Filtering**: Domain-specific filters (e.g., `status`, `search`)
-- **Representation**: `v` parameter for custom field selection
+| Parameter       | Purpose                                 |
+| --------------- | --------------------------------------- |
+| `page`, `limit` | Pagination                              |
+| `orderBy`       | Sort: `name:asc,createdAt:desc`         |
+| `v`             | Custom field selection (representation) |
+| Domain-specific | `status`, `search`, etc.                |
 
-#### Response Format
+### Response Format
 
-**List Responses:**
+**List:**
+
 ```json
-{
-  "results": [...],
-  "totalCount": 100,
-  "currentPage": 1,
-  "pageSize": 20,
-  "totalPages": 5
-}
+{ "results": [...], "totalCount": 100, "currentPage": 1, "pageSize": 20, "totalPages": 5 }
 ```
 
-**Detail Responses:**
+**Detail:**
+
 ```json
-{
-  "id": "...",
-  "name": "...",
-  "createdAt": "...",
-  "updatedAt": "..."
-}
+{ "id": "...", "name": "...", "createdAt": "...", "updatedAt": "..." }
 ```
 
-### Query Builder Pattern
+### Swagger
 
-#### Query Builder Schema
-- Standardized query parameters via `QueryBuilderSchema` from `@hive/common`
-- Includes: `page`, `limit`, `orderBy`, `v` (representation)
-
-#### Custom Representation
-- `v` parameter allows custom field selection
-- Format: `v=field1,field2,field3` or `v=field1:subfield1,field2`
-
-#### Pagination
-- Default page size: typically 20
-- Page-based pagination
-- Metadata includes: `totalCount`, `currentPage`, `pageSize`, `totalPages`
-
-### Swagger/OpenAPI Documentation
-
-#### Swagger Setup
-- Swagger UI at `/api` endpoint
-- Scalar API Reference at `/api-doc` endpoint
-- Merged with Better Auth OpenAPI schema
-
-#### API Documentation Decorators
-- `@ApiOperation({ summary: 'Description' })`: Operation description
-- `@ApiOkResponse({ type: ResponseDto })`: Success response
-- `@ApiCreatedResponse({ type: ResponseDto })`: Created response
-- `@ApiErrorsResponse({ badRequest: true })`: Error responses
+- `@ApiOperation({ summary: '...' })` — operation description
+- `@ApiOkResponse({ type: ResponseDto })` — 200 response
+- `@ApiCreatedResponse({ type: ResponseDto })` — 201 response
+- `@ApiErrorsResponse({ badRequest: true })` — standard error responses
 
 ---
 
@@ -690,59 +600,47 @@ export class PrismaModule {}
 
 ### Authentication (Better Auth)
 
-#### Setup
-- Better Auth configured in `apps/api-gateway-service/src/auth/`
-- CLI config: `auth.cli.config.ts`
-- Authentication endpoints: `/api/auth/*`
+Configured in `apps/api-gateway-service/src/auth/`. Auth endpoints live at `/api/auth/*`.
 
-#### Session Management
-- Sessions stored in database
-- Session includes: `activeOrganizationId`, `activeTeamId`
-- Session accessible via `@Session()` decorator
-
-#### Auth Decorators
-- `@OptionalAuth()`: Optional authentication
-- `@Session()`: Inject user session
+Sessions are stored in the database and include `activeOrganizationId` and `activeTeamId`.  
+Use the `@Session()` decorator to access the session in controllers:
 
 ```typescript
 @Get('/')
 @OptionalAuth()
-queryResources(
-  @Query() query: QueryResourceDto,
-  @Session() userSession?: UserSession,
-) {
-  // userSession contains { session, user }
+queryResources(@Session() userSession?: UserSession) {
+  // userSession = { session, user }
 }
+```
+
+Better Auth schema is regenerated with:
+
+```bash
+pnpm --filter @hive/api-gateway-service auth:gen
 ```
 
 ### Authorization (OpenFGA)
 
-#### Authorization Package
-- `@hive/authorization` package for OpenFGA integration
-- ACL definitions in `packages/authorization/auth.openfga`
+`@hive/authorization` wraps the OpenFGA SDK. ACL definitions are in `packages/authorization/auth.openfga`.
 
-#### Permission Guards
-- `RequireActiveOrganizationGuard`: Ensures active organization in session
-- `RequireOrganizationPermissionsGuard`: Checks organization-level permissions
-- `RequireSystemPermissionsGuard`: Checks system-level permissions
+**Guards (applied globally in api-gateway):**
 
-#### Permission Decorators
+- `RequireActiveOrganizationGuard` — ensures an active organisation is set in the session
+- `RequireOrganizationPermissionsGuard` — checks organisation-level permissions via OpenFGA
+- `RequireSystemPermissionsGuard` — checks system-level permissions
+
+**Decorators:**
+
 ```typescript
 @RequireOrganizationPermission({ property: ['create'] })
 @RequireOrganizationPermission({ property: ['read', 'update'] })
 @RequireSystemPermission({ admin: ['manage'] })
+@OptionalAuth()
 ```
-
-#### Permission Format
-- **Resource**: Permission format (e.g., `{ property: ['create', 'read', 'update', 'delete'] }`)
-- **System**: System-level permissions (e.g., `{ admin: ['manage'] }`)
 
 ### Context Propagation
 
-#### Request Context
-- `RequestContext` passed in gRPC requests
-- Contains: `organizationId`, `userId`
-- Automatically extracted from session in API Gateway
+Always pass `RequestContext` in gRPC calls:
 
 ```typescript
 context: {
@@ -755,23 +653,23 @@ context: {
 
 ## Package Development
 
-### Creating a New Package
+### New Package Checklist
 
-#### Package Structure
-1. Create package directory: `packages/[package-name]/`
-2. Set up `package.json` with workspace dependencies
-3. Create `src/` directory with `index.ts`
-4. Set up `tsconfig.json` extending `@hive/typescript-config/base.json`
-5. Add package exports in `package.json`
+1. Create `packages/[name]/` directory
+2. `package.json` — name `@hive/[name]`, add `exports`, workspace peer deps
+3. `tsconfig.json` extending `@hive/typescript-config/nestjs` (or `base`)
+4. `jest.config.js` — `module.exports = require('@hive/jest-config/nest')`
+5. `eslint.config.mjs` — import from `@hive/eslint-config/library`
+6. `src/index.ts` — barrel exports
 
-#### Package.json Pattern
+### package.json Pattern
+
 ```json
 {
-  "name": "@hive/[package-name]",
+  "name": "@hive/[name]",
   "version": "0.0.1",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist/**/*"],
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -782,53 +680,22 @@ context: {
   "scripts": {
     "dev": "pnpm build --watch",
     "build": "tsc -b -v",
-    "clean": "rm -rf dist"
-  },
-  "peerDependencies": {
-    "@nestjs/common": "^11.0.1",
-    // Other peer dependencies
+    "clean": "rm -rf dist",
+    "test": "jest",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
   }
 }
 ```
 
-### gRPC Package Pattern
+### gRPC Domain Package Constants
 
-#### Proto Files
-- Place proto files in `src/proto/`
-- Generate TypeScript types with `pnpm gen`
-- Types generated to `src/types/`
-
-#### Type Generation Script
-```javascript
-// scripts/generate-types.js
-const command = [
-  'pnpm exec protoc',
-  '--plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto',
-  `--ts_proto_out=${outputDir}`,
-  '--ts_proto_opt=nestJs=true',
-  `--proto_path=${protoDir}`,
-  protoFile,
-].join(' ');
-```
-
-#### Package Exports
-```typescript
-// src/index.ts
-export * from './providers';
-export * from './constants';
-export * from './dto';
-export * from './types';
-export * from './client';
-```
-
-#### Package Constants
 ```typescript
 // src/constants/index.ts
-export const PACKAGE_NAME = 'hive.[package].v1';
-export const PACKAGE = {
+export const DOMAIN_PACKAGE_NAME = 'hive.domain.v1';
+export const DOMAIN_PACKAGE = {
   V1: {
-    NAME: PACKAGE_NAME,
-    PROTO_PATH: join(__dirname, '../proto/[package].service.proto'),
+    NAME: DOMAIN_PACKAGE_NAME,
+    PROTO_PATH: join(__dirname, '../proto/domain.service.proto'),
   },
 };
 ```
@@ -837,84 +704,59 @@ export const PACKAGE = {
 
 ## Development Workflow
 
-### Setup
+### Prerequisites
 
-#### Prerequisites
-- Node.js >= 18
-- pnpm 8.15.5
+- Node.js ≥ 18
+- pnpm 9 — `corepack enable && corepack prepare pnpm@latest --activate`
 - PostgreSQL database
 
-#### Initial Setup
+### Initial Setup
+
 ```bash
-# Install dependencies
+# Install all dependencies and build shared packages
 pnpm install
 
 # Generate Prisma clients
-pnpm --filter @hive/* prisma generate
+pnpm db:generate
 
-# Generate proto types
-pnpm --filter @hive/* gen
+# Run database migrations for each service
+pnpm --filter @hive/api-gateway-service db:migrate
+pnpm --filter @hive/property-service db:migrate
+# … repeat for each service with a schema
 
-# Run database migrations
-pnpm --filter [service-name] prisma migrate dev
+# Start all services
+pnpm dev
 ```
 
-### Development Commands
+### Common Commands
 
-#### Root Level Commands
-- `pnpm dev`: Run all services in development mode (concurrency: 20)
-- `pnpm build`: Build all packages and apps
-- `pnpm test`: Run all tests
-- `pnpm test:e2e`: Run all E2E tests
-- `pnpm lint`: Lint all packages and apps
-- `pnpm format`: Format all code with Prettier
-
-#### Service-Specific Commands
 ```bash
-# Run specific service
+pnpm dev                                          # All services in watch mode
+pnpm build                                        # Build everything
+pnpm test                                         # All unit tests
+pnpm test:e2e                                     # All E2E tests
+pnpm lint                                         # ESLint (turbo, per-package)
+pnpm format                                       # Prettier across all files
+
+# Single service / package
 pnpm --filter @hive/api-gateway-service dev
-
-# Build specific package
 pnpm --filter @hive/property build
-
-# Generate proto types for package
-pnpm --filter @hive/property gen
-
-# Run Prisma migrations
-pnpm --filter @hive/api-gateway-service prisma migrate dev
+pnpm --filter @hive/property gen                  # Regenerate proto types
+pnpm --filter @hive/api-gateway-service db:generate
+pnpm --filter @hive/api-gateway-service db:migrate
+pnpm --filter @hive/api-gateway-service auth:gen  # Regenerate Better Auth schema
 ```
 
-### Turborepo Tasks
+### Scaffolding a New Resource
 
-#### Task Configuration
-- Defined in `turbo.json`
-- Tasks: `dev`, `build`, `lint`, `test`, `test:e2e`
-- Build tasks depend on `^build` (build dependencies first)
-- Dev tasks are persistent and not cached
-
-#### Task Dependencies
-- Build tasks automatically build dependencies first
-- Use `^build` in `dependsOn` for build dependencies
-
-### Code Generation
-
-#### Proto Type Generation
 ```bash
-# In package directory
-pnpm gen
+pnpm scaffold --resource <Name> --package <pkg> --service <SERVICE_NAME>
+# Example
+pnpm scaffold --resource Review --package property --service PROPERTIES_SERVICE_NAME
 ```
 
-#### Prisma Client Generation
-```bash
-# In service directory
-pnpm prisma generate
-```
-
-#### Better Auth Generation
-```bash
-# In api-gateway-service
-pnpm auth:gen
-```
+Generates: DTO, domain service, domain controller, domain module, gateway controller, gateway module.  
+See [Adding a New RPC Method](#adding-a-new-rpc-method-full-workflow) for the remaining manual steps.
 
 ---
 
@@ -922,289 +764,216 @@ pnpm auth:gen
 
 ### Unit Tests
 
-#### Test File Naming
-- `*.spec.ts` for unit tests
-- Same directory as source file
+- Files named `*.spec.ts`, co-located with source
+- Config: `jest.config.js` → `require('@hive/jest-config/nest')`
 
-#### Test Structure
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceName } from './service-name.service';
+import { AmenitiesService } from './amenities.service';
 
-describe('ServiceName', () => {
-  let service: ServiceName;
+describe('AmenitiesService', () => {
+  let service: AmenitiesService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ServiceName],
+      providers: [AmenitiesService],
     }).compile();
-
-    service = module.get<ServiceName>(ServiceName);
+    service = module.get<AmenitiesService>(AmenitiesService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+  it('should be defined', () => expect(service).toBeDefined());
 });
 ```
 
 ### E2E Tests
 
-#### E2E Test Location
-- `test/app.e2e-spec.ts` in each service
+- Files: `test/app.e2e-spec.ts` in each service
+- Config: `test/jest-e2e.js` → `require('@hive/jest-config/nest-e2e')`
+- Uses `supertest` for HTTP assertions
 
-#### E2E Test Configuration
-- `test/jest-e2e.json` for Jest configuration
-- Uses `supertest` for HTTP testing
-
-#### E2E Test Pattern
 ```typescript
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
+import { Test } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
 import { AppModule } from './../src/app.module';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
-
-    app = moduleFixture.createNestApplication();
+    app = module.createNestApplication();
     await app.init();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
-  });
+  it('GET /', () => request(app.getHttpServer()).get('/').expect(200));
 });
 ```
 
 ### Frontend Tests
 
-#### Jest Tests
-- Unit tests with Jest
-- React Testing Library for component tests
+- Jest + React Testing Library for unit/component tests
+- Playwright for E2E (`playwright.config.ts` in `apps/web/`)
 
-#### Playwright Tests
-- E2E tests with Playwright
-- Configuration in `playwright.config.ts`
+---
+
+## Tooling
+
+### Jest — `@hive/jest-config`
+
+Shared configs in `packages/jest-config/`. No inline jest config lives in any `package.json`.
+
+| Export                       | Use                                |
+| ---------------------------- | ---------------------------------- |
+| `@hive/jest-config/nest`     | Unit tests — all apps and packages |
+| `@hive/jest-config/nest-e2e` | E2E tests — `test/` directory      |
+| `@hive/jest-config/base`     | Base config for custom setups      |
+
+To change jest behaviour globally, edit `packages/jest-config/nest.js`.
+
+### ESLint — `@hive/eslint-config`
+
+All configs use the **flat config format** (`eslint.config.mjs`). Every app and package has its own config; the root config ignores `apps/**` and `packages/**`.
+
+| Export                               | Use                           |
+| ------------------------------------ | ----------------------------- |
+| `@hive/eslint-config/nest`           | NestJS apps                   |
+| `@hive/eslint-config/library`        | Shared packages               |
+| `@hive/eslint-config/next`           | Next.js app                   |
+| `@hive/eslint-config/react-internal` | React packages                |
+| `@hive/eslint-config/prettier-base`  | Adds Prettier rules to ESLint |
+
+### TypeScript — `@hive/typescript-config`
+
+| File                 | Use                             |
+| -------------------- | ------------------------------- |
+| `nestjs.json`        | NestJS apps and packages        |
+| `nextjs.json`        | Next.js app                     |
+| `react-library.json` | React component packages        |
+| `base.json`          | Base (strict, ES2022, NodeNext) |
+
+### Pre-commit Hooks
+
+Managed by **Husky** + **lint-staged**. Installed automatically via `pnpm install` (`prepare` script).
+
+What runs on every `git commit`:
+
+- `prettier --write` on all staged `ts / tsx / js / mjs / json / md / css` files
+
+ESLint runs in CI via `pnpm lint` (turbo, per-package).
+
+To skip in an emergency: `git commit --no-verify`
+
+### Turbo Remote Caching (optional)
+
+```bash
+npx turbo login
+npx turbo link
+```
 
 ---
 
 ## Configuration Management
 
-### Configify
+All services use `@itgorillaz/configify` for typed, validated configuration. Required env vars are declared as class properties with Zod validators — no bare `process.env` reads in service code.
 
-#### Configuration Setup
-- Uses `@itgorillaz/configify` for configuration management
-- Configuration files: `.env`, `package.json`
-- Async configuration: `ConfigifyModule.forRootAsync()`
-
-#### Configuration Pattern
 ```typescript
-// config/app.config.ts
-import { ConfigifyModule } from '@itgorillaz/configify';
-
+@Configuration()
 export class AppConfig {
+  @Value('PORT', { parse: z.coerce.number().parse })
   port: number;
-  environment: string;
-}
 
-ConfigifyModule.forRootAsync({
-  configFilePath: ['.env', 'package.json'],
-})
+  @Value('GRPC_HOST')
+  grpcHost: string;
+
+  @Value('GRPC_PORT', { parse: z.coerce.number().parse })
+  grpcPort: number;
+}
 ```
 
-### Environment Variables
+### Common Environment Variables
 
-#### Naming Convention
-- UPPER_SNAKE_CASE
-- Service-specific prefixes (e.g., `PROPERTY_`, `IDENTITY_`)
-
-#### Common Variables
-- `DATABASE_URL`: PostgreSQL connection string
-- `PORT`: Service port
-- `GRPC_HOST`: gRPC server host
-- `GRPC_PORT`: gRPC server port
-- `HTTP_HOST`: HTTP server host
-- `HTTP_PORT`: HTTP server port
-
-### Server Configuration
-
-#### Server Config Pattern
-```typescript
-// In package config
-export interface ServerConfig {
-  host: string;
-  port: number;
-}
-
-export const SERVER_CONFIG_TOKEN = Symbol('SERVER_CONFIG');
-```
+| Variable                  | Purpose                      |
+| ------------------------- | ---------------------------- |
+| `DATABASE_URL`            | PostgreSQL connection string |
+| `HTTP_HOST` / `HTTP_PORT` | HTTP server bind address     |
+| `GRPC_HOST` / `GRPC_PORT` | gRPC server bind address     |
 
 ---
 
 ## Build & Deployment
 
-### Build Process
+### Build Order
 
-#### Build Order
+Turborepo handles dependency ordering automatically via `dependsOn: ["^build"]`:
+
 1. Shared packages build first
-2. Services build after dependencies
+2. Domain services build after their package dependencies
 3. Frontend builds last
 
-#### Build Output
-- Packages: `dist/` directory
-- Services: `dist/` directory
-- Frontend: `.next/` directory
+### Build Commands
 
-### Turborepo Caching
-
-#### Cache Configuration
-- Build outputs cached
-- Cache includes: `.next/**`, `dist/**`
-- Remote caching via Vercel (optional)
-
-### Production Build
-
-#### Build Commands
 ```bash
-# Build all
-pnpm build
-
-# Build specific service
-pnpm --filter @hive/api-gateway-service build
-```
-
-#### Production Start
-```bash
-# Start production server
+pnpm build                                        # Build everything
+pnpm --filter @hive/api-gateway-service build     # Build a single service
 pnpm --filter @hive/api-gateway-service start:prod
 ```
+
+### Build Outputs
+
+- Packages and services: `dist/`
+- Frontend: `.next/`
+- Prisma clients: `generated/prisma/` (per service, not committed)
 
 ---
 
 ## Rules & Guidelines
 
-### General Rules
+### TypeScript
 
-1. **TypeScript Strict Mode**: Always use strict TypeScript configuration
-2. **No `any` Types**: Avoid `any`, use proper types or `unknown`
-3. **Error Handling**: Always handle errors properly, use custom exceptions
-4. **Async/Await**: Prefer async/await over Promises
-5. **Imports**: Use absolute imports from workspace packages
-6. **Exports**: Always export from `index.ts` in packages
+- Strict mode always enabled
+- No `any` — use `unknown` or proper generics
+- Prefer `async/await` over raw Promises
+- Import from workspace packages with `@hive/` scope; never relative cross-package imports
 
-### Code Style
+### API Design
 
-1. **Formatting**: Use Prettier (run `pnpm format`)
-2. **Linting**: Fix linting errors before committing
-3. **Imports**: Group imports (external, workspace, relative)
-4. **Comments**: Use JSDoc for public APIs
-5. **Naming**: Follow naming conventions strictly
+- Follow REST conventions and response format strictly
+- Document every endpoint with Swagger decorators
+- Validate all inputs with Zod; never trust raw request data
 
-### API Design Rules
+### Service Communication
 
-1. **Consistent Endpoints**: Follow REST conventions
-2. **Response Format**: Always use standardized response format
-3. **Error Responses**: Use standardized error responses
-4. **Documentation**: Document all endpoints with Swagger decorators
-5. **Validation**: Validate all inputs with Zod schemas
+- gRPC for all service-to-service calls
+- Always pass `RequestContext` (`organizationId`, `userId`) in gRPC requests
+- Update `.proto` files first; regenerate types before implementing
 
-### Service Communication Rules
+### Database
 
-1. **gRPC First**: Use gRPC for service-to-service communication
-2. **Proto Definitions**: Define all messages in proto files
-3. **Type Generation**: Always regenerate types after proto changes
-4. **Service Registry**: Register all services with registry
-5. **Context Propagation**: Always pass RequestContext in gRPC calls
+- Use migrations for every schema change (`db:migrate`)
+- Never add `url` to the Prisma datasource block — use the `PrismaPg` adapter
+- Always include `voided`, `createdAt`, `updatedAt` on domain models
+- Soft delete via `voided`; hard delete only via explicit `purge` flag
 
-### Database Rules
+### Security
 
-1. **Migrations**: Always use migrations for schema changes
-2. **Soft Deletes**: Use `voided` field for soft deletes
-3. **Timestamps**: Always include `createdAt` and `updatedAt`
-4. **Relations**: Define proper foreign key relationships
-5. **Indexes**: Add indexes for frequently queried fields
+- Protect every endpoint with an auth decorator (`@RequireOrganizationPermission`, `@OptionalAuth`)
+- Never commit secrets — use `.env` files excluded from git
 
-### Security Rules
+### Testing
 
-1. **Authentication**: Protect endpoints with authentication guards
-2. **Authorization**: Use permission guards for resource access
-3. **Input Validation**: Validate all inputs
-4. **SQL Injection**: Use Prisma to prevent SQL injection
-5. **Secrets**: Never commit secrets, use environment variables
+- Unit tests (`*.spec.ts`) alongside source; E2E tests in `test/`
+- Tests must be independent and isolated
 
-### Testing Rules
+### Git / Code Style
 
-1. **Test Coverage**: Maintain reasonable test coverage
-2. **Unit Tests**: Write unit tests for services and utilities
-3. **E2E Tests**: Write E2E tests for critical flows
-4. **Test Data**: Use test fixtures, not production data
-5. **Test Isolation**: Tests should be independent and isolated
-
-### Git Rules
-
-1. **Branch Naming**: Use descriptive branch names
-2. **Commit Messages**: Use clear, descriptive commit messages
-3. **PR Reviews**: Require PR reviews before merging
-4. **Main Branch**: Keep main branch stable
-5. **Migration Files**: Commit migration files with schema changes
-
-### Package Rules
-
-1. **Package Exports**: Define all exports in `package.json`
-2. **Peer Dependencies**: Use peer dependencies for NestJS packages
-3. **Version Management**: Use workspace protocol (`workspace:*`)
-4. **Type Definitions**: Include type definitions in packages
-5. **Build Scripts**: Include build and clean scripts
-
-### Documentation Rules
-
-1. **README**: Each service/package should have a README
-2. **API Docs**: Document all public APIs
-3. **Code Comments**: Comment complex logic
-4. **JSDoc**: Use JSDoc for public functions and classes
-5. **Examples**: Include usage examples in package READMEs
+- Prettier runs automatically on staged files (pre-commit hook)
+- ESLint must pass before merging (`pnpm lint`)
+- Use descriptive branch names and commit messages
+- Always commit migration files alongside schema changes
 
 ---
 
-## Additional Resources
-
-### Key Packages Reference
-
-- **@hive/common**: Common utilities, DTOs, interceptors, query builder
-- **@hive/registry**: Service registry and discovery
-- **@hive/authorization**: OpenFGA authorization utilities
-- **@hive/utils**: General utility functions
-- **@hive/property**: Property domain package
-- **@hive/identity**: Identity domain package
-- **@hive/files**: Files domain package
-- **@hive/reference**: Reference data package
-- **@hive/vitual-tour**: Virtual tour package
-
-### Common Patterns Reference
-
-1. **Query Pattern**: Use `QueryBuilderSchema` for all queries
-2. **Response Pattern**: Use interceptors for response transformation
-3. **Error Pattern**: Use global exception filters
-4. **Auth Pattern**: Use guards and decorators for protection
-5. **gRPC Pattern**: Use proto files and generated types
-
----
-
-## Version History
-
-- **v1.0.0**: Initial project specification document
-
----
-
-**Last Updated**: 2025-01-27
-**Maintained By**: The Hive Team
-
+**Last updated:** 2026-06-01

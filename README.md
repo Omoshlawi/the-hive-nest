@@ -1,7 +1,7 @@
 # The Hive Nest
 
 NestJS microservices monorepo for the Havena / The Hive property management platform.  
-Managed with **pnpm workspaces** and **Turborepo**.
+Managed with **pnpm 9 workspaces** and **Turborepo**.
 
 See [`PROJECT_SPEC.md`](./PROJECT_SPEC.md) for full architecture and code-pattern reference.
 
@@ -21,20 +21,21 @@ the-hive-nest/
 │   ├── template-service/
 │   └── web/                   # Next.js 14 frontend
 └── packages/
-    ├── common/                # Interceptors, filters, base service, shared DTOs
+    ├── common/                # Interceptors, filters, base CRUD service, Prisma module
     ├── property/              # Property proto + generated types + gRPC client
     ├── identity/              # Identity proto + gRPC client
     ├── files/                 # Files proto + gRPC client
     ├── reference/             # Reference proto + gRPC client
-    ├── vitual-tour/           # Virtual-tour package
-    ├── registry/              # Registry service client
+    ├── vitual-tour/           # Virtual-tour proto + gRPC client (note: typo in dir name)
+    ├── template/              # Template package
+    ├── registry/              # Registry service client + HiveServiceModule
     ├── authorization/         # OpenFGA integration
-    ├── utils/                 # Utility functions
+    ├── utils/                 # Utility functions, server config helpers
     ├── ui/                    # Shared React components
     ├── eslint-config/         # Shared ESLint flat configs
     ├── jest-config/           # Shared Jest configs (nest / nest-e2e / base)
     ├── typescript-config/     # Shared tsconfig bases
-    └── tools/                 # scaffold-resource CLI + generators
+    └── tools/                 # scaffold-resource CLI + hive-gen
 ```
 
 ---
@@ -42,21 +43,30 @@ the-hive-nest/
 ## Prerequisites
 
 - **Node.js** ≥ 18
-- **pnpm** 9 — install via `corepack enable && corepack prepare pnpm@latest --activate`
+- **pnpm** 9 — `corepack enable && corepack prepare pnpm@latest --activate`
+- **PostgreSQL** database (one per service that owns a schema)
 
 ---
 
 ## Getting started
 
 ```bash
-# Install all dependencies + build shared packages
+# Install all dependencies and build shared packages
 pnpm install
+
+# Generate all Prisma clients
+pnpm db:generate
+
+# Migrate each service database (interactive — prompts for migration name)
+pnpm --filter @hive/api-gateway-service db:migrate
+pnpm --filter @hive/property-service db:migrate
+# … repeat for each service with a Prisma schema
 
 # Start all services with hot-reload
 pnpm dev
 ```
 
-`pnpm install` also runs `prepare`, which wires the pre-commit hook (see [Pre-commit hooks](#pre-commit-hooks)).
+`pnpm install` also runs `prepare`, which installs the pre-commit hook (see [Pre-commit hooks](#pre-commit-hooks)).
 
 ---
 
@@ -82,7 +92,7 @@ pnpm --filter @hive/api-gateway-service dev
 pnpm --filter @hive/property-service test
 pnpm --filter @hive/property gen          # Regenerate proto types after .proto changes
 pnpm --filter @hive/api-gateway-service db:generate
-pnpm --filter @hive/api-gateway-service db:migrate   # Interactive — prompts for name
+pnpm --filter @hive/api-gateway-service db:migrate    # Interactive — prompts for name
 ```
 
 ---
@@ -175,7 +185,7 @@ This guarantees consistent formatting without requiring developers to remember t
 **First-time setup** — the hook is installed automatically by `pnpm install` via the `prepare` script. To install it manually:
 
 ```bash
-pnpm husky
+pnpm exec husky
 ```
 
 **Skipping the hook** (emergency only):
