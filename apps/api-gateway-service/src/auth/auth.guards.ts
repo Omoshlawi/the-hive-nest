@@ -21,8 +21,7 @@ export class RequireActiveOrganizationGuard implements CanActivate {
   constructor(
     private readonly authService: AuthService<BetterAuthWithPlugins>,
     private reflector: Reflector,
-  ) {
-  }
+  ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requireActiveOrganization = this.reflector.get<
       | {
@@ -78,7 +77,6 @@ export class RequireOrganizationPermissionsGuard implements CanActivate {
         permissions,
       },
     });
-    this.authService.api.
     if (!success) {
       this.logger.warn(
         `Access denied. Missing permissions: ${JSON.stringify(permissions)}`,
