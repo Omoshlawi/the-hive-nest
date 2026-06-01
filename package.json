@@ -15,7 +15,8 @@
     "gen": "turbo gen",
     "scaffold": "hive-scaffold",
     "db:generate": "turbo db:generate",
-    "db:migrate": "turbo db:migrate"
+    "db:migrate": "turbo db:migrate",
+    "postinstall": "turbo run build --filter='./packages/**'"
   },
   "devDependencies": {
     "@hive/eslint-config": "workspace:*",

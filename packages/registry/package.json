@@ -39,7 +39,7 @@
   },
   "scripts": {
     "dev": "pnpm build --watch",
-    "postinstall": "pnpm gen",
+    "postinstall": "pnpm gen && pnpm build",
     "gen": "hive-gen && hive-copy-assets",
     "build": "tsc -b -v",
     "clean": "rm -rf dist",
