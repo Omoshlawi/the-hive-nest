@@ -62,7 +62,7 @@ the-hive-nest/
     ├── vitual-tour/           # Virtual-tour proto + gRPC client  (typo in dir name)
     ├── template/              # Template package
     ├── registry/              # Registry client + HiveServiceModule
-    ├── authorization/         # OpenFGA authorization integration
+    ├── authorization/         # Reserved — not currently active
     ├── utils/                 # Server config helpers, utilities
     ├── ui/                    # Shared React components
     ├── eslint-config/         # Shared ESLint flat configs
@@ -278,4 +278,4 @@ The API Gateway binds to `HTTP_PORT` (default `8090`). Domain services use dynam
 - [`PROJECT_SPEC.md`](./PROJECT_SPEC.md) — architecture decisions, all code patterns, auth, rules
 - [`packages/tools/`](./packages/tools/) — scaffold CLI source
 - [`packages/common/`](./packages/common/) — query builder services, interceptors, Prisma module
-- [`packages/authorization/auth.openfga`](./packages/authorization/auth.openfga) — OpenFGA permission model
+- [`apps/api-gateway-service/src/auth/auth.acl.ts`](./apps/api-gateway-service/src/auth/auth.acl.ts) — Better Auth ACL definitions (resource permissions)

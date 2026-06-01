@@ -1,9 +1,11 @@
-import { AuthorizatioModule, AuthorizationConfig } from '@hive/authorization';
-import { GlobalRpcExceptionFilter, PrismaModule, QueryBuilderModule } from '@hive/common';
+import {
+  GlobalRpcExceptionFilter,
+  PrismaModule,
+  QueryBuilderModule,
+} from '@hive/common';
 import {
   FILE_HTTP_SERVER_CONFIG_TOKEN,
   FILE_RPC_SERVER_CONFIG_TOKEN,
-  FileAuthZService,
   FileHTTPServerConfigProvider,
   FileRPCServerConfigProvider,
 } from '@hive/files';
@@ -27,17 +29,6 @@ import { S3Module } from './s3/s3.module';
 
 @Module({
   imports: [
-    AuthorizatioModule.forRootAsync({
-      global: true,
-      inject: [AuthorizationConfig],
-      useFactory(config: AuthorizationConfig) {
-        return {
-          storeId: config.fgaStoreId,
-          apiUrl: config.fgaApiUrl,
-          authorizationModelId: config.fgaModelId,
-        };
-      },
-    }),
     QueryBuilderModule.register({ global: true }),
     ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
     ScheduleModule.forRoot(),
@@ -105,6 +96,6 @@ import { S3Module } from './s3/s3.module';
     S3Module,
   ],
   controllers: [AppController],
-  providers: [AppService, GlobalRpcExceptionFilter, FileAuthZService],
+  providers: [AppService, GlobalRpcExceptionFilter],
 })
 export class AppModule {}

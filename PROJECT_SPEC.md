@@ -118,7 +118,7 @@ Browser / API client
 ┌─────────────────────────────────────────────┐
 │            api-gateway-service              │
 │  - HTTP/REST endpoints (NestJS controllers) │
-│  - Auth: Better Auth + OpenFGA              │
+│  - Auth: Better Auth (ACL)                  │
 │  - Identity data (users, orgs, members)     │
 │  - Routes all other calls via gRPC          │
 └────┬────────────────────────────────────────┘
@@ -160,17 +160,17 @@ Browser / API client
 
 ### Backend
 
-|                             |                                                              |
-| --------------------------- | ------------------------------------------------------------ |
-| **Framework**               | NestJS 11.x                                                  |
-| **Microservices transport** | `@nestjs/microservices` (gRPC)                               |
-| **Database ORM**            | Prisma 7.x with `@prisma/adapter-pg`                         |
-| **Validation**              | Zod 4.x + nestjs-zod 5.x (beta)                              |
-| **API docs**                | `@nestjs/swagger` (Swagger UI `/api`, Scalar `/api-doc`)     |
-| **Authentication**          | Better Auth (`better-auth` + `@thallesp/nestjs-better-auth`) |
-| **Authorization**           | OpenFGA via `@hive/authorization`                            |
-| **Scheduling**              | `@nestjs/schedule`                                           |
-| **Config**                  | `@itgorillaz/configify`                                      |
+|                             |                                                                             |
+| --------------------------- | --------------------------------------------------------------------------- |
+| **Framework**               | NestJS 11.x                                                                 |
+| **Microservices transport** | `@nestjs/microservices` (gRPC)                                              |
+| **Database ORM**            | Prisma 7.x with `@prisma/adapter-pg`                                        |
+| **Validation**              | Zod 4.x + nestjs-zod 5.x (beta)                                             |
+| **API docs**                | `@nestjs/swagger` (Swagger UI `/api`, Scalar `/api-doc`)                    |
+| **Authentication**          | Better Auth (`better-auth` + `@thallesp/nestjs-better-auth`)                |
+| **Authorization**           | Better Auth ACL (`auth.acl.ts` — `organizationPluginAcl`, `adminPluginAcl`) |
+| **Scheduling**              | `@nestjs/schedule`                                                          |
+| **Config**                  | `@itgorillaz/configify`                                                     |
 
 ### Frontend
 
@@ -217,7 +217,7 @@ the-hive-nest/
     ├── vitual-tour/            # Virtual-tour proto + gRPC client  (typo in dir name)
     ├── template/               # Template package
     ├── registry/               # Registry client + HiveServiceModule
-    ├── authorization/          # OpenFGA integration
+    ├── authorization/          # Reserved — not currently active
     ├── utils/                  # Server config helpers, utilities
     ├── ui/                     # Shared React components
     ├── eslint-config/          # Shared ESLint flat configs
@@ -812,51 +812,55 @@ Regenerate the Better Auth DB schema:
 pnpm --filter @hive/api-gateway-service auth:gen
 ```
 
-### Authorization (OpenFGA)
+### Authorization (Better Auth ACL)
 
-OpenFGA is a relationship-based access control (ReBAC) system. Instead of role checks (`if user.role === 'admin'`), permissions are modelled as tuples: _"user X has relation Y to object Z"_.
+Permissions are enforced by Better Auth's built-in ACL plugins. The ACL model is defined in `apps/api-gateway-service/src/auth/auth.acl.ts` using `createAccessControl()`.
 
-**Why ReBAC instead of RBAC?** It supports fine-grained resource-level permissions — a user can be blocked from a specific property even if their organisation role would otherwise grant access.
+Two separate ACL scopes are defined:
 
-**The permission model** (`packages/authorization/auth.openfga`):
+```typescript
+// System-level permissions (admin plugin) — used with @RequireSystemPermission
+export const adminPluginAcl = createAccessControl({
+  category: ['create', 'list', 'update', 'delete'],
+  amenity: ['create', 'list', 'update', 'delete'],
+  // ... reference/lookup data resources
+});
 
-| Type           | Key relations                 | Notes                                           |
-| -------------- | ----------------------------- | ----------------------------------------------- |
-| `system`       | `super_user`                  | Bypasses all org and resource checks globally   |
-| `organization` | `owner`, `admin`, `member`    | `owner` > `admin` > `member` hierarchy          |
-| `property`     | `owner`, `manager`, `blocked` | `can_manage` = owner or manager AND NOT blocked |
-| `file`         | same as property              |                                                 |
-| `listing`      | same as property              |                                                 |
-
-**Permission evaluation flow:**
-
-```
-Is user a system super_user?  → allow everything
-Is user blocked on this resource? → deny
-Does user have owner/manager/member on this resource's org? → allow/deny by role
+// Organisation-level permissions (organization plugin) — used with @RequireOrganizationPermission
+export const organizationPluginAcl = createAccessControl({
+  file: ['upload', 'delete', 'list'],
+  property: ['create', 'read', 'update', 'delete'],
+  listing: ['create', 'read', 'update', 'delete'],
+});
 ```
 
 **Guards (applied globally in api-gateway):**
 
-| Guard                                 | Triggered by                          |
-| ------------------------------------- | ------------------------------------- |
-| `RequireActiveOrganizationGuard`      | Any route with org context            |
-| `RequireOrganizationPermissionsGuard` | `@RequireOrganizationPermission(...)` |
-| `RequireSystemPermissionsGuard`       | `@RequireSystemPermission(...)`       |
+| Guard                                 | Triggered by                                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------- |
+| `RequireActiveOrganizationGuard`      | Any route with org context — checks `session.activeOrganizationId`              |
+| `RequireOrganizationPermissionsGuard` | `@RequireOrganizationPermission(...)` — calls `authService.api.hasPermission()` |
+| `RequireSystemPermissionsGuard`       | `@RequireSystemPermission(...)` — calls `authService.api.userHasPermission()`   |
 
 **Decorators:**
 
 ```typescript
+// Checks organisation-level permission (uses organizationPluginAcl)
 @RequireOrganizationPermission({ property: ['create'] })
 @RequireOrganizationPermission({ property: ['read', 'update'] })
-@RequireSystemPermission({ admin: ['manage'] })
+
+// Checks system-level permission (uses adminPluginAcl)
+@RequireSystemPermission({ category: ['create'] })
+
+// No permission check — allows unauthenticated access
 @OptionalAuth()
 ```
 
-**Adding a new resource type to the permission model:**
+**Adding a new resource type:**
 
-1. Add the type to `packages/authorization/auth.openfga` with `can_manage`, `can_view`, `can_delete` relations
-2. Write tuples when creating/sharing resources via `BaseAuthorizationService`
+1. Add the resource and its allowed actions to `adminPluginAcl` or `organizationPluginAcl` in `auth.acl.ts`
+2. Add the corresponding role statements to the role definitions in the same file
+3. Use `@RequireOrganizationPermission` or `@RequireSystemPermission` on your controller methods
 
 ### Context Propagation
 

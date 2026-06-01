@@ -9,7 +9,6 @@ import {
 import {
   CreateFileRequest,
   DeleteRequest,
-  FileAuthZService,
   FileBlob,
   GenerateUploadSignedUrlRequest,
   GetByHashRequest,
@@ -40,7 +39,6 @@ export class AppService {
     private readonly sortService: SortService,
     private readonly paginationService: PaginationService,
     private readonly representationService: CustomRepresentationService,
-    private readonly authz: FileAuthZService,
     private readonly s3Service: S3Service,
   ) {}
 
@@ -125,23 +123,6 @@ export class AppService {
         new BadRequestException('User ID is required in context'),
       );
     }
-    // if (query.context?.organizationId) {
-    //   const hasAccess = await this.authz.canViewOrganizationFiles(
-    //     query.context.userId,
-    //     query.context.organizationId,
-    //   );
-    //   if (!hasAccess)
-    //     throw new RpcException(
-    //       new ForbiddenException(
-    //         'You do not have permission to view a file in this organization.',
-    //       ),
-    //     );
-    //   viewableFiles = await this.authz.listOrganizationUserViewableFileObjects(
-    //     query.context.userId,
-    //     query.context.organizationId,
-    //   );
-    // }
-
     const dbQuery: Prisma.FileMetadataWhereInput = {
       AND: [
         {
@@ -224,16 +205,6 @@ export class AppService {
         new BadRequestException('User ID is required in context'),
       );
     }
-    // if (
-    //   context?.organizationId &&
-    //   !(await this.authz.canCreateFile(context.userId, context.organizationId))
-    // )
-    //   throw new RpcException(
-    //     new ForbiddenException(
-    //       'You do not have permission to create a file in this organization.',
-    //     ),
-    //   );
-    // TODO: eNHANCE VALIDATION to chech upload purpose scope scope and rules
     const buffer = Buffer.from(blob!.buffer);
     const hash = this.generateFileHash(buffer);
 

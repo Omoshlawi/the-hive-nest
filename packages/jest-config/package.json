@@ -11,7 +11,8 @@
     ".": "./base.js",
     "./base": "./base.js",
     "./nest": "./nest.js",
-    "./nest-e2e": "./nest-e2e.js"
+    "./nest-e2e": "./nest-e2e.js",
+    "./next": "./next.js"
   },
   "files": [
     "*.js"

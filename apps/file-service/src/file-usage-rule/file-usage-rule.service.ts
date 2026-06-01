@@ -1,14 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   SortService,
   PaginationService,
   CustomRepresentationService,
 } from '@hive/common';
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   QueryFileUsageRuleRequest,
@@ -16,10 +11,8 @@ import {
   CreateFileUsageRuleRequest,
   UpdateFileUsageRuleRequest,
   DeleteRequest,
-  FileUsageAuthzService,
 } from '@hive/files';
 import { FileUsageRule, Prisma } from '../../generated/prisma/client';
-import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class FileUsageRuleService {
@@ -28,24 +21,7 @@ export class FileUsageRuleService {
     private readonly sortService: SortService,
     private readonly paginationService: PaginationService,
     private readonly representationService: CustomRepresentationService,
-    private readonly authz: FileUsageAuthzService,
   ) {}
-
-  private async requirePermisions(userId?: string) {
-    if (!userId) {
-      throw new RpcException(
-        new BadRequestException('User ID is required in the request context.'),
-      );
-    }
-    const canCreate = await this.authz.canCreateFileUsageRule(userId);
-    if (!canCreate) {
-      throw new RpcException(
-        new ForbiddenException(
-          'You do not have permission to create a file usage scope.',
-        ),
-      );
-    }
-  }
 
   async getAll(query: QueryFileUsageRuleRequest) {
     const dbQuery: Prisma.FileUsageRuleWhereInput = {
@@ -65,11 +41,18 @@ export class FileUsageRuleService {
         },
       ],
     };
-    const totalCount = await this.prismaService.fileUsageRule.count({ where: dbQuery });
+    const totalCount = await this.prismaService.fileUsageRule.count({
+      where: dbQuery,
+    });
     const data = await this.prismaService.fileUsageRule.findMany({
       where: dbQuery,
-      ...this.paginationService.buildSafePaginationQuery(query.queryBuilder, totalCount),
-      ...this.representationService.buildCustomRepresentationQuery(query.queryBuilder?.v),
+      ...this.paginationService.buildSafePaginationQuery(
+        query.queryBuilder,
+        totalCount,
+      ),
+      ...this.representationService.buildCustomRepresentationQuery(
+        query.queryBuilder?.v,
+      ),
       ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
     });
     return {
@@ -110,8 +93,7 @@ export class FileUsageRuleService {
   }
 
   async update(query: UpdateFileUsageRuleRequest) {
-    const { queryBuilder, id, context, ...props } = query;
-    await this.requirePermisions(context?.userId);
+    const { queryBuilder, id, context: _, ...props } = query;
 
     const data = await this.prismaService.fileUsageRule.update({
       where: { id },
@@ -127,8 +109,7 @@ export class FileUsageRuleService {
     };
   }
   async delete(query: DeleteRequest) {
-    const { id, purge, queryBuilder, context } = query;
-    await this.requirePermisions(context?.userId);
+    const { id, purge, queryBuilder } = query;
 
     let data: FileUsageRule;
     if (purge) {

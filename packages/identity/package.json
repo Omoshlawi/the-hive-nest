@@ -49,7 +49,6 @@
     "@nestjs/microservices": "catalog:",
     "@nestjs/common": "catalog:",
     "@hive/registry": "workspace:*",
-    "@hive/authorization": "workspace:*",
     "@nestjs/swagger": "catalog:",
     "nestjs-zod": "5.0.0-beta.20250806T023752",
     "@itgorillaz/configify": "^4.0.1",

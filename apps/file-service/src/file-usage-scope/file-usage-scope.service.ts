@@ -1,9 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   SortService,
@@ -13,13 +8,11 @@ import {
 import {
   CreateFileUsageScopeRequest,
   DeleteRequest,
-  FileUsageAuthzService,
   GetRequest,
   QueryFileUsageScopeRequest,
   UpdateFileUsageScopeRequest,
 } from '@hive/files';
 import { FileUsageScope, Prisma } from '../../generated/prisma/client';
-import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class FileUsageScopeService {
@@ -28,24 +21,7 @@ export class FileUsageScopeService {
     private readonly sortService: SortService,
     private readonly paginationService: PaginationService,
     private readonly representationService: CustomRepresentationService,
-    private readonly authz: FileUsageAuthzService,
   ) {}
-
-  private async requirePermisions(userId?: string) {
-    if (!userId) {
-      throw new RpcException(
-        new BadRequestException('User ID is required in the request context.'),
-      );
-    }
-    const canCreate = await this.authz.canCreateFileUsageScope(userId);
-    if (!canCreate) {
-      throw new RpcException(
-        new ForbiddenException(
-          'You do not have permission to create a file usage scope.',
-        ),
-      );
-    }
-  }
 
   async getAll(query: QueryFileUsageScopeRequest) {
     const dbQuery: Prisma.FileUsageScopeWhereInput = {
@@ -65,11 +41,18 @@ export class FileUsageScopeService {
         },
       ],
     };
-    const totalCount = await this.prismaService.fileUsageScope.count({ where: dbQuery });
+    const totalCount = await this.prismaService.fileUsageScope.count({
+      where: dbQuery,
+    });
     const data = await this.prismaService.fileUsageScope.findMany({
       where: dbQuery,
-      ...this.paginationService.buildSafePaginationQuery(query.queryBuilder, totalCount),
-      ...this.representationService.buildCustomRepresentationQuery(query.queryBuilder?.v),
+      ...this.paginationService.buildSafePaginationQuery(
+        query.queryBuilder,
+        totalCount,
+      ),
+      ...this.representationService.buildCustomRepresentationQuery(
+        query.queryBuilder?.v,
+      ),
       ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
     });
     return {
@@ -94,7 +77,7 @@ export class FileUsageScopeService {
   }
 
   async create(query: CreateFileUsageScopeRequest) {
-    const { queryBuilder, context:_, ...props } = query;
+    const { queryBuilder, context: _, ...props } = query;
 
     const data = await this.prismaService.fileUsageScope.create({
       data: props,
@@ -110,8 +93,7 @@ export class FileUsageScopeService {
   }
 
   async update(query: UpdateFileUsageScopeRequest) {
-    const { queryBuilder, id, context, ...props } = query;
-    await this.requirePermisions(context?.userId);
+    const { queryBuilder, id, context: _, ...props } = query;
 
     const data = await this.prismaService.fileUsageScope.update({
       where: { id },
@@ -127,8 +109,7 @@ export class FileUsageScopeService {
     };
   }
   async delete(query: DeleteRequest) {
-    const { id, purge, queryBuilder, context } = query;
-    await this.requirePermisions(context?.userId);
+    const { id, purge, queryBuilder } = query;
 
     let data: FileUsageScope;
     if (purge) {
