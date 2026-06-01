@@ -15,20 +15,21 @@ import { prismaAdapter } from 'better-auth/adapters/prisma';
 import {
   admin,
   anonymous,
-  apiKey,
   bearer,
-  createAuthMiddleware,
   jwt,
   multiSession,
   openAPI,
   organization,
   username,
 } from 'better-auth/plugins';
+import { createAuthMiddleware } from "better-auth/api";
 import { PrismaService } from '../prisma/prisma.service';
 import { adminConfig, organizationConfig } from './auth.contants';
 import { AuthExtendedController } from './auth.controller';
 import { AuthHookHook } from './auth.hooks';
 import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
+import { apiKey } from "@better-auth/api-key"
+
 
 const HOOKS = [
   { metadataKey: BEFORE_HOOK_KEY, hookType: 'before' as const },

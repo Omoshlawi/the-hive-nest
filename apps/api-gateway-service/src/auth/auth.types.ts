@@ -3,7 +3,6 @@ import { betterAuth } from 'better-auth';
 import {
   admin,
   anonymous,
-  apiKey,
   bearer,
   jwt,
   multiSession,
@@ -11,6 +10,7 @@ import {
   organization,
   username,
 } from 'better-auth/plugins';
+import { apiKey } from "@better-auth/api-key"
 import { adminConfig, organizationConfig } from './auth.contants';
 
 export type BetterAuthWithPlugins = ReturnType<
