@@ -16,19 +16,25 @@
     "scaffold": "hive-scaffold",
     "db:generate": "turbo db:generate",
     "db:migrate": "turbo db:migrate",
-    "postinstall": "turbo run build --filter='./packages/**'"
+    "postinstall": "turbo run build --filter='./packages/**'",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@hive/eslint-config": "workspace:*",
     "@hive/tools": "workspace:*",
     "@turbo/gen": "^2.0.0",
     "eslint": "^9.18.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0",
     "@hive/typescript-config": "workspace:*",
     "@types/jest": "^29.5.14",
     "prettier": "^3.4.2",
     "turbo": "^2.5.5"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,js,mjs,json,md,css}": "prettier --write --ignore-unknown"
   },
   "packageManager": "pnpm@9.15.9+sha512.68046141893c66fad01c079231128e9afb89ef87e2691d69e4d40eee228988295fd4682181bae55b58418c3a253bde65a505ec7c5f9403ece5cc3cd37dcf2531",
   "engines": {

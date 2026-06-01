@@ -6,6 +6,16 @@
   "publishConfig": {
     "access": "public"
   },
+  "main": "./base.js",
+  "exports": {
+    ".": "./base.js",
+    "./base": "./base.js",
+    "./nest": "./nest.js",
+    "./nest-e2e": "./nest-e2e.js"
+  },
+  "files": [
+    "*.js"
+  ],
   "devDependencies": {
     "@jest/types": "^29.6.3",
     "jest": "^29.7.0",
