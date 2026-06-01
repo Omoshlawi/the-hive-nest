@@ -1,9 +1,42 @@
 # The Hive Nest
 
-NestJS microservices monorepo for the Havena / The Hive property management platform.  
-Managed with **pnpm 9 workspaces** and **Turborepo**.
+Backend and frontend monorepo for **Havena** — a multi-tenant property management platform. Landlords and agencies manage properties, listings, files, virtual tours, and team members across isolated organisations.
 
-See [`PROJECT_SPEC.md`](./PROJECT_SPEC.md) for full architecture and code-pattern reference.
+Managed with **pnpm 9 workspaces** and **Turborepo**. For full architecture, patterns, and guidelines see [`PROJECT_SPEC.md`](./PROJECT_SPEC.md).
+
+---
+
+## How a request travels
+
+Understanding the flow is the single most useful thing before you touch any code.
+
+```
+Browser / API client
+       │  HTTP  (port 8090)
+       ▼
+api-gateway-service        ← the only service that speaks HTTP
+       │  gRPC  (dynamic ports, resolved via registry)
+       ├──► property-service   → PostgreSQL (property schema)
+       ├──► identity-service*  → managed by Better Auth in api-gateway DB
+       ├──► file-service        → PostgreSQL + AWS S3
+       ├──► reference-service   → PostgreSQL (geo / lookup data)
+       ├──► virtual-tour-service → PostgreSQL
+       └──► template-service
+       │
+       └──► registry-service  (port 4001, Redis)
+                 ↑ all services register here on startup
+```
+
+> `*` Identity data (users, organisations, members) lives in the api-gateway's own Prisma schema and is managed by Better Auth. There is no separate identity-service process — `@hive/identity` is a gRPC package that wraps queries into the api-gateway's own DB.
+
+Every feature module follows the same two-layer structure:
+
+| Layer                                         | Location         | Responsibility                                                  |
+| --------------------------------------------- | ---------------- | --------------------------------------------------------------- |
+| **Domain package** (`packages/property/`)     | Shared library   | Proto definitions, generated gRPC types, injectable gRPC client |
+| **Domain service** (`apps/property-service/`) | Runnable process | Business logic, Prisma queries, gRPC server                     |
+
+The API Gateway imports the domain **package** (client side). The domain **service** implements the gRPC server. They share type definitions through the proto files in the package.
 
 ---
 
@@ -12,25 +45,25 @@ See [`PROJECT_SPEC.md`](./PROJECT_SPEC.md) for full architecture and code-patter
 ```
 the-hive-nest/
 ├── apps/
-│   ├── api-gateway-service/   # Single HTTP entry point → routes gRPC to domain services
-│   ├── property-service/      # Property domain (Prisma + gRPC server)
-│   ├── file-service/          # File management (AWS S3)
-│   ├── reference-service/     # Reference / lookup data
-│   ├── virtual-tour-service/
-│   ├── registry-service/      # Service discovery + health monitoring
-│   ├── template-service/
+│   ├── api-gateway-service/   # HTTP entry point — the only public-facing service
+│   ├── property-service/      # Property domain: properties, amenities, media, categories
+│   ├── file-service/          # File management (AWS S3 + metadata DB)
+│   ├── reference-service/     # Geo reference data: countries, cities, address hierarchy
+│   ├── virtual-tour-service/  # Virtual tour links and metadata
+│   ├── registry-service/      # Service discovery (Redis-backed, port 4001)
+│   ├── template-service/      # Reusable templates
 │   └── web/                   # Next.js 14 frontend
 └── packages/
-    ├── common/                # Interceptors, filters, base CRUD service, Prisma module
+    ├── common/                # Interceptors, filters, Prisma module, query builder services
     ├── property/              # Property proto + generated types + gRPC client
-    ├── identity/              # Identity proto + gRPC client
+    ├── identity/              # User / org / member proto + gRPC client
     ├── files/                 # Files proto + gRPC client
     ├── reference/             # Reference proto + gRPC client
-    ├── vitual-tour/           # Virtual-tour proto + gRPC client (note: typo in dir name)
+    ├── vitual-tour/           # Virtual-tour proto + gRPC client  (typo in dir name)
     ├── template/              # Template package
-    ├── registry/              # Registry service client + HiveServiceModule
-    ├── authorization/         # OpenFGA integration
-    ├── utils/                 # Utility functions, server config helpers
+    ├── registry/              # Registry client + HiveServiceModule
+    ├── authorization/         # OpenFGA authorization integration
+    ├── utils/                 # Server config helpers, utilities
     ├── ui/                    # Shared React components
     ├── eslint-config/         # Shared ESLint flat configs
     ├── jest-config/           # Shared Jest configs (nest / nest-e2e / base)
@@ -44,35 +77,99 @@ the-hive-nest/
 
 - **Node.js** ≥ 18
 - **pnpm** 9 — `corepack enable && corepack prepare pnpm@latest --activate`
-- **PostgreSQL** database (one per service that owns a schema)
+- **PostgreSQL** — one database per service that owns a schema (see below)
+- **Redis** — used by `registry-service` for service discovery
+
+---
+
+## Environment setup
+
+Each service reads its configuration via `@itgorillaz/configify`. There are no untyped `process.env` reads — every variable is declared as a typed class property validated at startup.
+
+Create a `.env` file in each service directory. Minimum required variables:
+
+### `apps/api-gateway-service/.env`
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/hive_gateway
+BETTER_AUTH_SECRET=your-secret-here
+BETTER_AUTH_URL=http://localhost:8090
+HTTP_PORT=8090
+```
+
+### `apps/property-service/.env`
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/hive_property
+```
+
+### `apps/file-service/.env`
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/hive_files
+S3_ACCESS_KEY_ID=your-key
+S3_SECRETE_ACCESS_KEY_ID=your-secret
+S3_ENDPOINT=http://localhost:9000
+S3_BUCKET_PUBLIC=hive-public
+S3_BUCKET_PRIVATE=hive-private
+```
+
+### `apps/reference-service/.env`
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/hive_reference
+```
+
+### `apps/virtual-tour-service/.env`
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/hive_virtual_tour
+```
+
+### `apps/registry-service/.env`
+
+```env
+REDIS_DB_URL=redis://localhost:6379
+STORAGE_STRATEGY=redis
+SERVICE_TTL=60
+```
+
+> `template-service` and `registry-service` have no Prisma schema. Only the five services above need a `DATABASE_URL`.
 
 ---
 
 ## Getting started
 
 ```bash
-# Install all dependencies and build shared packages
+# 1. Install all dependencies and build shared packages
 pnpm install
 
-# Generate all Prisma clients
+# 2. Generate all Prisma clients (must run before migrations)
 pnpm db:generate
 
-# Migrate each service database (interactive — prompts for migration name)
+# 3. Run migrations for each service that owns a database
 pnpm --filter @hive/api-gateway-service db:migrate
 pnpm --filter @hive/property-service db:migrate
-# … repeat for each service with a Prisma schema
+pnpm --filter @hive/file-service db:migrate
+pnpm --filter @hive/reference-service db:migrate
+pnpm --filter @hive/virtual-tour-service db:migrate
 
-# Start all services with hot-reload
+# 4. Start all services
 pnpm dev
 ```
 
-`pnpm install` also runs `prepare`, which installs the pre-commit hook (see [Pre-commit hooks](#pre-commit-hooks)).
+Once running, the API is available at **http://localhost:8090**:
+
+- Swagger UI: `http://localhost:8090/api`
+- Scalar API docs: `http://localhost:8090/api-doc`
+
+> Domain services (property, file, reference, etc.) bind to dynamic ports resolved at runtime by the registry. You interact with them exclusively through the API Gateway — never directly.
 
 ---
 
 ## Commands
 
-### Root (runs across all apps + packages via Turbo)
+### Root — runs across all apps and packages via Turbo
 
 | Command            | Description                                       |
 | ------------------ | ------------------------------------------------- |
@@ -90,138 +187,31 @@ pnpm dev
 ```bash
 pnpm --filter @hive/api-gateway-service dev
 pnpm --filter @hive/property-service test
-pnpm --filter @hive/property gen          # Regenerate proto types after .proto changes
+pnpm --filter @hive/property gen                  # Regenerate proto types after .proto changes
 pnpm --filter @hive/api-gateway-service db:generate
-pnpm --filter @hive/api-gateway-service db:migrate    # Interactive — prompts for name
-```
-
----
-
-## Tooling
-
-### Jest — `@hive/jest-config`
-
-Shared Jest configuration lives in `packages/jest-config/`. Every app and package imports it — there is no inline jest config in any `package.json`.
-
-**Exports:**
-
-| Path                         | Use                                                   |
-| ---------------------------- | ----------------------------------------------------- |
-| `@hive/jest-config/nest`     | Unit tests for NestJS apps and packages               |
-| `@hive/jest-config/nest-e2e` | E2E tests (`test/` directory, `.e2e-spec.ts` pattern) |
-| `@hive/jest-config/base`     | Base config (extend for custom setups)                |
-
-**How each package uses it:**
-
-```js
-// jest.config.js  (unit tests — every app and package)
-module.exports = require('@hive/jest-config/nest');
-```
-
-```js
-// test/jest-e2e.js  (E2E — every app)
-module.exports = require('@hive/jest-config/nest-e2e');
-```
-
-To change jest behaviour globally (e.g. add a `moduleNameMapper`, increase timeout), edit `packages/jest-config/nest.js`. The change propagates to all 17 packages immediately — no per-package edits needed.
-
-### ESLint — `@hive/eslint-config`
-
-All configs use the **flat config format** (`eslint.config.mjs`). The root config applies only to root-level files; each app and package carries its own `eslint.config.mjs`.
-
-**Available configs:**
-
-| Export                               | Use                      |
-| ------------------------------------ | ------------------------ |
-| `@hive/eslint-config/nest`           | NestJS apps              |
-| `@hive/eslint-config/library`        | Shared packages          |
-| `@hive/eslint-config/next`           | Next.js apps             |
-| `@hive/eslint-config/react-internal` | React component packages |
-| `@hive/eslint-config/prettier-base`  | Adds Prettier rules      |
-
-**Typical package config (`eslint.config.mjs`):**
-
-```js
-// @ts-check
-import hiveConfig from '@hive/eslint-config/nest';
-import tseslint from 'typescript-eslint';
-
-export default tseslint.config(
-  { ignores: ['eslint.config.mjs', 'dist/**/*'] },
-  ...hiveConfig,
-  {
-    languageOptions: {
-      parserOptions: { tsconfigRootDir: import.meta.dirname },
-    },
-  },
-);
-```
-
-### TypeScript — `@hive/typescript-config`
-
-| File                 | Use                             |
-| -------------------- | ------------------------------- |
-| `nestjs.json`        | NestJS apps and packages        |
-| `nextjs.json`        | Next.js app                     |
-| `react-library.json` | React component packages        |
-| `base.json`          | Base (strict, ES2022, NodeNext) |
-
-Each `tsconfig.json` extends the relevant variant:
-
-```json
-{ "extends": "@hive/typescript-config/nestjs" }
-```
-
-### Pre-commit hooks
-
-Pre-commit hooks are managed by **Husky** + **lint-staged**. After `pnpm install`, Husky installs a Git hook that runs automatically on every `git commit`.
-
-**What runs on commit:**
-
-- `prettier --write` on all staged `ts / tsx / js / mjs / json / md / css` files
-
-This guarantees consistent formatting without requiring developers to remember to run `pnpm format`. ESLint is enforced in CI via `pnpm lint`.
-
-**First-time setup** — the hook is installed automatically by `pnpm install` via the `prepare` script. To install it manually:
-
-```bash
-pnpm exec husky
-```
-
-**Skipping the hook** (emergency only):
-
-```bash
-git commit --no-verify -m "message"
+pnpm --filter @hive/api-gateway-service db:migrate
+pnpm --filter @hive/api-gateway-service auth:gen  # Regenerate Better Auth schema
 ```
 
 ---
 
 ## Adding a new resource
 
-Use the scaffold tool to generate the full slice for a new domain resource:
+Use the scaffold tool to generate the full slice:
 
 ```bash
-pnpm scaffold --resource <ResourceName> --package <package> --service <SERVICE_NAME>
+pnpm scaffold --resource <Name> --package <pkg> --service <SERVICE_NAME>
 
-# Example
+# Example — adds a "Review" resource to the property domain
 pnpm scaffold --resource Review --package property --service PROPERTIES_SERVICE_NAME
 ```
 
-This generates six files:
-
-| File               | Location                                                           |
-| ------------------ | ------------------------------------------------------------------ |
-| DTO schema         | `packages/<pkg>/src/dto/<resource>.dto.ts`                         |
-| Domain service     | `apps/<pkg>-service/src/<resource>/<resource>.service.ts`          |
-| Domain controller  | `apps/<pkg>-service/src/<resource>/<resource>.controller.ts`       |
-| Domain module      | `apps/<pkg>-service/src/<resource>/<resource>.module.ts`           |
-| Gateway controller | `apps/api-gateway-service/src/<resource>/<resource>.controller.ts` |
-| Gateway module     | `apps/api-gateway-service/src/<resource>/<resource>.module.ts`     |
+Generates 6 files: DTO, domain service, domain controller, domain module, gateway controller, gateway module.
 
 **Steps after scaffolding:**
 
 1. Add message definitions to `packages/<pkg>/src/proto/*.proto`
-2. Run `pnpm --filter @hive/<pkg> gen` to regenerate TypeScript types
+2. `pnpm --filter @hive/<pkg> gen` — regenerate TypeScript types
 3. Export new types from `packages/<pkg>/src/types/index.ts`
 4. Add resource methods to `packages/<pkg>/src/client/hive-<pkg>-client.service.ts`
 5. Import the new module in `apps/<pkg>-service/src/app.module.ts`
@@ -229,35 +219,63 @@ This generates six files:
 
 ---
 
-## Data layer
+## Tooling
 
-Each service owns its own Prisma schema at `apps/<service>/prisma/schema.prisma`. Connection is managed via `prisma.config.ts` — no `url` in the datasource block.
+### Jest — `@hive/jest-config`
 
-```bash
-pnpm --filter @hive/<service> db:migrate   # Create and apply a migration (prompts for name)
-pnpm --filter @hive/<service> db:generate  # Regenerate Prisma client after schema change
+No inline jest config in any `package.json`. Every app/package uses a one-liner:
+
+```js
+// jest.config.js
+module.exports = require('@hive/jest-config/nest');
+
+// test/jest-e2e.js
+module.exports = require('@hive/jest-config/nest-e2e');
 ```
 
-The Prisma module is shared from `@hive/common`. Each service only needs:
+To change jest behaviour globally, edit `packages/jest-config/nest.js`.
 
-```typescript
-// src/prisma/prisma.service.ts
-@Injectable()
-export class PrismaService extends createPrismaService(PrismaClient) {}
-```
+### ESLint — `@hive/eslint-config`
+
+Flat config format (`eslint.config.mjs`) everywhere. Each app and package owns its config.
+
+| Export                        | Use             |
+| ----------------------------- | --------------- |
+| `@hive/eslint-config/nest`    | NestJS apps     |
+| `@hive/eslint-config/library` | Shared packages |
+| `@hive/eslint-config/next`    | Next.js app     |
+
+### Pre-commit hooks
+
+Husky + lint-staged, installed automatically on `pnpm install`.  
+Runs `prettier --write` on all staged files. ESLint runs in CI via `pnpm lint`.
+
+Skip in an emergency: `git commit --no-verify`
 
 ---
 
-## Environment
+## Troubleshooting
 
-Each service reads its config via `@itgorillaz/configify`. Required variables are declared as typed class properties validated at startup — there are no untyped `process.env` reads in service code.
+**`pnpm install` fails with build errors**  
+The `postinstall` script builds all `packages/**`. If a package fails to compile, fix the TypeScript error first, then re-run `pnpm install`.
 
-Copy `.env.example` (if present) to `.env.local` in each service directory that needs it.
+**Services fail to start — "cannot connect to registry"**  
+`registry-service` must be running before domain services start. Check that Redis is running and `REDIS_DB_URL` is set correctly in `apps/registry-service/.env`.
+
+**`pnpm db:generate` fails with "schema not found"**  
+The Prisma client output path is `generated/prisma/` relative to the service root. Run `pnpm --filter @hive/<service> db:generate` in isolation to see the specific error.
+
+**Proto type generation fails**  
+Ensure `protoc` is installed (`brew install protobuf` on macOS). Then run `pnpm --filter @hive/<pkg> gen`.
+
+**Port conflicts**  
+The API Gateway binds to `HTTP_PORT` (default `8090`). Domain services use dynamic ports via `getFreePort()` — they register their resolved address with the registry on startup, so port conflicts between domain services are handled automatically.
 
 ---
 
 ## Further reading
 
-- [`PROJECT_SPEC.md`](./PROJECT_SPEC.md) — architecture, service communication pattern, controller/service conventions, auth
-- [`packages/tools/`](./packages/tools/) — scaffold CLI source and generator templates
-- [`packages/common/`](./packages/common/) — shared interceptors, filters, base CRUD service, Prisma module
+- [`PROJECT_SPEC.md`](./PROJECT_SPEC.md) — architecture decisions, all code patterns, auth, rules
+- [`packages/tools/`](./packages/tools/) — scaffold CLI source
+- [`packages/common/`](./packages/common/) — query builder services, interceptors, Prisma module
+- [`packages/authorization/auth.openfga`](./packages/authorization/auth.openfga) — OpenFGA permission model
