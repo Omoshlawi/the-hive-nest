@@ -1,0 +1,71 @@
+syntax = 'proto3';
+
+import "common.message.proto";
+import "template.model.proto";
+
+
+// ── Org Override CRUD ──────────────────────────────────────────────────────
+
+message UpsertOrgOverrideRequest {
+    QueryBuilder query_builder = 1;
+    string template_key = 2;
+    string organization_id = 3;
+    string slots = 4; // JSON stringified — only the slots to override
+    optional string metadata = 5; // JSON stringified — org-specific metadata overrides
+    optional string change_note = 6;
+    optional RequestContext context = 7;
+}
+
+message GetOrgOverrideRequest {
+    QueryBuilder query_builder = 1;
+    string template_key = 2;
+    string organization_id = 3;
+    optional RequestContext context = 4;
+}
+
+message GetOrgOverrideResponse {
+    OrgTemplateOverride data = 1;
+    string metadata = 2; // JSON stringified
+}
+
+message DeleteOrgOverrideRequest {
+    QueryBuilder query_builder = 1;
+    string template_key = 2;
+    string organization_id = 3;
+    optional bool purge = 4;
+    optional RequestContext context = 5;
+}
+
+message ListOrgOverridesRequest {
+    QueryBuilder query_builder = 1;
+    string organization_id = 2;
+    optional bool include_voided = 3;
+    optional RequestContext context = 4;
+}
+
+message ListOrgOverridesResponse {
+    repeated OrgTemplateOverride data = 1;
+    string metadata = 2; // JSON stringified
+}
+
+
+// ── Org Override version management ────────────────────────────────────────
+
+message ListOrgOverrideVersionsRequest {
+    QueryBuilder query_builder = 1;
+    string override_id = 2;
+    optional RequestContext context = 3;
+}
+
+message ListOrgOverrideVersionsResponse {
+    repeated OrgTemplateOverrideVersion data = 1;
+    string metadata = 2; // JSON stringified
+}
+
+message RevertOrgOverrideRequest {
+    QueryBuilder query_builder = 1;
+    string override_id = 2;
+    string version_id = 3; // ID of the OrgTemplateOverrideVersion to revert to
+    optional string change_note = 4;
+    optional RequestContext context = 5;
+}

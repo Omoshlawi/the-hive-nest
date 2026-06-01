@@ -1,0 +1,36 @@
+syntax = 'proto3';
+
+
+message Empty {
+
+}
+
+message QueryBuilder {
+    // Pagination queries
+    optional int32 page = 1;
+    optional int32 limit = 2;
+    // Sort queries
+    optional string order_by = 3;
+    // Custom representation queries
+    optional string v = 4;
+}
+
+message GetRequest {
+    QueryBuilder query_builder = 1;
+    string id = 2;
+}
+
+message DeleteRequest {
+    QueryBuilder query_builder = 1;
+    string id = 2;
+    optional bool purge = 3;
+}
+
+message RequestContext {
+    optional string userId = 1;
+    optional string organizationId = 2;
+}
+
+message DeleteResponse {
+    bool success = 1;
+}

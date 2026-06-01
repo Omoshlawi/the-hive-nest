@@ -1,0 +1,32 @@
+syntax = 'proto3';
+
+import "common.message.proto";
+import "template.message.proto";
+import "org-override.message.proto";
+
+package hive.template.v1;
+
+service Templates {
+    // ── Template CRUD ──────────────────────────────────────────────────────
+    rpc CreateTemplate(CreateTemplateRequest) returns (GetTemplateResponse){};
+    rpc GetTemplate(GetRequest) returns (GetTemplateResponse){}; // lookup by id or key
+    rpc UpdateTemplate(UpdateTemplateRequest) returns (GetTemplateResponse){}; // snapshots current state before applying changes
+    rpc DeleteTemplate(DeleteRequest) returns (DeleteResponse){};
+    rpc ListTemplates(ListTemplatesRequest) returns (ListTemplatesResponse){};
+
+    // ── Version management ─────────────────────────────────────────────────
+    rpc ListTemplateVersions(ListTemplateVersionsRequest) returns (ListTemplateVersionsResponse){};
+    rpc RevertTemplate(RevertTemplateRequest) returns (GetTemplateResponse){}; // revert to any past version
+
+    // ── Org overrides ──────────────────────────────────────────────────────
+    rpc UpsertOrgOverride(UpsertOrgOverrideRequest) returns (GetOrgOverrideResponse){}; // create or update override
+    rpc GetOrgOverride(GetOrgOverrideRequest) returns (GetOrgOverrideResponse){};
+    rpc DeleteOrgOverride(DeleteOrgOverrideRequest) returns (DeleteResponse){};
+    rpc ListOrgOverrides(ListOrgOverridesRequest) returns (ListOrgOverridesResponse){};
+    rpc ListOrgOverrideVersions(ListOrgOverrideVersionsRequest) returns (ListOrgOverrideVersionsResponse){};
+    rpc RevertOrgOverride(RevertOrgOverrideRequest) returns (GetOrgOverrideResponse){}; // revert override to any past version
+
+    // ── Rendering ──────────────────────────────────────────────────────────
+    // Primary consumer method: resolves org override → merges slots → compiles with Handlebars
+    rpc RenderTemplate(RenderTemplateRequest) returns (RenderTemplateResponse){};
+}

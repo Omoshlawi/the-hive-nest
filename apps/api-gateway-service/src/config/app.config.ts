@@ -11,9 +11,20 @@ export class AppConfig {
   })
   betterAuthUrl: string;
   @Value('BETTER_AUTH_TRUSTED_ORIGINS', {
-    parse: z.string({ error: 'Invalid BETTER_AUTH_URL' }).parse,
+    parse: z.string().default('').parse,
   })
   private _trustedOrigin: string;
+
+  @Value('BETTER_AUTH_DISABLE_CSRF_CHECK', {
+    parse: z
+      .stringbool({
+        truthy: ['true', '1'],
+        falsy: ['false', '0'],
+        error: 'Invalid BETTER_AUTH_DISABLE_CSRF_CHECK',
+      })
+      .default(false).parse,
+  })
+  disableCSRFCheck: boolean;
 
   get trustedOrigins(): string[] {
     return this._trustedOrigin

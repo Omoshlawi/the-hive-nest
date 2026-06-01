@@ -93,6 +93,11 @@ export class AuthModule {
               provider: 'postgresql',
             }),
             trustedOrigins: appConfig.trustedOrigins,
+            advanced: {
+              // Kras dev proxy strips the Origin header before requests reach the server.
+              // trustedOrigins handles production; this covers the local dev proxy gap.
+              disableCSRFCheck: appConfig.disableCSRFCheck,
+            },
             plugins: [
               username(),
               anonymous(),

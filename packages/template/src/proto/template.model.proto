@@ -1,0 +1,65 @@
+syntax = 'proto3';
+
+import "common.message.proto";
+
+// Supported template rendering engines
+enum TemplateEngine {
+    HANDLEBARS = 0;
+}
+
+// System default template (organizationId = null on the DB side).
+// Org-level customizations are stored in OrgTemplateOverride.
+message Template {
+    string id = 1;
+    string key = 2; // unique machine key e.g. "auth.email.verification"
+    string type = 3; // "notification" | "prompt" | "report" | "invoice" | "document"
+    string name = 4;
+    optional string description = 5;
+    TemplateEngine engine = 6;
+    string slots = 7; // JSON stringified { slotName: "Handlebars string" }
+    optional string schema = 8; // JSON stringified JSON Schema for required/optional slots
+    optional string metadata = 9; // JSON stringified type-specific config
+    int32 version = 10; // increments on every update
+    bool voided = 11;
+    string created_at = 12;
+    string updated_at = 13;
+}
+
+// Immutable point-in-time snapshot of a Template's content.
+message TemplateVersion {
+    string id = 1;
+    string template_id = 2;
+    int32 version = 3;
+    string slots = 4; // JSON stringified
+    optional string schema = 5; // JSON stringified
+    optional string metadata = 6; // JSON stringified
+    optional string changed_by_id = 7; // userId
+    optional string change_note = 8; // optional commit-message style description
+    string created_at = 9;
+}
+
+// Per-org slot overrides — only the slots the org changed are stored here.
+// At render time: system slots merged with these (org wins on conflict).
+message OrgTemplateOverride {
+    string id = 1;
+    string template_key = 2;
+    string organization_id = 3;
+    string slots = 4; // JSON stringified — only overridden slots
+    optional string metadata = 5; // JSON stringified — org-specific metadata overrides
+    int32 version = 6;
+    bool voided = 7;
+    string created_at = 8;
+    string updated_at = 9;
+}
+
+// Immutable snapshot of an OrgTemplateOverride's content.
+message OrgTemplateOverrideVersion {
+    string id = 1;
+    string override_id = 2;
+    int32 version = 3;
+    string slots = 4; // JSON stringified
+    optional string metadata = 5; // JSON stringified
+    optional string changed_by_id = 6;
+    optional string change_note = 7;
+    string created_at = 8;
+}

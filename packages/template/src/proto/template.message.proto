@@ -1,0 +1,86 @@
+syntax = 'proto3';
+
+import "common.message.proto";
+import "template.model.proto";
+
+
+// ── Template CRUD ──────────────────────────────────────────────────────────
+
+message CreateTemplateRequest {
+    QueryBuilder query_builder = 1;
+    string key = 2;
+    string type = 3;
+    string name = 4;
+    optional string description = 5;
+    optional TemplateEngine engine = 6;
+    string slots = 7; // JSON stringified { slotName: "Handlebars string" }
+    optional string schema = 8; // JSON stringified JSON Schema
+    optional string metadata = 9; // JSON stringified type-specific config
+    optional RequestContext context = 10;
+}
+
+message UpdateTemplateRequest {
+    QueryBuilder query_builder = 1;
+    string id = 2;
+    optional string name = 3;
+    optional string description = 4;
+    optional string slots = 5; // JSON stringified — full slots replacement
+    optional string schema = 6; // JSON stringified
+    optional string metadata = 7; // JSON stringified
+    optional string change_note = 8; // commit-message style description of what changed
+    optional RequestContext context = 9;
+}
+
+message GetTemplateResponse {
+    Template data = 1;
+    string metadata = 2; // JSON stringified
+}
+
+message ListTemplatesRequest {
+    QueryBuilder query_builder = 1;
+    optional string type = 2; // filter by type
+    optional bool include_voided = 3;
+    optional RequestContext context = 4;
+}
+
+message ListTemplatesResponse {
+    repeated Template data = 1;
+    string metadata = 2; // JSON stringified { totalCount, currentPage, pageSize, totalPages }
+}
+
+
+// ── Version management ─────────────────────────────────────────────────────
+
+message ListTemplateVersionsRequest {
+    QueryBuilder query_builder = 1;
+    string template_id = 2;
+    optional RequestContext context = 3;
+}
+
+message ListTemplateVersionsResponse {
+    repeated TemplateVersion data = 1;
+    string metadata = 2; // JSON stringified
+}
+
+message RevertTemplateRequest {
+    QueryBuilder query_builder = 1;
+    string template_id = 2;
+    string version_id = 3; // ID of the TemplateVersion to revert to
+    optional string change_note = 4;
+    optional RequestContext context = 5;
+}
+
+
+// ── Rendering ──────────────────────────────────────────────────────────────
+
+message RenderTemplateRequest {
+    string key = 1;
+    optional string organization_id = 2; // if set, org override slots are merged in
+    string variables = 3; // JSON stringified object passed to Handlebars at compile time
+    optional RequestContext context = 4;
+}
+
+message RenderTemplateResponse {
+    map<string, string> rendered_slots = 1; // { slotName: "compiled output" }
+    string metadata = 2; // JSON stringified merged metadata
+}

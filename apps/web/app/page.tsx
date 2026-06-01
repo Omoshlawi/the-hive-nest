@@ -1,7 +1,4 @@
-import { Suspense } from 'react';
 import Image from 'next/image';
-
-import { Link } from '@hive/template/links/entities/link.entity';
 
 import { Card } from '@hive/ui/card';
 import { Code } from '@hive/ui/code';
@@ -32,39 +29,7 @@ const Gradient = ({
   );
 };
 
-const LinksSection = async () => {
-  const fetchLinks = async (): Promise<Link[]> => {
-    try {
-      return await (await fetch('http://localhost:3000/links')).json();
-    } catch (_) {
-      return [];
-    }
-  };
-
-  const links = await fetchLinks();
-
-  return (
-    <div className={styles.grid}>
-      {links.map(({ title, url, description }) => (
-        <Card className={styles.card} href={url} key={title} title={title}>
-          {description}
-        </Card>
-      ))}
-    </div>
-  );
-};
-
-const LinksSectionForTest = () => {
-  return (
-    <div className={styles.grid}>
-      <Card className={styles.card} href={'url'} title={'title'}>
-        description
-      </Card>
-    </div>
-  );
-};
-
-const RootPage = ({ params }: { params: { forTest?: boolean } }) => {
+const RootPage = () => {
   return (
     <main className={styles.main}>
       <div className={styles.description}>
@@ -146,17 +111,15 @@ const RootPage = ({ params }: { params: { forTest?: boolean } }) => {
         </div>
       </div>
 
-      {/**
-       * @note Unsupported async component testing.
-       * Should limit the following constrain for a specific environment (dev or testing).
-       *
-       * @see https://nextjs.org/docs/app/building-your-application/testing/jest
-       */}
-      {params.forTest ? (
-        <LinksSectionForTest />
-      ) : (
-        <Suspense fallback={'Loading links...'}>{<LinksSection />}</Suspense>
-      )}
+      <div className={styles.grid}>
+        <Card
+          className={styles.card}
+          href="https://turborepo.com/docs?utm_source"
+          title="Docs"
+        >
+          Find in-depth information about Turborepo features and API.
+        </Card>
+      </div>
     </main>
   );
 };
