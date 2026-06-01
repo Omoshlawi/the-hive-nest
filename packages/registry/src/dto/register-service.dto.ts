@@ -24,6 +24,6 @@ export const RegisterServiceSchema = z.object({
 });
 
 export class RegisterServiceDto extends createZodDto(RegisterServiceSchema) {}
-export class RegistryServiceEndpointDto extends createZodDto(
+export class ServiceEndpointDto extends createZodDto(
   RegistryServiceEndpointSchema,
 ) {}

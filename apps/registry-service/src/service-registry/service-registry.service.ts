@@ -90,7 +90,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
   ): Promise<ServiceRegistration> {
     const instanceId = await this.generateUniqueInstanceId(registerDto);
 
-    const service = ServiceUtils.createRegistryServiceEntry(
+    const service = ServiceUtils.createServiceRegistration(
       instanceId,
       registerDto,
     );
@@ -126,8 +126,7 @@ export class ServiceRegistryService implements OnModuleInit, OnModuleDestroy {
       return null;
     }
 
-    const { index, service } =
-      ServiceUtils.loadBalanceAndFindOneService(services);
+    const { index, service } = ServiceUtils.selectRandomService(services);
 
     this.logger.log(
       `Service selected: ${service.name}@${service.version} ` +

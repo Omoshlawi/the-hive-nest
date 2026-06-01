@@ -95,7 +95,11 @@ export class ServiceUtils {
     return semver.compare(version1, version2);
   }
 
-  static createRegistryServiceEntry(
+  /**
+   * Builds a `ServiceRegistration` record from a registration request DTO.
+   * Assigns the given `instanceId` and stamps the current timestamp.
+   */
+  static createServiceRegistration(
     instanceId: string,
     registerDto: RegisterServiceDto,
   ): ServiceRegistration {
@@ -113,10 +117,13 @@ export class ServiceUtils {
     };
   }
 
-  // TODO: Implement various load balancing strategy asides randomizing
-  static loadBalanceAndFindOneService(
-    allServices: Array<ServiceRegistration> = [],
-  ) {
+  /**
+   * Picks one service at random from the provided list.
+   * Returns the selected service and its index in the array.
+   *
+   * TODO: extend with weighted, round-robin, and least-connections strategies.
+   */
+  static selectRandomService(allServices: Array<ServiceRegistration> = []) {
     const randomIndex = Math.floor(Math.random() * allServices.length);
     const selectedService = allServices[randomIndex];
     return { index: randomIndex, service: selectedService };
@@ -194,6 +201,11 @@ export class ServiceUtils {
     return filteredServices;
   }
 
+  /**
+   * Returns the IDs of services whose last heartbeat timestamp is older than
+   * `ttl` milliseconds. Used by the registry cleanup scheduler to evict stale
+   * registrations.
+   */
   static expiredServiceIds(
     services: Array<ServiceRegistration>,
     ttl: number,

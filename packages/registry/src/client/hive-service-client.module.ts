@@ -6,7 +6,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { RegistryClientConfig } from '../config';
 import {
   CLIENT_SERVICE_CONFIG_TOKEN,
-  HIVE_SERVICE_METADATA_KEY,
+  HIVE_SERVICE_METADATA_TOKEN,
   REGISTRY_PACKAGE,
 } from '../constants';
 import { HiveServiceConfig, RegistryClientAsyncOptions } from '../interfaces';
@@ -21,16 +21,30 @@ export interface HiveServiceModuleOptions {
   enableHeartbeat?: boolean;
 }
 
-// TODO: 
-// document that for heartbeat to work, you must import ScheduleModule in the consumer module
-// one service can only have one heartbeat service
-// Make global using for root (in root module) to share HiveDiscovery service and other service to the forFeature
+/**
+ * Central NestJS module for service registration, discovery, and gRPC client
+ * injection. Provides two entry points:
+ *
+ * **`forRoot(options)`** — call once in your service's `AppModule`.
+ *   - Connects to `registry-service` via gRPC.
+ *   - Registers this service and starts the heartbeat (when `enableHeartbeat: true`).
+ *   - Requires `ScheduleModule.forRoot()` in the same AppModule for heartbeats to fire.
+ *   - Only one `forRoot` call per process.
+ *
+ * **`forFeature(services)`** — call in individual feature modules of the
+ *   API Gateway to inject typed gRPC client stubs (e.g. `HivePropertyServiceClient`).
+ *   - Relies on `forRoot` having been called in the root module.
+ *   - Each service class must be decorated with `@HiveService(config)`.
+ *
+ * @example
+ * // Domain service AppModule — registers with registry and sends heartbeats
+ * HiveServiceModule.forRoot({ enableHeartbeat: true, client: { ... } })
+ *
+ * // API Gateway feature module — injects the property service gRPC client
+ * HiveServiceModule.forFeature([HivePropertyServiceClient])
+ */
 @Module({})
 export class HiveServiceModule {
-  /**
-   * RECOMMENDED: Use this ONLY in AppModule
-   * Choose whether to include heartbeat functionality or not
-   */
   static forRoot(options: HiveServiceModuleOptions): DynamicModule {
     if (options.enableHeartbeat && !options.client) {
       throw new Error(
@@ -64,9 +78,10 @@ export class HiveServiceModule {
   }
 
   /**
-   * Relies on forRoot called and app(root) module
-   * ✅ RECOMMENDED: Use this in feature modules
-   * Creates service clients that use the singleton RegistryClientService
+   * Standalone variant of `forFeature` that also sets up the registry
+   * connection. Use this when you need a client in a module that does not
+   * have a parent `forRoot` in scope (e.g. standalone tests or micro-apps).
+   * Prefer `forFeature` in normal gateway feature modules.
    */
   static forFeatureStandAlone(services: Array<Type<any>>): DynamicModule {
     if (!services || services.length === 0) {
@@ -93,7 +108,7 @@ export class HiveServiceModule {
         registryConfig: RegistryClientConfig,
       ) => {
         const config = reflector.get<HiveServiceConfig>(
-          HIVE_SERVICE_METADATA_KEY,
+          HIVE_SERVICE_METADATA_TOKEN,
           serviceClass,
         );
         if (!config) {

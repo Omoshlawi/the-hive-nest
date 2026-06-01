@@ -20,10 +20,26 @@ import {
 } from '../types';
 import { HiveDiscoveryService } from './hive-discovery.service';
 
+/**
+ * Manages the live gRPC client proxy pool for a single named remote service.
+ *
+ * On startup it subscribes to the registry's service-update stream and
+ * maintains one `ClientGrpcProxy` per healthy remote endpoint (keyed by
+ * service instance ID). When the registry reports a service as removed the
+ * corresponding proxy is closed and evicted.
+ *
+ * Use `getService<T>()` when you want a nullable result, or
+ * `loadBalance<T>()` when you expect the service to be available and want a
+ * throw on absence (preferred in domain client packages).
+ *
+ * Lifecycle: instantiated by `HiveServiceModule.forFeature()` — one instance
+ * per `@HiveService`-decorated client class.
+ */
 @Injectable()
 export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
   private readonly logger: Logger = new Logger(HiveServiceClient.name);
-  private serviceGrpcClientProxyPool: Map<string, ClientGrpcProxy> = new Map();
+  /** Live proxy pool: serviceInstanceId → ClientGrpcProxy */
+  private grpcProxies: Map<string, ClientGrpcProxy> = new Map();
 
   constructor(
     private readonly config: HiveServiceConfig,
@@ -33,7 +49,7 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
   onModuleInit(): void {
     this.logger.debug('Setting up service stream processing');
     this.validateConfiguration();
-    this.setupServiceWatcher();
+    this.initServiceWatcher();
   }
 
   private validateConfiguration(): void {
@@ -54,16 +70,15 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Sets up a robust watcher for the service discovery stream.
-   * This method  includes retry logic with exponential backoff
-   * to handle transient connection failures gracefully.
+   * Subscribes to the registry discovery stream with exponential-backoff
+   * retry so transient network failures are handled automatically.
+   * Drives `handleServiceUpdate` on each registry event.
    */
-  private setupServiceWatcher(): void {
+  private initServiceWatcher(): void {
     try {
       this.discoveryService
         .watchServices()
         .pipe(
-          // Use the `tap` operator to log messages before the retry attempt.
           tap({
             error: (err) =>
               this.logger.warn(
@@ -71,8 +86,6 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
                 err,
               ),
           }),
-          // The `retry` operator will resubscribe to the source Observable
-          // on error. The `delay` function implements an exponential backoff.
           retry({
             delay: (error, retryCount) => {
               const delayMs = Math.pow(2, retryCount) * 1000;
@@ -84,23 +97,19 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
           }),
         )
         .subscribe({
-          next: (updateStream) => this.handleServiceUpdate(updateStream),
+          next: (update) => this.handleServiceUpdate(update),
           error: (error) => {
             this.logger.error(
-              'Service watch stream failed after all retry attempts. The service client is now in a potentially unstable state.',
+              'Service watch stream failed after all retry attempts. ' +
+                'The service client is now in a potentially unstable state.',
               error,
             );
-            // Future-proof: Consider adding a mechanism here to alert a health check or a monitoring system.
           },
           complete: () => {
             this.logger.warn('Service watch stream completed unexpectedly');
-            // Implement logic here to re-establish the connection if needed.
-            // For now, the `retry` logic in the pipe handles this, but a full
-            // shutdown/re-initialization might be necessary for certain scenarios.
           },
         });
     } catch (error) {
-      // Catch any synchronous errors that might occur during the initial call.
       this.logger.error(
         'Failed to initialize the service watch stream.',
         error,
@@ -108,40 +117,41 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  private handleServiceUpdate(updateStream: ServiceUpdate) {
+  /** Routes a registry update event to add, remove, or skip a proxy. */
+  private handleServiceUpdate(update: ServiceUpdate) {
     this.logger.debug('Consuming service changes stream');
-    const serviceName = this.formatServiceName(updateStream.service);
-    const serviceId = updateStream.service?.id;
+    const label = this.formatServiceLabel(update.service);
+    const serviceId = update.service?.id;
 
-    // Only process relevant services with grpc tag
-    if (!this.isRelevantService(updateStream.service) || !serviceId) {
-      this.logger.debug(`Skipping processing service ${serviceName}`);
+    if (!this.matchesClient(update.service) || !serviceId) {
+      this.logger.debug(`Skipping service ${label}`);
       return;
     }
 
-    this.logger.debug(`Processing service ${serviceName}`);
+    this.logger.debug(`Processing service ${label}`);
 
-    switch (updateStream.type) {
+    switch (update.type) {
       case ServiceUpdate_UpdateType.REMOVED:
-        this.removeServiceInstance(serviceId, serviceName);
+        this.removeServiceProxy(serviceId, label);
         break;
       case ServiceUpdate_UpdateType.ADDED:
       case ServiceUpdate_UpdateType.UPDATED:
-        this.addOrUpdateServiceInstance(
-          updateStream.service!,
-          serviceId,
-          serviceName,
-        );
+        this.ensureServiceProxy(update.service!, serviceId, label);
         break;
     }
   }
 
-  private formatServiceName(service?: ServiceRegistration): string {
+  /** Returns a human-readable label used in log messages. */
+  private formatServiceLabel(service?: ServiceRegistration): string {
     if (!service) return 'unknown';
     return `${service.name}@${service.version}(${service.id})`;
   }
 
-  private isRelevantService(service?: ServiceRegistration): boolean {
+  /**
+   * Returns true when the registry event is for the service this client
+   * is configured to connect to, and the instance advertises a gRPC endpoint.
+   */
+  private matchesClient(service?: ServiceRegistration): boolean {
     return !!(
       service &&
       this.config.name === service.name &&
@@ -149,56 +159,56 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
     );
   }
 
-  private removeServiceInstance(serviceId: string, serviceName: string) {
-    const instance = this.serviceGrpcClientProxyPool.get(serviceId);
+  /** Closes and removes the proxy for a service instance that left the registry. */
+  private removeServiceProxy(serviceId: string, label: string) {
+    const instance = this.grpcProxies.get(serviceId);
     if (instance) {
       instance.close();
-      this.serviceGrpcClientProxyPool.delete(serviceId);
+      this.grpcProxies.delete(serviceId);
       this.logger.log(
-        `Service instance [${serviceName}] removed: connection cleared`,
+        `Service instance [${label}] removed: connection cleared`,
       );
     }
   }
 
-  private addOrUpdateServiceInstance(
+  /**
+   * Adds a gRPC proxy for a new service instance. No-ops if a proxy for
+   * this instance ID already exists (update events are idempotent).
+   */
+  private ensureServiceProxy(
     service: ServiceRegistration,
     serviceId: string,
-    serviceName: string,
+    label: string,
   ) {
-    // Skip if connection already exists and is healthy
-    const existingInstance = this.serviceGrpcClientProxyPool.get(serviceId);
-    if (existingInstance) {
+    if (this.grpcProxies.has(serviceId)) {
       this.logger.debug(
-        `Service connection for [${serviceName}] already exists and is healthy, skipping`,
+        `Proxy for [${label}] already exists and is healthy, skipping`,
       );
       return;
     }
 
     const endpoint = service.endpoints?.find((end) => end.protocol === 'grpc');
     if (!endpoint) {
-      this.logger.warn(`No GRPC endpoint found for service [${serviceName}]`);
+      this.logger.warn(`No gRPC endpoint found for service [${label}]`);
       return;
     }
 
     try {
-      const newClientProxy = this.createGrpcProxyClientForEndpoint(endpoint);
-      this.serviceGrpcClientProxyPool.set(serviceId, newClientProxy);
-      this.logger.log(
-        `New client instance for [${serviceName}] established and cached`,
-      );
+      const proxy = this.createGrpcProxy(endpoint);
+      this.grpcProxies.set(serviceId, proxy);
+      this.logger.log(`New proxy for [${label}] established and cached`);
     } catch (error) {
-      this.logger.error(`Failed to create client for [${serviceName}]`, error);
+      this.logger.error(`Failed to create proxy for [${label}]`, error);
     }
   }
 
   /**
-   * Creates a GRPC proxy client for the given endpoint.
-   * @param endpoint Service endpoint information
-   * @returns GRPC proxy client
+   * Constructs a `ClientGrpcProxy` pointed at the given endpoint using the
+   * package and proto path from this client's `HiveServiceConfig`.
    */
-  private createGrpcProxyClientForEndpoint(endpoint: Endpoint) {
+  private createGrpcProxy(endpoint: Endpoint): ClientGrpcProxy {
     this.logger.debug(
-      `Creating GRPC proxy client for endpoint ${endpoint.host}:${endpoint.port}`,
+      `Creating gRPC proxy for endpoint ${endpoint.host}:${endpoint.port}`,
     );
     return ClientProxyFactory.create({
       transport: Transport.GRPC,
@@ -206,59 +216,57 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
         package: this.config.package,
         protoPath: this.config.protoPath,
         url: `${endpoint.host}:${endpoint.port}`,
-        // Support large file uploads (up to 100MB)
-        // This is especially important for virtual tour service file streaming
-        // maxSendMessageLength: 100 * 1024 * 1024, // 100MB
-        // maxReceiveMessageLength: 100 * 1024 * 1024, // 100MB
       },
     });
   }
 
   /**
-   * Get a service proxy with load balancing
-   * @returns ClientGrpcProxy or null if no healthy instances
+   * Selects one healthy proxy at random (simple random load balancing).
+   * Returns `null` if the proxy pool is empty — the service may not have
+   * registered yet or all instances may have left.
    */
   getServiceProxy(): ClientGrpcProxy | null {
-    const healthyInstances = Array.from(
-      this.serviceGrpcClientProxyPool.entries(),
-    ).map(([id, instance]) => ({ id, instance }));
+    const proxies = Array.from(this.grpcProxies.entries()).map(
+      ([id, instance]) => ({ id, instance }),
+    );
 
-    if (healthyInstances.length === 0) {
+    if (proxies.length === 0) {
       this.logger.warn(
         `No healthy instances available for service ${this.config.name}`,
       );
       return null;
     }
+
     this.logger.log('Load balancing ' + this.config.name + ' client proxies');
-    // Simple round-robin load balancing
-    const selectedIndex = Math.floor(Math.random() * healthyInstances.length);
-    return healthyInstances[selectedIndex].instance;
+    const selected = Math.floor(Math.random() * proxies.length);
+    return proxies[selected].instance;
   }
 
-  /**
-   * Get all available service proxies
-   */
+  /** Returns all live proxies (useful for health checks). */
   getAllServiceProxies(): ClientGrpcProxy[] {
-    return Array.from(this.serviceGrpcClientProxyPool.values()).map(
-      (instance) => instance,
-    );
+    return Array.from(this.grpcProxies.values());
   }
 
   /**
-   * Load balances proxy using method getServiceProxy and retreive its client
+   * Returns a typed gRPC service stub via a randomly selected proxy, or
+   * `null` if no healthy instances are available.
+   *
+   * Prefer `loadBalance<T>()` in production code — it throws on absence
+   * which surfaces misconfiguration early rather than silently returning null.
    */
-  getService<T extends Object>() {
+  getService<T extends object>(): T | null {
     const proxy = this.getServiceProxy();
-    if (!proxy) {
-      return null;
-    }
+    if (!proxy) return null;
     return proxy.getService<T>(this.config.serviceName);
   }
 
   /**
-   * Returns a typed gRPC service client or throws if no healthy instance is
-   * available. Use this in domain client packages instead of duplicating the
-   * null-check in every client.
+   * Returns a typed gRPC service stub or throws if no healthy instance is
+   * available. Use this in domain client packages (`@hive/property`,
+   * `@hive/files`, etc.) instead of implementing the null-check locally.
+   *
+   * @throws Error when the proxy pool is empty (service not yet registered
+   *   or all instances have deregistered).
    */
   loadBalance<T extends object>(): T {
     const service = this.getService<T>();
@@ -271,16 +279,13 @@ export class HiveServiceClient implements OnModuleInit, OnModuleDestroy {
     return service;
   }
 
-  getconfig() {
+  /** Returns the resolved configuration for this client. */
+  getConfig(): HiveServiceConfig {
     return this.config;
   }
 
   onModuleDestroy() {
-    Array.from(this.serviceGrpcClientProxyPool.entries()).forEach(
-      ([key, value]) => {
-        value.close();
-      },
-    );
-    this.serviceGrpcClientProxyPool.clear();
+    this.grpcProxies.forEach((proxy) => proxy.close());
+    this.grpcProxies.clear();
   }
 }

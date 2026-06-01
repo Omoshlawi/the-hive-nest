@@ -1,9 +1,19 @@
 /* eslint-disable @typescript-eslint/require-await */
 import { Logger } from '@nestjs/common';
 import { ServiceRegistration } from '../types';
-import { IStorage } from '../interfaces'; // Assuming IStorage is in this file path
+import { StorageAdapter } from '../interfaces';
 
-export abstract class BaseStorage implements IStorage {
+/**
+ * Abstract base for all storage backends. Provides default no-op
+ * implementations of `initialize` and `close` so concrete backends only
+ * need to override them when they require setup/teardown (e.g. Redis
+ * connection). All data methods are left abstract.
+ *
+ * Concrete implementations:
+ * - `MemoryStorage` — in-process map (default, used locally and in tests)
+ * - `RedisStorage` — Redis-backed (used in production, lives in `registry-service`)
+ */
+export abstract class BaseStorage implements StorageAdapter {
   protected readonly logger = new Logger(this.constructor.name);
   protected initialized = false;
 
@@ -11,12 +21,12 @@ export abstract class BaseStorage implements IStorage {
     this.initialized = true;
     this.logger.log('Initialized storage');
   }
+
   async close(): Promise<void> {
     this.initialized = false;
     this.logger.log('Storage closed');
   }
 
-  // Implement the methods from the IStorage interface
   abstract getAll(): Promise<ServiceRegistration[]>;
   abstract get(id: string): Promise<ServiceRegistration | null>;
   abstract save(service: ServiceRegistration): Promise<ServiceRegistration>;

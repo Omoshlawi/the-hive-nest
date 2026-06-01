@@ -12,6 +12,23 @@ import { ClientServiceConfig } from '../interfaces';
 import { ServiceRegistration } from '../types';
 import { HiveDiscoveryService } from './hive-discovery.service';
 
+/**
+ * Registers this service with the registry on startup and keeps the
+ * registration alive by sending a heartbeat every 30 seconds.
+ *
+ * **Registration lifecycle:**
+ * - On `onModuleInit`: attempts registration up to `MAX_REGISTRATION_ATTEMPTS`
+ *   times with exponential backoff. If all attempts fail the service continues
+ *   to run but will not be discoverable by other services.
+ * - On each `@Cron` tick: sends a heartbeat. If the registry reports the
+ *   service as NOT_FOUND (e.g. after a registry restart), clears the local
+ *   registration so the next tick re-registers.
+ * - On `onModuleDestroy`: sends an unregister call so the registry removes
+ *   this instance immediately rather than waiting for TTL expiry.
+ *
+ * Requires `ScheduleModule.forRoot()` to be imported in the consuming
+ * AppModule for the `@Cron` decorator to fire.
+ */
 @Injectable()
 export class HiveHeartbeatService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(HiveHeartbeatService.name);
