@@ -13,7 +13,6 @@ import {
 import { PrismaClient } from '../../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { adminConfig, organizationConfig } from './auth.contants';
-import { BetterAuthWithPlugins } from './auth.types';
 import { apiKey } from "@better-auth/api-key"
 
 
@@ -21,7 +20,7 @@ const connectionString = `${process.env.DATABASE_URL}`;
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
-export const auth: BetterAuthWithPlugins = betterAuth({
+export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),

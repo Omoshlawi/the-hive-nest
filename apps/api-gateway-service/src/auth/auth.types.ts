@@ -1,42 +1,14 @@
+import type { auth } from './auth.cli.config';
 import { UserSession as BetterAuthUserSession } from '@thallesp/nestjs-better-auth';
-import { betterAuth } from 'better-auth';
-import {
-  admin,
-  anonymous,
-  bearer,
-  jwt,
-  multiSession,
-  openAPI,
-  organization,
-  username,
-} from 'better-auth/plugins';
-import { apiKey } from "@better-auth/api-key"
-import { adminConfig, organizationConfig } from './auth.contants';
 
-export type BetterAuthWithPlugins = ReturnType<
-  typeof betterAuth<{
-    plugins: [
-      ReturnType<typeof username>,
-      ReturnType<typeof anonymous>,
-      ReturnType<typeof admin<typeof adminConfig>>,
-      ReturnType<typeof apiKey>,
-      ReturnType<typeof organization<typeof organizationConfig>>,
-      ReturnType<typeof bearer>,
-      ReturnType<typeof multiSession>,
-      ReturnType<typeof openAPI>,
-      ReturnType<typeof jwt>,
-    ];
-  }>
->;
+export type BetterAuthWithPlugins = typeof auth;
 
 export interface UserSession extends BetterAuthUserSession {
   user: BetterAuthUserSession['user'] & {
     isAnonymous?: boolean;
-    // Add any other user fields as needed
   };
   session: BetterAuthUserSession['session'] & {
     activeOrganizationId?: string;
     impersonatedBy?: string;
-    // Add any other session fields as needed
   };
 }
