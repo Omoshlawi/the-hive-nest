@@ -7,8 +7,8 @@ Manages Handlebars templates with versioning and per-org slot overrides. Used by
 ## What this service owns
 
 - **System templates** — global defaults keyed by a dot-notation `key` (e.g. `auth.email.verification`)
-- **Org template overrides** — per-org partial slot overrides merged on top of system templates at render time (org slots win on conflict)
-- **Version history** — every update snapshots the previous state; any past version can be reverted to at any time
+- **Org template overrides** — per-org partial slot overrides merged on top of system templates at render time (org slots win on conflict, missing org slots fall back to system)
+- **Version history** — every update snapshots the previous state into an immutable version row; any past version can be reverted to at any time
 - **Handlebars rendering** — `RenderTemplate` resolves the correct template, merges org overrides, compiles all slots with caller-supplied variables, and returns rendered output
 
 ---
@@ -26,22 +26,95 @@ Caller (notification-service, etc.)
       → PostgreSQL (templates, versions, org overrides)
 ```
 
-### Rendering flow
+---
+
+## Core concepts
+
+### Slots
+
+A template stores its content as a flat map of named strings called **slots**. Each slot is a Handlebars template string.
+
+```json
+{
+  "email_subject": "Verify your email address",
+  "email_body": "<p>Hi {{user.firstName}}, please click <a href=\"{{actionUrl}}\">here</a>.</p>",
+  "sms_body": "Verify your account: {{actionUrl}}"
+}
+```
+
+Slot names are open — any string is valid. The notification service defines its own contract (see [Slot naming convention](#slot-naming-convention-notification-templates)). Other consumers (AI prompts, reports, invoices) define different names.
+
+### System templates vs org overrides
+
+There is one system template per `key`. Orgs do not own copies of system templates — they own **override records** that store only the slots they changed. At render time, the service merges the two:
+
+```
+rendered = { ...systemSlots, ...orgOverrideSlots }
+```
+
+Org slots win on conflict. Any slot not present in the org override falls back to the system default. If an org has no override at all, the system template is used as-is.
+
+### Rendering pipeline
 
 ```
 RenderTemplate(key, organizationId?, variables)
-  1. Load Template by key
-  2. If organizationId is given → load OrgTemplateOverride (if exists)
-  3. Merge: { ...systemSlots, ...orgOverrideSlots }   ← org wins on conflict
-  4. Compile each merged slot with Handlebars(variables)
-  5. Return { renderedSlots: { slotName: "compiled string" }, metadata }
+
+  1. Check in-memory cache (key + orgId, 5-min TTL)
+     → hit: skip DB reads
+     → miss: continue
+
+  2. Fetch system Template by key from DB
+     → not found or voided → NOT_FOUND error
+
+  3. If organizationId provided:
+       Fetch OrgTemplateOverride for (key, orgId)
+       → may be null (org has no customization)
+
+  4. Cache the resolved (template, override) pair
+
+  5. Merge slots:
+       mergedSlots = { ...systemSlots, ...orgOverrideSlots }
+
+  6. Merge metadata:
+       mergedMetadata = { ...systemMetadata, ...orgOverrideMetadata }
+
+  7. For each slot in mergedSlots:
+       compiledFn = compileCache.get(slotString) ?? Handlebars.compile(slotString)
+       renderedSlots[name] = compiledFn(variables, { allowProtoProperties: false })
+
+  8. Return { renderedSlots, metadata }
+```
+
+**Caches involved:**
+
+- **Resolution cache** — the `(template, override)` DB result is cached in memory per `key:orgId` for 5 minutes. Invalidated on any mutation to that template or override.
+- **Compile cache** — compiled Handlebars template functions are cached per slot string (max 500 entries, LRU eviction). Avoids re-parsing the Handlebars AST on every render call.
+
+### Versioning
+
+Every mutating operation that changes a template's content (`UpdateTemplate`, `RevertTemplate`) or an org override's content (`UpsertOrgOverride`, `RevertOrgOverride`) first snapshots the **current state** into an immutable version row before applying changes. The snapshot and the update happen inside a single database transaction — if the update fails, no orphaned version is created.
+
+```
+Update Template A (version 3 → 4):
+  DB transaction:
+    INSERT TemplateVersion { templateId: A, version: 3, slots: <current> }
+    UPDATE Template        { version: 4, slots: <new> }
+```
+
+Reverting to a past version is itself a forward-only operation: the current state is snapshotted first, then the target version's content is applied as a new version. No version is ever deleted.
+
+```
+Revert Template A to version 2 (currently at version 4):
+  DB transaction:
+    INSERT TemplateVersion { templateId: A, version: 4, slots: <current> }  ← current snapshotted
+    UPDATE Template        { version: 5, slots: <version-2 content> }
 ```
 
 ---
 
 ## Environment variables
 
-Create a `.env` file in this directory (see `.env.example` if present):
+Create a `.env` file in this directory:
 
 | Variable                     | Description                               | Required |
 | ---------------------------- | ----------------------------------------- | -------- |
@@ -76,19 +149,17 @@ pnpm dev
 
 ## Adding a new system template
 
-System templates are defined in two places and kept in sync manually:
+System templates are defined in two places:
 
 ```
 prisma/seeds/
 ├── templates.csv              ← one row per template (metadata + slot sources)
 └── templates/
     └── <key>/
-        └── <slot_name>.hbs    ← Handlebars file for each large slot
+        └── <slot_name>.hbs    ← Handlebars file for large slots
 ```
 
 ### Step 1 — Add a row to `templates.csv`
-
-Each column follows this convention:
 
 | Column        | Value                                                                        |
 | ------------- | ---------------------------------------------------------------------------- |
@@ -101,7 +172,7 @@ Each column follows this convention:
 | `schema`      | JSON Schema for required/optional slots (optional)                           |
 | `metadata`    | Type-specific config JSON (optional)                                         |
 
-**Slot source directives** (the `slot_*` columns):
+**Slot source directives** — each `slot_*` cell value:
 
 | Directive              | Usage                                                        |
 | ---------------------- | ------------------------------------------------------------ |
@@ -112,19 +183,19 @@ Each column follows this convention:
 Example row:
 
 ```csv
-billing.invoice.sent,notification,Invoice Sent,Sent when a new invoice is issued.,HANDLEBARS,text:Your invoice #{{invoice.number}} is ready,file:templates/billing.invoice.sent/email_body.hbs,text:Invoice #{{invoice.number}} from {{orgName}} is ready.,,,"{"required":["email_subject","email_body"]}","{"channels":{"email":true,"sms":true,"push":false}}"
+billing.invoice.sent,notification,Invoice Sent,Sent when a new invoice is issued.,HANDLEBARS,text:Your invoice #{{invoice.number}} is ready,file:templates/billing.invoice.sent/email_body.hbs,text:Invoice #{{invoice.number}} from {{orgName}}.,,,"{""required"":[""email_subject"",""email_body""]}","{""channels"":{""email"":true}}"
 ```
 
 ### Step 2 — Create `.hbs` files for large slots
 
-For any slot using `file:`, create the corresponding file under `prisma/seeds/templates/<key>/`:
+For any `file:` slot, create the file under `prisma/seeds/templates/<key>/`:
 
 ```
 prisma/seeds/templates/billing.invoice.sent/
 └── email_body.hbs
 ```
 
-`.hbs` files are plain Handlebars templates. Use `{{variable}}` syntax — whatever the caller passes in `variables` becomes available.
+`.hbs` files are plain Handlebars templates:
 
 ```html
 <p>Hi {{user.firstName}},</p>
@@ -134,9 +205,7 @@ prisma/seeds/templates/billing.invoice.sent/
   <strong>{{invoice.amount}}</strong> is ready.
 </p>
 
-<p>
-  <a href="{{invoiceUrl}}">View Invoice</a>
-</p>
+<p><a href="{{invoiceUrl}}">View Invoice</a></p>
 ```
 
 ### Step 3 — Run the seed
@@ -151,7 +220,7 @@ The seed upserts — running it again updates existing templates without duplica
 
 ## Slot naming convention (notification templates)
 
-Slots are open strings — any name is valid. The following names are the shared contract with the notification service:
+Slots are open strings — any name is valid. The following are the shared contract with the notification service:
 
 | Slot            | Content                                                    |
 | --------------- | ---------------------------------------------------------- |
@@ -159,9 +228,7 @@ Slots are open strings — any name is valid. The following names are the shared
 | `email_body`    | Email HTML body (Handlebars)                               |
 | `sms_body`      | SMS message text, 160-char target (plain text, Handlebars) |
 | `push_title`    | Push notification title (plain text, Handlebars)           |
-| `push_body`     | Push notification body (plain text, Handlebars)            |
-
-Other consumer types (AI prompts, reports, invoices) define their own slot names.
+| `push_body`     | Push notification body text (plain text, Handlebars)       |
 
 ---
 
@@ -178,23 +245,86 @@ Other consumer types (AI prompts, reports, invoices) define their own slot names
 
 ## Org-level template customization
 
-Orgs can override specific slots without replacing the whole template. Only the changed slots need to be stored — the rest fall back to system defaults at render time.
+Orgs override only the slots they want to change. The system template provides the rest. This means an org can rebrand the subject line without touching the email body, or swap the full body while keeping the system subject.
 
-**Via gRPC** (`HiveTemplateClientService.orgOverrides`):
+**Create or update an org's override** (`HiveTemplateClientService.orgOverrides.upsertOrgOverride`):
 
 ```typescript
-// Create or update an org's override for a template
-await templateClient.orgOverrides.upsertOrgOverride({
-  templateKey: 'auth.email.verification',
-  organizationId: 'org-123',
-  slots: JSON.stringify({
-    email_subject: 'Verify your Acme account', // overrides system subject
-    // email_body not set → system default is used
-  }),
-  metadata: JSON.stringify({ fromName: 'Acme Support' }),
-  changeNote: 'Brand customization',
-});
+// Only email_subject is overridden — email_body falls back to the system default
+await templateClient.orgOverrides
+  .upsertOrgOverride({
+    templateKey: 'auth.email.verification',
+    organizationId: 'org-123',
+    slots: JSON.stringify({
+      email_subject: 'Verify your Acme account',
+    }),
+    metadata: JSON.stringify({ fromName: 'Acme Support' }),
+    changeNote: 'Initial brand customization',
+  })
+  .toPromise();
 ```
+
+**What render returns for that org:**
+
+```json
+{
+  "renderedSlots": {
+    "email_subject": "Verify your Acme account",   ← org override
+    "email_body": "<p>Hi Alice, please click …</p>" ← system default, compiled with variables
+  },
+  "metadata": "{\"channels\":{\"email\":true},\"fromName\":\"Acme Support\"}"
+}
+```
+
+**Calling RenderTemplate from another service:**
+
+```typescript
+const result = await templateClient.render
+  .renderTemplate({
+    key: 'auth.email.verification',
+    organizationId: session.activeOrganizationId, // omit for system default only
+    variables: JSON.stringify({
+      user: { firstName: 'Alice' },
+      actionUrl: 'https://app.thehive.com/verify?token=abc123',
+    }),
+  })
+  .toPromise();
+
+const subject = result.renderedSlots['email_subject'];
+const body = result.renderedSlots['email_body'];
+```
+
+---
+
+## Cache behaviour
+
+| Cache            | Key                        | TTL                    | Invalidated by                            |
+| ---------------- | -------------------------- | ---------------------- | ----------------------------------------- |
+| Resolution cache | `key` or `key:orgId`       | 5 minutes              | Any mutation to that template or override |
+| Compile cache    | Handlebars template string | Forever (LRU, max 500) | Never (content-addressed)                 |
+
+The resolution cache is **in-memory per instance**. If you run multiple instances, each has its own cache. In a multi-instance setup, a mutation on one instance invalidates that instance's cache only — other instances serve stale data for up to 5 minutes. This is acceptable for template content (changes are infrequent and content is not security-sensitive). If stricter consistency is needed, reduce `RENDER_CACHE_TTL_MS` or replace with a shared Redis cache.
+
+---
+
+## gRPC API surface
+
+All operations are exposed via the `Templates` gRPC service. The client is `HiveTemplateClientService` from `@hive/template`, grouped into three namespaces:
+
+| Namespace       | Methods                                                                                                                        |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `.templates`    | `createTemplate`, `getTemplate`, `updateTemplate`, `deleteTemplate`, `listTemplates`, `listTemplateVersions`, `revertTemplate` |
+| `.orgOverrides` | `upsertOrgOverride`, `getOrgOverride`, `deleteOrgOverride`, `listOrgOverrides`, `listOrgOverrideVersions`, `revertOrgOverride` |
+| `.render`       | `renderTemplate`                                                                                                               |
+
+Error codes returned:
+
+| Code               | When                                                            |
+| ------------------ | --------------------------------------------------------------- |
+| `NOT_FOUND`        | Template or version or override does not exist                  |
+| `INVALID_ARGUMENT` | Required field missing, invalid JSON, version/override mismatch |
+| `ALREADY_EXISTS`   | `createTemplate` with a key that already exists                 |
+| `INTERNAL`         | Handlebars compilation failure                                  |
 
 ---
 
@@ -223,11 +353,11 @@ pnpm db:generate    # regenerate Prisma client
 ## Testing
 
 ```bash
-pnpm test           # unit tests
-pnpm test:e2e       # end-to-end tests
+pnpm test       # unit tests
+pnpm test:e2e   # end-to-end tests
 ```
 
-Key test coverage:
+Test coverage:
 
-- `templates.renderer.spec.ts` — slot merge logic, Handlebars compilation, org override wins
-- `templates.service.spec.ts` — CRUD, versioning (snapshot on update), revert, render with/without org override
+- `templates.renderer.spec.ts` — slot merge, Handlebars compile, org override wins, prototype pollution prevention, parse helpers
+- `templates.service.spec.ts` — CRUD, transactional snapshotting, revert, render with and without org override, soft vs hard delete

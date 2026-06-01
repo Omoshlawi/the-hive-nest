@@ -54,6 +54,9 @@ const mockPrisma = {
     findMany: jest.fn(),
     count: jest.fn(),
   },
+  // Pass the mock itself as the transaction client so all mocked methods are available
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  $transaction: jest.fn((cb: (tx: any) => Promise<unknown>) => cb(mockPrisma)),
 };
 
 describe('TemplatesService', () => {
