@@ -35,7 +35,7 @@
     "test:cov": "jest --coverage"
   },
   "dependencies": {
-    "@nestjs/mapped-types": "*"
+    "@nestjs/mapped-types": "catalog:"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
@@ -45,11 +45,11 @@
     "ts-protoc-gen": "^0.15.0"
   },
   "peerDependencies": {
-    "@nestjs/microservices": "^11.1.6",
-    "@nestjs/common": "^11.0.1",
+    "@nestjs/microservices": "catalog:",
+    "@nestjs/common": "catalog:",
     "@hive/registry": "workspace:*",
     "@hive/authorization": "workspace:*",
-    "@nestjs/swagger": "^11.2.0",
+    "@nestjs/swagger": "catalog:",
     "nestjs-zod": "5.0.0-beta.20250806T023752",
     "@itgorillaz/configify": "^4.0.1",
     "@hive/utils": "workspace:*",

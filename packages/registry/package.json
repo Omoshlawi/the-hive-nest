@@ -50,16 +50,16 @@
     "test:cov": "jest --coverage"
   },
   "dependencies": {
-    "@nestjs/mapped-types": "*",
+    "@nestjs/mapped-types": "catalog:",
     "uuid": "^11.1.0",
     "semver": "^7.7.2"
   },
   "peerDependencies": {
-    "@nestjs/microservices": "^11.1.6",
-    "@nestjs/schedule": "^6.0.0",
-    "@nestjs/common": "^11.0.1",
-    "@nestjs/core": "^11.0.1",
-    "@nestjs/swagger": "^11.2.0",
+    "@nestjs/microservices": "catalog:",
+    "@nestjs/schedule": "catalog:",
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/swagger": "catalog:",
     "nestjs-zod": "5.0.0-beta.20250806T023752",
     "@itgorillaz/configify": "^4.0.1",
     "@hive/common": "workspace:*",

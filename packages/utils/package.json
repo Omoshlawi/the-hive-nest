@@ -33,7 +33,7 @@
     "test:cov": "jest --coverage"
   },
   "dependencies": {
-    "@nestjs/mapped-types": "*"
+    "@nestjs/mapped-types": "catalog:"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
