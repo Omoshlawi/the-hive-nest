@@ -1,6 +1,5 @@
 import {
   CustomRepresentationService,
-  FunctionFirstArgument,
   PaginationService,
   SortService,
 } from '@hive/common';
@@ -13,7 +12,6 @@ import {
   UpdateTourRequest,
 } from '@hive/virtual-tour';
 import { Injectable, Logger } from '@nestjs/common';
-import { pick } from 'lodash';
 import { firstValueFrom, Observable } from 'rxjs';
 import { PrismaService } from './prisma/prisma.service';
 import { Prisma, Tour } from '../generated/prisma/client';
@@ -46,26 +44,20 @@ export class TourService {
   ) {}
 
   async getAll(query: QueryTourRequest) {
-    const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.tour.findMany
-    > = {
-      where: {
-        AND: [
-          { voided: query?.includeVoided ? undefined : false },
-          { propertyId: query.propertyId },
-          { listingId: query.listingId },
-        ],
-      },
-      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
-      ...this.representationService.buildCustomRepresentationQuery(
-        query.queryBuilder?.v,
-      ),
-      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    const dbQuery: Prisma.TourWhereInput = {
+      AND: [
+        { voided: query?.includeVoided ? undefined : false },
+        { propertyId: query.propertyId },
+        { listingId: query.listingId },
+      ],
     };
-    const [data, totalCount] = await Promise.all([
-      this.prismaService.tour.findMany(dbQuery),
-      this.prismaService.tour.count(pick(dbQuery, 'where')),
-    ]);
+    const totalCount = await this.prismaService.tour.count({ where: dbQuery });
+    const data = await this.prismaService.tour.findMany({
+      where: dbQuery,
+      ...this.paginationService.buildSafePaginationQuery(query.queryBuilder, totalCount),
+      ...this.representationService.buildCustomRepresentationQuery(query.queryBuilder?.v),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    });
     return {
       data,
       metadata: JSON.stringify({ totalCount: totalCount }),

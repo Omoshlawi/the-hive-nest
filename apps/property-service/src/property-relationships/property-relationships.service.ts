@@ -1,6 +1,5 @@
 import {
   CustomRepresentationService,
-  FunctionFirstArgument,
   PaginationService,
   SortService,
 } from '@hive/common';
@@ -13,7 +12,6 @@ import {
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
 import { Relationship, Prisma } from '../../generated/prisma/client';
-import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -26,50 +24,44 @@ export class PropertyRelationshipsService {
   ) {}
 
   async getAll(query: QueryRelationshipRequest) {
-    const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.relationship.findMany
-    > = {
-      where: {
-        AND: [
-          {
-            voided: query?.includeVoided ? undefined : false,
-            startDate: {
-              gte: query.startDateFrom
-                ? new Date(query.startDateFrom)
-                : undefined,
-              lte: query.startDateTo ? new Date(query.startDateTo) : undefined,
-            },
-            endDate: {
-              gte: query.endDateFrom ? new Date(query.endDateFrom) : undefined,
-              lte: query.endDateTo ? new Date(query.endDateTo) : undefined,
-            },
-            propertyAId: query.propertyAId,
-            propertyBId: query.propertyBId,
-            typeId: query.typeId,
-          },
-          {
-            OR: query.search
-              ? [
-                  {
-                    propertyB: {
-                      name: { contains: query.search, mode: 'insensitive' },
-                    },
-                  },
-                ]
+    const dbQuery: Prisma.RelationshipWhereInput = {
+      AND: [
+        {
+          voided: query?.includeVoided ? undefined : false,
+          startDate: {
+            gte: query.startDateFrom
+              ? new Date(query.startDateFrom)
               : undefined,
+            lte: query.startDateTo ? new Date(query.startDateTo) : undefined,
           },
-        ],
-      },
-      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
-      ...this.representationService.buildCustomRepresentationQuery(
-        query.queryBuilder?.v,
-      ),
-      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+          endDate: {
+            gte: query.endDateFrom ? new Date(query.endDateFrom) : undefined,
+            lte: query.endDateTo ? new Date(query.endDateTo) : undefined,
+          },
+          propertyAId: query.propertyAId,
+          propertyBId: query.propertyBId,
+          typeId: query.typeId,
+        },
+        {
+          OR: query.search
+            ? [
+                {
+                  propertyB: {
+                    name: { contains: query.search, mode: 'insensitive' },
+                  },
+                },
+              ]
+            : undefined,
+        },
+      ],
     };
-    const [data, totalCount] = await Promise.all([
-      this.prismaService.relationship.findMany(dbQuery),
-      this.prismaService.relationship.count(pick(dbQuery, 'where')),
-    ]);
+    const totalCount = await this.prismaService.relationship.count({ where: dbQuery });
+    const data = await this.prismaService.relationship.findMany({
+      where: dbQuery,
+      ...this.paginationService.buildSafePaginationQuery(query.queryBuilder, totalCount),
+      ...this.representationService.buildCustomRepresentationQuery(query.queryBuilder?.v),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    });
     return {
       data,
       metadata: JSON.stringify({ totalCount: totalCount }),

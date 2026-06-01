@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   CustomRepresentationService,
-  FunctionFirstArgument,
   PaginationService,
   SortService,
 } from '@hive/common';
@@ -25,10 +24,9 @@ import {
 } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { createHash } from 'crypto';
-import { pick } from 'lodash';
 import { basename, extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { FileMetadata, UploadStatus } from '../generated/prisma/client';
+import { FileMetadata, Prisma, UploadStatus } from '../generated/prisma/client';
 import { PrismaService } from './prisma/prisma.service';
 import { S3FileMetadata, S3Service } from './s3/s3.service';
 
@@ -144,38 +142,39 @@ export class AppService {
     //   );
     // }
 
-    const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.fileMetadata.findMany
-    > = {
-      where: {
-        AND: [
-          {
-            voided: query?.includeVoided ? undefined : false,
-            organizationId: query.context?.organizationId,
-            uploadedById: query.context?.organizationId
-              ? undefined
-              : query.context?.userId,
-          },
-          {
-            OR: query.search
-              ? [
-                  { purpose: { contains: query.search } },
-                  { relatedModelName: { contains: query.search } },
-                ]
-              : undefined,
-          },
-        ],
-      },
-      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
+    const dbQuery: Prisma.FileMetadataWhereInput = {
+      AND: [
+        {
+          voided: query?.includeVoided ? undefined : false,
+          organizationId: query.context?.organizationId,
+          uploadedById: query.context?.organizationId
+            ? undefined
+            : query.context?.userId,
+        },
+        {
+          OR: query.search
+            ? [
+                { purpose: { contains: query.search } },
+                { relatedModelName: { contains: query.search } },
+              ]
+            : undefined,
+        },
+      ],
+    };
+    const totalCount = await this.prismaService.fileMetadata.count({
+      where: dbQuery,
+    });
+    const data = await this.prismaService.fileMetadata.findMany({
+      where: dbQuery,
+      ...this.paginationService.buildSafePaginationQuery(
+        query.queryBuilder,
+        totalCount,
+      ),
       ...this.representationService.buildCustomRepresentationQuery(
         query.queryBuilder?.v,
       ),
       ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
-    };
-    const [data, totalCount] = await Promise.all([
-      this.prismaService.fileMetadata.findMany(dbQuery),
-      this.prismaService.fileMetadata.count(pick(dbQuery, 'where')),
-    ]);
+    });
     return {
       data,
       metadata: JSON.stringify({ totalCount: totalCount }),

@@ -1,6 +1,5 @@
 import {
   CustomRepresentationService,
-  FunctionFirstArgument,
   PaginationService,
   SortService,
 } from '@hive/common';
@@ -12,8 +11,7 @@ import {
   UpdateRelationshipTypeRequest,
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
-import { RelationshipType } from '../../generated/prisma/client';
-import { pick } from 'lodash';
+import { Prisma, RelationshipType } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class RelationshipTypesService {
@@ -25,32 +23,26 @@ export class RelationshipTypesService {
   ) {}
 
   async getAll(query: QueryRelationshipTypeRequest) {
-    const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.relationshipType.findMany
-    > = {
-      where: {
-        AND: [
-          { voided: query?.includeVoided ? undefined : false },
-          {
-            OR: query.search
-              ? [
-                  { aIsToB: { contains: query.search } },
-                  { bIsToA: { contains: query.search } },
-                ]
-              : undefined,
-          },
-        ],
-      },
-      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
-      ...this.representationService.buildCustomRepresentationQuery(
-        query.queryBuilder?.v,
-      ),
-      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    const dbQuery: Prisma.RelationshipTypeWhereInput = {
+      AND: [
+        { voided: query?.includeVoided ? undefined : false },
+        {
+          OR: query.search
+            ? [
+                { aIsToB: { contains: query.search } },
+                { bIsToA: { contains: query.search } },
+              ]
+            : undefined,
+        },
+      ],
     };
-    const [data, totalCount] = await Promise.all([
-      this.prismaService.relationshipType.findMany(dbQuery),
-      this.prismaService.relationshipType.count(pick(dbQuery, 'where')),
-    ]);
+    const totalCount = await this.prismaService.relationshipType.count({ where: dbQuery });
+    const data = await this.prismaService.relationshipType.findMany({
+      where: dbQuery,
+      ...this.paginationService.buildSafePaginationQuery(query.queryBuilder, totalCount),
+      ...this.representationService.buildCustomRepresentationQuery(query.queryBuilder?.v),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    });
     return {
       data,
       metadata: JSON.stringify({ totalCount }),

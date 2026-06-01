@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   CustomRepresentationService,
-  FunctionFirstArgument,
   PaginationService,
   SortService,
 } from '@hive/common';
@@ -13,8 +12,7 @@ import {
   UpdateAddressRequest,
 } from '@hive/reference';
 import { Injectable } from '@nestjs/common';
-import { Address, AddressType } from '../../generated/prisma/client';
-import { pick } from 'lodash';
+import { Address, AddressType, Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -26,106 +24,100 @@ export class AddressService {
     private readonly representationService: CustomRepresentationService,
   ) {}
 
-  async getAll(query: QueryAddressRequest) {    
-    const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.address.findMany
-    > = {
-      where: {
-        AND: [
-          {
-            voided: query?.includeVoided ? undefined : false,
-            userId: query?.userId,
-            organizationId: query?.organizationId,
-            type: query?.type as AddressType,
-            level1: query?.level1,
-            level2: query?.level2,
-            level3: query?.level3,
-            level4: query?.level4,
-            level5: query?.level5,
-            country: query?.country,
-            postalCode: query?.postalCode,
-            startDate: {
-              gte: query?.startDateFrom,
-              lte: query?.startDateTo,
-            },
-            endDate: {
-              gte: query?.endDateFrom,
-              lte: query?.endDateTo,
-            },
-            createdAt: {
-              gte: query?.createdAtFrom,
-              lte: query?.createdAtTo,
-            },
+  async getAll(query: QueryAddressRequest) {
+    const dbQuery: Prisma.AddressWhereInput = {
+      AND: [
+        {
+          voided: query?.includeVoided ? undefined : false,
+          userId: query?.userId,
+          organizationId: query?.organizationId,
+          type: query?.type as AddressType,
+          level1: query?.level1,
+          level2: query?.level2,
+          level3: query?.level3,
+          level4: query?.level4,
+          level5: query?.level5,
+          country: query?.country,
+          postalCode: query?.postalCode,
+          startDate: {
+            gte: query?.startDateFrom,
+            lte: query?.startDateTo,
           },
-          {
-            OR: query.search
-              ? [
-                  { label: { contains: query.search, mode: 'insensitive' } },
-                  {
-                    formatted: { contains: query.search, mode: 'insensitive' },
-                  },
-                ]
-              : undefined,
+          endDate: {
+            gte: query?.endDateFrom,
+            lte: query?.endDateTo,
           },
-          {
-            OR: query.location
-              ? [
-                  { label: { contains: query.location, mode: 'insensitive' } },
-                  { id: { contains: query.location, mode: 'insensitive' } },
-                  {
-                    address1: { contains: query.location, mode: 'insensitive' },
-                  },
-                  {
-                    address2: { contains: query.location, mode: 'insensitive' },
-                  },
-                  {
-                    cityVillage: {
-                      contains: query.location,
-                      mode: 'insensitive',
-                    },
-                  },
-                  {
-                    country: { contains: query.location, mode: 'insensitive' },
-                  },
-                  {
-                    formatted: {
-                      contains: query.location,
-                      mode: 'insensitive',
-                    },
-                  },
-                  { label: { contains: query.location, mode: 'insensitive' } },
-                  {
-                    landmark: { contains: query.location, mode: 'insensitive' },
-                  },
-                  { level1: { contains: query.location, mode: 'insensitive' } },
-                  { level2: { contains: query.location, mode: 'insensitive' } },
-                  { level3: { contains: query.location, mode: 'insensitive' } },
-                  { level4: { contains: query.location, mode: 'insensitive' } },
-                  { level5: { contains: query.location, mode: 'insensitive' } },
-                  {
-                    plusCode: { contains: query.location, mode: 'insensitive' },
-                  },
-                  {
-                    postalCode: {
-                      contains: query.location,
-                      mode: 'insensitive',
-                    },
-                  },
-                ]
-              : undefined,
+          createdAt: {
+            gte: query?.createdAtFrom,
+            lte: query?.createdAtTo,
           },
-        ],
-      },
-      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
-      ...this.representationService.buildCustomRepresentationQuery(
-        query.queryBuilder?.v,
-      ),
-      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+        },
+        {
+          OR: query.search
+            ? [
+                { label: { contains: query.search, mode: 'insensitive' } },
+                {
+                  formatted: { contains: query.search, mode: 'insensitive' },
+                },
+              ]
+            : undefined,
+        },
+        {
+          OR: query.location
+            ? [
+                { label: { contains: query.location, mode: 'insensitive' } },
+                { id: { contains: query.location, mode: 'insensitive' } },
+                {
+                  address1: { contains: query.location, mode: 'insensitive' },
+                },
+                {
+                  address2: { contains: query.location, mode: 'insensitive' },
+                },
+                {
+                  cityVillage: {
+                    contains: query.location,
+                    mode: 'insensitive',
+                  },
+                },
+                {
+                  country: { contains: query.location, mode: 'insensitive' },
+                },
+                {
+                  formatted: {
+                    contains: query.location,
+                    mode: 'insensitive',
+                  },
+                },
+                { label: { contains: query.location, mode: 'insensitive' } },
+                {
+                  landmark: { contains: query.location, mode: 'insensitive' },
+                },
+                { level1: { contains: query.location, mode: 'insensitive' } },
+                { level2: { contains: query.location, mode: 'insensitive' } },
+                { level3: { contains: query.location, mode: 'insensitive' } },
+                { level4: { contains: query.location, mode: 'insensitive' } },
+                { level5: { contains: query.location, mode: 'insensitive' } },
+                {
+                  plusCode: { contains: query.location, mode: 'insensitive' },
+                },
+                {
+                  postalCode: {
+                    contains: query.location,
+                    mode: 'insensitive',
+                  },
+                },
+              ]
+            : undefined,
+        },
+      ],
     };
-    const [data, totalCount] = await Promise.all([
-      this.prismaService.address.findMany(dbQuery),
-      this.prismaService.address.count(pick(dbQuery, 'where')),
-    ]);
+    const totalCount = await this.prismaService.address.count({ where: dbQuery });
+    const data = await this.prismaService.address.findMany({
+      where: dbQuery,
+      ...this.paginationService.buildSafePaginationQuery(query.queryBuilder, totalCount),
+      ...this.representationService.buildCustomRepresentationQuery(query.queryBuilder?.v),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    });
     return {
       data,
       metadata: JSON.stringify({ totalCount: totalCount }),

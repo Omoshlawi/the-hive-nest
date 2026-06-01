@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
 
@@ -38,7 +39,7 @@ export const DeleteQuerySchema = CustomRepresentationQuerySchema.extend({
     .default(false),
 });
 
-function hasBalancedParentheses(str: string): boolean {
+export function hasBalancedParentheses(str: string): boolean {
   let count = 0;
   for (const char of str) {
     if (char === '(') count++;
@@ -51,13 +52,7 @@ function hasBalancedParentheses(str: string): boolean {
 export const REP_STRING_REGEX_COMPREHENSIVE =
   /^[a-zA-Z_][a-zA-Z0-9_]*:(?:include|omit|select)\([^)]+\)$/;
 export function validateRepString(repString: string): boolean {
-  // First check basic structure
-  // if (!REP_STRING_REGEX_COMPREHENSIVE.test(repString.trim())) {
-  //   return false;
-  // }
-
-  // Additional validation for balanced parentheses
-  // return hasBalancedParentheses(repString);
+  // TODO: Implement proper validation
   return true;
 }
 

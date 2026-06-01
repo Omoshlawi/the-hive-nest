@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   CustomRepresentationService,
-  FunctionFirstArgument,
   PaginationService,
   SortService,
 } from '@hive/common';
@@ -15,7 +14,6 @@ import {
 } from '@hive/property';
 import { Injectable, Logger } from '@nestjs/common';
 import { Property, Prisma, PropertyMediaType } from '../../generated/prisma/client';
-import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   Address,
@@ -58,86 +56,80 @@ export class PropertiesService {
       const ids = await this.queryaddress(query.address);
       addressIds.push(...ids);
     }
-    const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.property.findMany
-    > = {
-      where: {
-        AND: [
-          {
-            voided: query?.includeVoided ? undefined : false,
-            status: query?.status as Prisma.EnumPropertyStatusFilter,
-            organizationId: query?.context?.organizationId ?? undefined,
-            isVirtual: query?.isVirtual,
-            addressId: addressIds.length
-              ? {
-                  in: addressIds,
-                }
-              : undefined,
-            attributes: Object.keys(query.attributes ?? {}).length
-              ? {
-                  some: {
-                    AND: Object.entries(query.attributes ?? {}).map((attr) => ({
-                      OR: [
-                        { attribute: { name: attr[0] } },
-                        { attributeId: attr[0] },
-                      ],
-                      value: attr[1],
-                    })),
+    const dbQuery: Prisma.PropertyWhereInput = {
+      AND: [
+        {
+          voided: query?.includeVoided ? undefined : false,
+          status: query?.status as Prisma.EnumPropertyStatusFilter,
+          organizationId: query?.context?.organizationId ?? undefined,
+          isVirtual: query?.isVirtual,
+          addressId: addressIds.length
+            ? {
+                in: addressIds,
+              }
+            : undefined,
+          attributes: Object.keys(query.attributes ?? {}).length
+            ? {
+                some: {
+                  AND: Object.entries(query.attributes ?? {}).map((attr) => ({
+                    OR: [
+                      { attribute: { name: attr[0] } },
+                      { attributeId: attr[0] },
+                    ],
+                    value: attr[1],
+                  })),
+                },
+              }
+            : undefined,
+        },
+        // Amenities
+        {
+          OR: query?.amenities?.length
+            ? [
+                {
+                  amenities: { some: { amenityId: { in: query.amenities } } },
+                },
+                {
+                  amenities: {
+                    some: { amenity: { name: { in: query.amenities } } },
                   },
-                }
-              : undefined,
-          },
-          // Amenities
-          {
-            OR: query?.amenities?.length
-              ? [
-                  {
-                    amenities: { some: { amenityId: { in: query.amenities } } },
+                },
+              ]
+            : undefined,
+        },
+        // categories
+        {
+          OR: query?.categories?.length
+            ? [
+                {
+                  categories: {
+                    some: { categoryId: { in: query.categories } },
                   },
-                  {
-                    amenities: {
-                      some: { amenity: { name: { in: query.amenities } } },
-                    },
+                },
+                {
+                  categories: {
+                    some: { category: { name: { in: query.categories } } },
                   },
-                ]
-              : undefined,
-          },
-          // categories
-          {
-            OR: query?.categories?.length
-              ? [
-                  {
-                    categories: {
-                      some: { categoryId: { in: query.categories } },
-                    },
-                  },
-                  {
-                    categories: {
-                      some: { category: { name: { in: query.categories } } },
-                    },
-                  },
-                ]
-              : undefined,
-          },
-          // seach
-          {
-            OR: query.search
-              ? [{ name: { contains: query.search, mode: 'insensitive' } }]
-              : undefined,
-          },
-        ],
-      },
-      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
-      ...this.representationService.buildCustomRepresentationQuery(
-        query.queryBuilder?.v,
-      ),
-      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+                },
+              ]
+            : undefined,
+        },
+        // search
+        {
+          OR: query.search
+            ? [{ name: { contains: query.search, mode: 'insensitive' } }]
+            : undefined,
+        },
+      ],
     };
     this.logger.log('Query: ' + JSON.stringify(dbQuery, null, 2));
-    const [data, totalCount] = await Promise.all([
-      this.prismaService.property.findMany(dbQuery),
-      this.prismaService.property.count(pick(dbQuery, 'where')),
-    ]);
+    const totalCount = await this.prismaService.property.count({ where: dbQuery });
+    const data = await this.prismaService.property.findMany({
+      where: dbQuery,
+      ...this.paginationService.buildSafePaginationQuery(query.queryBuilder, totalCount),
+      ...this.representationService.buildCustomRepresentationQuery(query.queryBuilder?.v),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    });
     return {
       data,
       metadata: JSON.stringify({ totalCount: totalCount }),

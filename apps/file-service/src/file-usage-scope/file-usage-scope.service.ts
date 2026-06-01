@@ -9,7 +9,6 @@ import {
   SortService,
   PaginationService,
   CustomRepresentationService,
-  FunctionFirstArgument,
 } from '@hive/common';
 import {
   CreateFileUsageScopeRequest,
@@ -19,8 +18,7 @@ import {
   QueryFileUsageScopeRequest,
   UpdateFileUsageScopeRequest,
 } from '@hive/files';
-import { pick } from 'lodash';
-import { FileUsageScope } from '../../generated/prisma/client';
+import { FileUsageScope, Prisma } from '../../generated/prisma/client';
 import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
@@ -50,36 +48,30 @@ export class FileUsageScopeService {
   }
 
   async getAll(query: QueryFileUsageScopeRequest) {
-    const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.fileUsageScope.findMany
-    > = {
-      where: {
-        AND: [
-          {
-            voided: query?.includeVoided ? undefined : false,
-            modelName: query.modelName,
-            purpose: query.purpose,
-          },
-          {
-            OR: query.search
-              ? [
-                  { modelName: { contains: query.search } },
-                  { purpose: { contains: query.search } },
-                ]
-              : undefined,
-          },
-        ],
-      },
-      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
-      ...this.representationService.buildCustomRepresentationQuery(
-        query.queryBuilder?.v,
-      ),
-      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    const dbQuery: Prisma.FileUsageScopeWhereInput = {
+      AND: [
+        {
+          voided: query?.includeVoided ? undefined : false,
+          modelName: query.modelName,
+          purpose: query.purpose,
+        },
+        {
+          OR: query.search
+            ? [
+                { modelName: { contains: query.search } },
+                { purpose: { contains: query.search } },
+              ]
+            : undefined,
+        },
+      ],
     };
-    const [data, totalCount] = await Promise.all([
-      this.prismaService.fileUsageScope.findMany(dbQuery),
-      this.prismaService.fileUsageScope.count(pick(dbQuery, 'where')),
-    ]);
+    const totalCount = await this.prismaService.fileUsageScope.count({ where: dbQuery });
+    const data = await this.prismaService.fileUsageScope.findMany({
+      where: dbQuery,
+      ...this.paginationService.buildSafePaginationQuery(query.queryBuilder, totalCount),
+      ...this.representationService.buildCustomRepresentationQuery(query.queryBuilder?.v),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    });
     return {
       data,
       metadata: JSON.stringify({ totalCount }),

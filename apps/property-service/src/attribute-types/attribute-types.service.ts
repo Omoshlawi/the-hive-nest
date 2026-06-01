@@ -1,6 +1,5 @@
 import {
   CustomRepresentationService,
-  FunctionFirstArgument,
   PaginationService,
   SortService,
 } from '@hive/common';
@@ -12,7 +11,6 @@ import {
   UpdateAttributeTypeRequest,
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
-import { pick } from 'lodash';
 import { AttributeType, Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -26,29 +24,28 @@ export class AttributeTypesService {
   ) {}
 
   async getAll(query: QueryAttributeTypeRequest) {
-    const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.attributeType.findMany
-    > = {
-      where: {
-        AND: [
-          { voided: query?.includeVoided ? undefined : false },
-          {
-            OR: query.search
-              ? [{ name: { contains: query.search } }]
-              : undefined,
-          },
-        ],
-      },
-      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
+    const dbQuery: Prisma.AttributeTypeWhereInput = {
+      AND: [
+        { voided: query?.includeVoided ? undefined : false },
+        {
+          OR: query.search ? [{ name: { contains: query.search } }] : undefined,
+        },
+      ],
+    };
+    const totalCount = await this.prismaService.attributeType.count({
+      where: dbQuery,
+    });
+    const data = await this.prismaService.attributeType.findMany({
+      where: dbQuery,
+      ...this.paginationService.buildSafePaginationQuery(
+        query.queryBuilder,
+        totalCount,
+      ),
       ...this.representationService.buildCustomRepresentationQuery(
         query.queryBuilder?.v,
       ),
       ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
-    };
-    const [data, totalCount] = await Promise.all([
-      this.prismaService.attributeType.findMany(dbQuery),
-      this.prismaService.attributeType.count(pick(dbQuery, 'where')),
-    ]);
+    });
     return {
       data,
       metadata: JSON.stringify({ totalCount }),

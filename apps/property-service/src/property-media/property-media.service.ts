@@ -1,6 +1,5 @@
 import {
   CustomRepresentationService,
-  FunctionFirstArgument,
   PaginationService,
   SortService,
 } from '@hive/common';
@@ -12,8 +11,7 @@ import {
   UpdatePropertyMediaRequest,
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
-import { pick } from 'lodash';
-import { PropertyMedia, PropertyMediaType } from '../../generated/prisma/client';
+import { Prisma, PropertyMedia, PropertyMediaType } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -26,37 +24,27 @@ export class PropertyMediaService {
   ) {}
 
   async getAll(query: QueryPropertyMediaRequest) {
-    const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.propertyMedia.findMany
-    > = {
-      where: {
-        AND: [
-          {
-            voided: query?.includeVoided ? undefined : false,
-            type: query.type as PropertyMediaType,
-            propertyId: query.propertyId,
-            // metadata:{
-            //   path:['size'],
-
-            // }
-          },
-          {
-            OR: query.search
-              ? [{ title: { contains: query.search, mode: 'insensitive' } }]
-              : undefined,
-          },
-        ],
-      },
-      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
-      ...this.representationService.buildCustomRepresentationQuery(
-        query.queryBuilder?.v,
-      ),
-      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    const dbQuery: Prisma.PropertyMediaWhereInput = {
+      AND: [
+        {
+          voided: query?.includeVoided ? undefined : false,
+          type: query.type as PropertyMediaType,
+          propertyId: query.propertyId,
+        },
+        {
+          OR: query.search
+            ? [{ title: { contains: query.search, mode: 'insensitive' } }]
+            : undefined,
+        },
+      ],
     };
-    const [data, totalCount] = await Promise.all([
-      this.prismaService.propertyMedia.findMany(dbQuery),
-      this.prismaService.propertyMedia.count(pick(dbQuery, 'where')),
-    ]);
+    const totalCount = await this.prismaService.propertyMedia.count({ where: dbQuery });
+    const data = await this.prismaService.propertyMedia.findMany({
+      where: dbQuery,
+      ...this.paginationService.buildSafePaginationQuery(query.queryBuilder, totalCount),
+      ...this.representationService.buildCustomRepresentationQuery(query.queryBuilder?.v),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    });
     return {
       data,
       metadata: JSON.stringify({ totalCount: totalCount }),

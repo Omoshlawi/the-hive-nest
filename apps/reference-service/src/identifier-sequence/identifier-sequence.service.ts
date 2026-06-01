@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   CustomRepresentationService,
-  FunctionFirstArgument,
   PaginationService,
   SortService,
 } from '@hive/common';
@@ -11,9 +10,8 @@ import {
   QueryIdentifierSequenceRequest,
 } from '@hive/reference';
 import { Injectable } from '@nestjs/common';
-import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
-import { IdentifierSequence as IdentifierSequenceModel } from '../../generated/prisma/client';
+import { IdentifierSequence as IdentifierSequenceModel, Prisma } from '../../generated/prisma/client';
 import type { IdentifierSequence } from '@hive/reference';
 
 @Injectable()
@@ -30,26 +28,20 @@ export class IdentifierSequenceService {
   }
 
   async getAll(query: QueryIdentifierSequenceRequest) {
-    const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.identifierSequence.findMany
-    > = {
-      where: {
-        dataModel: query?.dataModel,
-        updatedAt: {
-          gte: query.updatedAtFrom ? new Date(query?.updatedAtFrom) : undefined, // TODO: explore timezone options
-          lte: query.updatedAtTo ? new Date(query?.updatedAtTo) : undefined,
-        },
+    const dbQuery: Prisma.IdentifierSequenceWhereInput = {
+      dataModel: query?.dataModel,
+      updatedAt: {
+        gte: query.updatedAtFrom ? new Date(query?.updatedAtFrom) : undefined,
+        lte: query.updatedAtTo ? new Date(query?.updatedAtTo) : undefined,
       },
-      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
-      ...this.representationService.buildCustomRepresentationQuery(
-        query.queryBuilder?.v,
-      ),
-      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
     };
-    const [data, totalCount] = await Promise.all([
-      this.prismaService.identifierSequence.findMany(dbQuery),
-      this.prismaService.identifierSequence.count(pick(dbQuery, 'where')),
-    ]);
+    const totalCount = await this.prismaService.identifierSequence.count({ where: dbQuery });
+    const data = await this.prismaService.identifierSequence.findMany({
+      where: dbQuery,
+      ...this.paginationService.buildSafePaginationQuery(query.queryBuilder, totalCount),
+      ...this.representationService.buildCustomRepresentationQuery(query.queryBuilder?.v),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    });
     return {
       data: data as Array<IdentifierSequence & IdentifierSequenceModel>,
       metadata: JSON.stringify({ totalCount: totalCount }),

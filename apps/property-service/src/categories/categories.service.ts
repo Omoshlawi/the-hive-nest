@@ -1,6 +1,5 @@
 import {
   CustomRepresentationService,
-  FunctionFirstArgument,
   PaginationService,
   SortService,
 } from '@hive/common';
@@ -12,7 +11,6 @@ import {
   UpdateCategoryRequest,
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
-import { pick } from 'lodash';
 import { Category, Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -26,29 +24,23 @@ export class CategoriesService {
   ) {}
 
   async getAll(query: QueryCategoryRequest) {
-    const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.category.findMany
-    > = {
-      where: {
-        AND: [
-          { voided: query?.includeVoided ? undefined : false, OR: [{}] },
-          {
-            OR: query.search
-              ? [{ name: { contains: query.search } }]
-              : undefined,
-          },
-        ],
-      },
-      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
-      ...this.representationService.buildCustomRepresentationQuery(
-        query.queryBuilder?.v,
-      ),
-      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    const dbQuery: Prisma.CategoryWhereInput = {
+      AND: [
+        { voided: query?.includeVoided ? undefined : false, OR: [{}] },
+        {
+          OR: query.search
+            ? [{ name: { contains: query.search } }]
+            : undefined,
+        },
+      ],
     };
-    const [data, totalCount] = await Promise.all([
-      this.prismaService.category.findMany(dbQuery),
-      this.prismaService.category.count(pick(dbQuery, 'where')),
-    ]);
+    const totalCount = await this.prismaService.category.count({ where: dbQuery });
+    const data = await this.prismaService.category.findMany({
+      where: dbQuery,
+      ...this.paginationService.buildSafePaginationQuery(query.queryBuilder, totalCount),
+      ...this.representationService.buildCustomRepresentationQuery(query.queryBuilder?.v),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    });
     return {
       data,
       metadata: JSON.stringify({ totalCount }),

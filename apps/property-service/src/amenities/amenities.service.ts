@@ -1,6 +1,5 @@
 import {
   CustomRepresentationService,
-  FunctionFirstArgument,
   PaginationService,
   SortService,
 } from '@hive/common';
@@ -13,7 +12,6 @@ import {
 } from '@hive/property';
 import { Injectable } from '@nestjs/common';
 import { Amenity, Prisma } from '../../generated/prisma/client';
-import { pick } from 'lodash';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -26,29 +24,23 @@ export class AmenitiesService {
   ) {}
 
   async getAll(query: QueryAmenityRequest) {
-    const dbQuery: FunctionFirstArgument<
-      typeof this.prismaService.amenity.findMany
-    > = {
-      where: {
-        AND: [
-          { voided: query?.includeVoided ? undefined : false },
-          {
-            OR: query.search
-              ? [{ name: { contains: query.search } }]
-              : undefined,
-          },
-        ],
-      },
-      ...this.paginationService.buildPaginationQuery(query.queryBuilder),
-      ...this.representationService.buildCustomRepresentationQuery(
-        query.queryBuilder?.v,
-      ),
-      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    const dbQuery: Prisma.AmenityWhereInput = {
+      AND: [
+        { voided: query?.includeVoided ? undefined : false },
+        {
+          OR: query.search
+            ? [{ name: { contains: query.search } }]
+            : undefined,
+        },
+      ],
     };
-    const [data, totalCount] = await Promise.all([
-      this.prismaService.amenity.findMany(dbQuery),
-      this.prismaService.amenity.count(pick(dbQuery, 'where')),
-    ]);
+    const totalCount = await this.prismaService.amenity.count({ where: dbQuery });
+    const data = await this.prismaService.amenity.findMany({
+      where: dbQuery,
+      ...this.paginationService.buildSafePaginationQuery(query.queryBuilder, totalCount),
+      ...this.representationService.buildCustomRepresentationQuery(query.queryBuilder?.v),
+      ...this.sortService.buildSortQuery(query.queryBuilder?.orderBy),
+    });
     return {
       data,
       metadata: JSON.stringify({ totalCount: totalCount }),
