@@ -1,4 +1,4 @@
-import { QueryBuilderModule } from '@hive/common';
+import { GlobalRpcExceptionFilter, PrismaModule, QueryBuilderModule } from '@hive/common';
 import {
   {{constantCase name}}_HTTP_SERVER_CONFIG_TOKEN,
   {{constantCase name}}_RPC_SERVER_CONFIG_TOKEN,
@@ -14,9 +14,11 @@ import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaModule } from './prisma/prisma.module';
+import { PrismaConfig } from './prisma/prisma.config';
+import { PrismaService } from './prisma/prisma.service';
 
 @Module({
   imports: [
@@ -78,11 +80,18 @@ import { PrismaModule } from './prisma/prisma.module';
       },
     }),
     QueryBuilderModule.register({ global: true }),
-    PrismaModule,
+    PrismaModule.forRootAsync({
+      global: true,
+      service: PrismaService,
+      inject: [PrismaConfig],
+      useFactory: (config: PrismaConfig) => ({
+        adapter: new PrismaPg({ connectionString: config.databaseUrl }),
+      }),
+    }),
     // TODO: Add feature modules here, e.g.:
     // ItemsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, GlobalRpcExceptionFilter],
 })
 export class AppModule {}

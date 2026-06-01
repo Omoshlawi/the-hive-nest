@@ -174,6 +174,7 @@ Once running, the API is available at **http://localhost:8090**:
 | Command            | Description                                       |
 | ------------------ | ------------------------------------------------- |
 | `pnpm dev`         | Start all services in watch mode (concurrency 20) |
+| `pnpm start`       | Build then start all services in production mode  |
 | `pnpm build`       | Build all packages then all apps                  |
 | `pnpm test`        | Run all unit test suites                          |
 | `pnpm test:e2e`    | Run all E2E test suites                           |

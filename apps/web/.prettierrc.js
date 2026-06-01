@@ -1,4 +1,8 @@
 /** @type {import("prettier").Config} */
 module.exports = {
-  ...require('@hive/eslint-config/prettier-base'),
+  singleQuote: true,
+  trailingComma: 'all',
+  printWidth: 80,
+  tabWidth: 2,
+  semi: true,
 };
