@@ -1,5 +1,6 @@
-export * from './providers';
+{{#if includeGrpc}}export * from './providers';
 export * from './constants';
-export * from './dto';
+{{/if}}export * from './dto';
 export * from './types';
-export * from './client';
+{{#if includeGrpc}}export * from './client';
+{{/if}}

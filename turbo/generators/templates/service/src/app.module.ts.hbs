@@ -1,9 +1,10 @@
-import { GlobalRpcExceptionFilter, PrismaModule, QueryBuilderModule } from '@hive/common';
+import { GlobalRpcExceptionFilter, {{#if includeDatabase}}PrismaModule, {{/if}}QueryBuilderModule } from '@hive/common';
 import {
   {{constantCase name}}_HTTP_SERVER_CONFIG_TOKEN,
-  {{constantCase name}}_RPC_SERVER_CONFIG_TOKEN,
-  {{pascalCase name}}HTTPServerConfigProvider,
-  {{pascalCase name}}RPCServerConfigProvider,
+  {{#if includeGrpc}}{{constantCase name}}_RPC_SERVER_CONFIG_TOKEN,
+  {{/if}}{{pascalCase name}}HTTPServerConfigProvider,
+  {{#if includeGrpc}}{{pascalCase name}}RPCServerConfigProvider,
+  {{/if}}
 } from '@hive/{{name}}';
 import {
   Endpoint,
@@ -14,12 +15,12 @@ import { ServerConfig } from '@hive/utils';
 import { ConfigifyModule } from '@itgorillaz/configify';
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { AppController } from './app.controller';
+{{#if includeDatabase}}import { PrismaPg } from '@prisma/adapter-pg';
+{{/if}}import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaConfig } from './prisma/prisma.config';
+{{#if includeDatabase}}import { PrismaConfig } from './prisma/prisma.config';
 import { PrismaService } from './prisma/prisma.service';
-
+{{/if}}
 @Module({
   imports: [
     ConfigifyModule.forRootAsync({ configFilePath: ['.env', 'package.json'] }),
@@ -32,7 +33,8 @@ import { PrismaService } from './prisma/prisma.service';
         useFactory: (
           config: RegistryClientConfig,
           http: ServerConfig,
-          grpc: ServerConfig,
+          {{#if includeGrpc}}grpc: ServerConfig,
+          {{/if}}
         ) => {
           if (!config) {
             throw new Error('RegistryClientConfig is required');
@@ -45,7 +47,8 @@ import { PrismaService } from './prisma/prisma.service';
               version: config.serviceVersion,
               tags: [
                 http ? 'http' : undefined,
-                grpc ? 'grpc' : undefined,
+                {{#if includeGrpc}}grpc ? 'grpc' : undefined,
+                {{/if}}
               ].filter(Boolean) as Array<string>,
               endpoints: [
                 http
@@ -56,7 +59,7 @@ import { PrismaService } from './prisma/prisma.service';
                       metadata: {},
                     }
                   : undefined,
-                grpc
+                {{#if includeGrpc}}grpc
                   ? {
                       host: grpc.host,
                       port: grpc.port,
@@ -64,6 +67,7 @@ import { PrismaService } from './prisma/prisma.service';
                       metadata: {},
                     }
                   : undefined,
+                {{/if}}
               ].filter(Boolean) as Array<Endpoint>,
             },
           };
@@ -71,16 +75,18 @@ import { PrismaService } from './prisma/prisma.service';
         inject: [
           RegistryClientConfig,
           {{constantCase name}}_HTTP_SERVER_CONFIG_TOKEN,
-          {{constantCase name}}_RPC_SERVER_CONFIG_TOKEN,
+          {{#if includeGrpc}}{{constantCase name}}_RPC_SERVER_CONFIG_TOKEN,
+          {{/if}}
         ],
         providers: [
           {{pascalCase name}}HTTPServerConfigProvider,
-          {{pascalCase name}}RPCServerConfigProvider,
+          {{#if includeGrpc}}{{pascalCase name}}RPCServerConfigProvider,
+          {{/if}}
         ],
       },
     }),
     QueryBuilderModule.register({ global: true }),
-    PrismaModule.forRootAsync({
+    {{#if includeDatabase}}PrismaModule.forRootAsync({
       global: true,
       service: PrismaService,
       inject: [PrismaConfig],
@@ -88,7 +94,7 @@ import { PrismaService } from './prisma/prisma.service';
         adapter: new PrismaPg({ connectionString: config.databaseUrl }),
       }),
     }),
-    // TODO: Add feature modules here, e.g.:
+    {{/if}}// TODO: Add feature modules here, e.g.:
     // ItemsModule,
   ],
   controllers: [AppController],

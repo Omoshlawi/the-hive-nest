@@ -1,6 +1,8 @@
-// Auto-generated types appear here after running `pnpm gen`.
+{{#if includeGrpc}}// Auto-generated types appear here after running `pnpm gen`.
 // Add controller interface re-exports below as your proto grows.
 export * from './common.message';
 export * from './{{name}}.model';
 export * from './{{name}}.message';
 export * from './{{name}}.service';
+{{else}}// Add your type exports here.
+{{/if}}

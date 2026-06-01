@@ -1,4 +1,4 @@
-import {
+{{#if includeGrpc}}import {
   {{constantCase name}}_HTTP_SERVER_CONFIG_TOKEN,
   {{constantCase name}}_PACKAGE,
   {{constantCase name}}_RPC_SERVER_CONFIG_TOKEN,
@@ -41,3 +41,17 @@ async function bootstrap() {
   await app.listen(httpServerConfig.port);
 }
 bootstrap();
+{{else}}import { {{constantCase name}}_HTTP_SERVER_CONFIG_TOKEN } from '@hive/{{name}}';
+import { ServerConfig } from '@hive/utils';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  const httpServerConfig: ServerConfig = app.get(
+    {{constantCase name}}_HTTP_SERVER_CONFIG_TOKEN,
+  );
+  await app.listen(httpServerConfig.port);
+}
+bootstrap();
+{{/if}}
